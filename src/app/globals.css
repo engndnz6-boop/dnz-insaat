@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-ink: #0b0d10;
+  --brand-anthracite: #161a20;
+  --brand-gold: #c9a14a;
+  --brand-bone: #f2eee6;
+  --brand-navy: #152536;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-brand-ink text-brand-bone antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(201, 161, 74, 0.09), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(21, 37, 54, 0.45), transparent);
+  min-height: 100vh;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-brand-gold px-6 py-3 text-sm font-semibold tracking-wide text-brand-ink transition hover:bg-brand-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border border-brand-gold/40 bg-transparent px-6 py-3 text-sm font-semibold tracking-wide text-brand-gold transition hover:border-brand-gold hover:bg-brand-gold/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-brand-bone/80 transition hover:text-brand-gold;
+  }
+
+  .section-title {
+    @apply font-display text-3xl font-medium tracking-tight text-brand-bone sm:text-4xl;
+  }
+
+  .section-subtitle {
+    @apply mt-3 max-w-2xl text-base text-brand-mist sm:text-lg;
+  }
+
+  .input-field {
+    @apply w-full border border-white/10 bg-brand-anthracite px-4 py-3 text-sm text-brand-bone placeholder:text-brand-mist/60 outline-none transition focus:border-brand-gold/50;
+  }
+
+  .label-field {
+    @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-brand-mist;
+  }
+}
+
+/* Before/After range slider thumb */
+.before-after-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 4px;
+  height: 100%;
+  background: #c9a14a;
+  cursor: ew-resize;
+  box-shadow: 0 0 0 4px rgba(201, 161, 74, 0.25);
+}
+
+.before-after-range::-moz-range-thumb {
+  width: 4px;
+  height: 100%;
+  border: none;
+  background: #c9a14a;
+  cursor: ew-resize;
+}
