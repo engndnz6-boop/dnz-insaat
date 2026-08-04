@@ -5,9 +5,8 @@ export const brand = {
   tagline: "İnşaat Malzemeleri & Asma Tavan",
   description:
     "DNZ İnşaat malzemeleri: alçıpan, galvaniz profil, clip-in / klipin asma tavan, taşyünü tavan, metal tavan, plastik tavan, karolam, bölme duvar ve malzeme satışı. Ankara Gölbaşı.",
-  /** Teknik URL — Vercel/DNS için punycode (dnzinşaat.com.tr) */
+  /** Vercel/DNS: dnzinşaat.com.tr punycode */
   url: "https://www.xn--dnzinaat-rwb.com.tr",
-  /** Tarayıcıda görünen ad */
   domainDisplay: "dnzinşaat.com.tr",
   email: "info@dnzinsaat.com",
   phone: "0533 611 06 15",
