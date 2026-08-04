@@ -167,7 +167,7 @@ export default function OdemePage() {
         className="mt-10 grid gap-10 lg:grid-cols-[1fr_340px]"
       >
         <div className="space-y-8">
-          <section className="border border-white/5 bg-brand-anthracite/40 p-6">
+          <section className="border border-black/5 bg-brand-anthracite/40 p-6">
             <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
               Teslimat
             </h2>
@@ -235,7 +235,7 @@ export default function OdemePage() {
             </div>
           </section>
 
-          <section className="border border-white/5 bg-brand-anthracite/40 p-6">
+          <section className="border border-black/5 bg-brand-anthracite/40 p-6">
             <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
               Ödeme Yöntemi
             </h2>
@@ -246,7 +246,7 @@ export default function OdemePage() {
                   className={`flex cursor-pointer items-start gap-3 border p-4 transition ${
                     form.paymentMethod === m.id
                       ? "border-brand-gold bg-brand-gold/5"
-                      : "border-white/10 hover:border-white/20"
+                      : "border-black/10 hover:border-black/15"
                   }`}
                 >
                   <input
@@ -333,7 +333,7 @@ export default function OdemePage() {
             )}
 
             {form.paymentMethod === "transfer" && (
-              <div className="mt-6 border border-white/10 bg-brand-ink/40 p-4 text-sm text-brand-mist">
+              <div className="mt-6 border border-black/10 bg-brand-ink/40 p-4 text-sm text-brand-mist">
                 <p className="font-medium text-brand-bone">Havale bilgileri</p>
                 <p className="mt-2">
                   {brand.name}
@@ -353,11 +353,11 @@ export default function OdemePage() {
           )}
         </div>
 
-        <aside className="h-fit border border-white/5 bg-brand-anthracite p-6 lg:sticky lg:top-28">
+        <aside className="h-fit border border-black/5 bg-brand-anthracite p-6 lg:sticky lg:top-28">
           <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
             Sipariş Özeti
           </h2>
-          <ul className="mt-4 space-y-2 border-b border-white/10 pb-4 text-sm">
+          <ul className="mt-4 space-y-2 border-b border-black/10 pb-4 text-sm">
             {items.map((i) => (
               <li key={i.product.id} className="flex justify-between gap-3">
                 <span className="text-brand-mist">
@@ -388,7 +388,7 @@ export default function OdemePage() {
                   : formatPrice(totals.shipping)}
               </dd>
             </div>
-            <div className="flex justify-between border-t border-white/10 pt-3 text-base font-semibold">
+            <div className="flex justify-between border-t border-black/10 pt-3 text-base font-semibold">
               <dt>Toplam</dt>
               <dd className="text-brand-gold">{formatPrice(totals.total)}</dd>
             </div>

@@ -39,7 +39,7 @@ function SuccessContent() {
       </p>
 
       {order && (
-        <div className="mt-8 w-full max-w-md border border-white/10 bg-brand-anthracite p-6 text-left text-sm">
+        <div className="mt-8 w-full max-w-md border border-black/10 bg-brand-anthracite p-6 text-left text-sm">
           <p className="text-brand-mist">
             Ödeme:{" "}
             <span className="text-brand-bone">

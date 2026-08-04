@@ -23,7 +23,7 @@ export default function PdfCatalogsPublicPage() {
       {!ready ? (
         <p className="mt-10 text-brand-mist">Yükleniyor…</p>
       ) : pdfCatalogs.length === 0 ? (
-        <div className="mt-10 border border-dashed border-white/10 p-12 text-center text-sm text-brand-mist">
+        <div className="mt-10 border border-dashed border-black/10 p-12 text-center text-sm text-brand-mist">
           Henüz yayınlanmış PDF katalog yok.
         </div>
       ) : (
@@ -33,7 +33,7 @@ export default function PdfCatalogsPublicPage() {
             return (
               <li
                 key={pdf.id}
-                className="flex flex-col border border-white/5 bg-brand-anthracite/50 p-6"
+                className="flex flex-col border border-black/5 bg-brand-anthracite/50 p-6"
               >
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-gold">
                   {cat?.name || "Genel katalog"}

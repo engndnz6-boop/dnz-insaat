@@ -11,7 +11,7 @@ export function Footer() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <footer className="mt-24 border-t border-white/5 bg-brand-anthracite">
+    <footer className="mt-24 border-t border-black/5 bg-brand-anthracite">
       <div className="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <Logo />
@@ -84,7 +84,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/5 py-5 text-center text-xs text-brand-mist/70">
+      <div className="border-t border-black/5 py-5 text-center text-xs text-brand-mist/70">
         © {new Date().getFullYear()} {brand.name}. Tüm hakları saklıdır.
       </div>
     </footer>

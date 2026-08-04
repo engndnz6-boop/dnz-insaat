@@ -162,7 +162,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
           className={`shrink-0 px-3 py-2 text-xs transition ${
             !filters.category
               ? "bg-brand-gold text-brand-ink"
-              : "border border-white/10 text-brand-mist hover:border-brand-gold/40"
+              : "border border-black/10 text-brand-mist hover:border-brand-gold/40"
           }`}
         >
           Tümü
@@ -175,7 +175,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
             className={`shrink-0 px-3 py-2 text-xs transition ${
               filters.category === c.id
                 ? "bg-brand-gold text-brand-ink"
-                : "border border-white/10 text-brand-mist hover:border-brand-gold/40"
+                : "border border-black/10 text-brand-mist hover:border-brand-gold/40"
             }`}
           >
             {c.name}
@@ -191,7 +191,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
             className={`shrink-0 px-3 py-1.5 text-[11px] transition ${
               !filters.subcategory
                 ? "border border-brand-gold text-brand-gold"
-                : "border border-white/10 text-brand-mist"
+                : "border border-black/10 text-brand-mist"
             }`}
           >
             Tüm alt kategoriler
@@ -206,7 +206,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
               className={`shrink-0 px-3 py-1.5 text-[11px] transition ${
                 filters.subcategory === c.id
                   ? "border border-brand-gold text-brand-gold"
-                  : "border border-white/10 text-brand-mist"
+                  : "border border-black/10 text-brand-mist"
               }`}
             >
               {c.name}
@@ -232,7 +232,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[260px_1fr]">
         <aside className="hidden lg:block">
-          <div className="sticky top-28 border border-white/5 bg-brand-anthracite/50 p-5">
+          <div className="sticky top-28 border border-black/5 bg-brand-anthracite/50 p-5">
             <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
               Filtreler
             </h2>
@@ -248,7 +248,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
               : ""}
           </p>
           {filtered.length === 0 ? (
-            <div className="border border-dashed border-white/10 p-12 text-center text-sm text-brand-mist">
+            <div className="border border-dashed border-black/10 p-12 text-center text-sm text-brand-mist">
               Bu filtrelere uygun ürün bulunamadı.
             </div>
           ) : (
@@ -269,7 +269,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
             aria-label="Kapat"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto border-t border-white/10 bg-brand-anthracite p-6 animate-fade-up">
+          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto border-t border-black/10 bg-brand-anthracite p-6 animate-fade-up">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-brand-gold">
                 Filtreler
@@ -316,7 +316,7 @@ function FilterGroup({
           className={`px-3 py-1.5 text-xs transition ${
             value === ""
               ? "bg-brand-gold text-brand-ink"
-              : "border border-white/10 text-brand-mist hover:border-brand-gold/40"
+              : "border border-black/10 text-brand-mist hover:border-brand-gold/40"
           }`}
         >
           Tümü
@@ -329,7 +329,7 @@ function FilterGroup({
             className={`px-3 py-1.5 text-xs transition ${
               value === key
                 ? "bg-brand-gold text-brand-ink"
-                : "border border-white/10 text-brand-mist hover:border-brand-gold/40"
+                : "border border-black/10 text-brand-mist hover:border-brand-gold/40"
             }`}
           >
             {name}

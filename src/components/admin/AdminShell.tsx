@@ -84,7 +84,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen items-center justify-center bg-brand-ink px-4">
         <form
           onSubmit={login}
-          className="w-full max-w-sm border border-white/10 bg-brand-anthracite p-8"
+          className="w-full max-w-sm border border-black/10 bg-brand-anthracite p-8"
         >
           <Logo variant="mark" />
           <h1 className="mt-6 font-display text-2xl text-brand-bone">
@@ -131,7 +131,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-brand-ink">
-      <header className="border-b border-white/5 bg-brand-anthracite">
+      <header className="border-b border-black/5 bg-brand-anthracite">
         <div className="container-page flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Logo variant="markCompact" />
@@ -181,7 +181,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               className={`whitespace-nowrap px-3 py-1.5 text-xs ${
                 pathname.startsWith(item.href)
                   ? "bg-brand-gold text-brand-ink"
-                  : "border border-white/10 text-brand-mist"
+                  : "border border-black/10 text-brand-mist"
               }`}
             >
               {item.label}

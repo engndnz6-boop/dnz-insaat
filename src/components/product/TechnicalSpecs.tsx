@@ -16,8 +16,8 @@ export function TechnicalSpecsTable({ specs }: { specs: TechnicalSpecs }) {
     .map((key) => ({ label: LABELS[key], value: specs[key]! }));
 
   return (
-    <div className="overflow-hidden border border-white/5">
-      <h3 className="border-b border-white/5 bg-brand-anthracite px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
+    <div className="overflow-hidden border border-black/5">
+      <h3 className="border-b border-black/5 bg-brand-anthracite px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
         Teknik Özellikler
       </h3>
       <table className="w-full text-sm">

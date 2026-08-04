@@ -45,7 +45,7 @@ export default function AdminOrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="mt-10 border border-dashed border-white/10 p-12 text-center text-sm text-brand-mist">
+        <div className="mt-10 border border-dashed border-black/10 p-12 text-center text-sm text-brand-mist">
           Henüz sipariş yok. Site üzerinden bir ödeme tamamlayın.
         </div>
       ) : (
@@ -53,7 +53,7 @@ export default function AdminOrdersPage() {
           {orders.map((order) => (
             <li
               key={order.id}
-              className="border border-white/5 bg-brand-anthracite/50 p-5"
+              className="border border-black/5 bg-brand-anthracite/50 p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -72,7 +72,7 @@ export default function AdminOrdersPage() {
                   </p>
                 </div>
               </div>
-              <ul className="mt-4 space-y-1 border-t border-white/5 pt-3 text-sm text-brand-mist">
+              <ul className="mt-4 space-y-1 border-t border-black/5 pt-3 text-sm text-brand-mist">
                 {order.items.map((item) => (
                   <li key={item.productId}>
                     {item.name} × {item.quantity} —{" "}

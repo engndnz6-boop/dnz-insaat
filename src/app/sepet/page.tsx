@@ -47,7 +47,7 @@ export default function SepetPage() {
           {items.map(({ product, quantity }) => (
             <li
               key={product.id}
-              className="flex flex-col gap-4 border border-white/5 bg-brand-anthracite/40 p-4 sm:flex-row sm:items-center"
+              className="flex flex-col gap-4 border border-black/5 bg-brand-anthracite/40 p-4 sm:flex-row sm:items-center"
             >
               <Link
                 href={`/urun/${product.slug}`}
@@ -73,7 +73,7 @@ export default function SepetPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex items-center border border-white/10">
+                <div className="flex items-center border border-black/10">
                   <button
                     type="button"
                     className="p-2 text-brand-mist hover:text-brand-gold"
@@ -105,7 +105,7 @@ export default function SepetPage() {
           ))}
         </ul>
 
-        <aside className="h-fit border border-white/5 bg-brand-anthracite p-6">
+        <aside className="h-fit border border-black/5 bg-brand-anthracite p-6">
           <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
             Özet
           </h2>
@@ -124,7 +124,7 @@ export default function SepetPage() {
                 {totals.shipping === 0 ? "Ücretsiz" : formatPrice(totals.shipping)}
               </dd>
             </div>
-            <div className="flex justify-between border-t border-white/10 pt-3 font-semibold">
+            <div className="flex justify-between border-t border-black/10 pt-3 font-semibold">
               <dt className="text-brand-bone">Toplam</dt>
               <dd className="text-brand-gold">{formatPrice(totals.total)}</dd>
             </div>

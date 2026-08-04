@@ -74,7 +74,7 @@ export function ProductForm({
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6 border border-white/5 bg-brand-anthracite/40 p-6">
+    <form onSubmit={onSubmit} className="space-y-6 border border-black/5 bg-brand-anthracite/40 p-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Ürün adı *">
           <input
@@ -256,7 +256,7 @@ export function ProductForm({
               className={`px-3 py-1.5 text-xs ${
                 form.usageAreas.includes(area)
                   ? "bg-brand-gold text-brand-ink"
-                  : "border border-white/10 text-brand-mist"
+                  : "border border-black/10 text-brand-mist"
               }`}
             >
               {USAGE_LABELS[area]}

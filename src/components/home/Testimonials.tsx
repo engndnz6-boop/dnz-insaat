@@ -3,7 +3,7 @@ import type { Testimonial } from "@/lib/types";
 
 export function Testimonials({ items }: { items: Testimonial[] }) {
   return (
-    <section className="border-y border-white/5 bg-brand-anthracite/60 py-20 sm:py-28">
+    <section className="border-y border-black/5 bg-brand-anthracite/60 py-20 sm:py-28">
       <div className="container-page">
         <div className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
@@ -20,7 +20,7 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
           {items.map((item, index) => (
             <blockquote
               key={item.id}
-              className="flex flex-col border border-white/5 bg-brand-ink/40 p-6 opacity-0 animate-fade-up"
+              className="flex flex-col border border-black/5 bg-brand-ink/40 p-6 opacity-0 animate-fade-up"
               style={{
                 animationDelay: `${0.1 + index * 0.1}s`,
                 animationFillMode: "forwards",
@@ -34,7 +34,7 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
               <p className="mt-4 flex-1 text-sm leading-relaxed text-brand-bone/85">
                 “{item.quote}”
               </p>
-              <footer className="mt-6 border-t border-white/5 pt-4">
+              <footer className="mt-6 border-t border-black/5 pt-4">
                 <cite className="not-italic">
                   <span className="block text-sm font-semibold text-brand-bone">
                     {item.name}

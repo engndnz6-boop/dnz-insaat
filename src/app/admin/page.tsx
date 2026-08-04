@@ -79,7 +79,7 @@ function Stat({
   return (
     <Link
       href={href}
-      className="border border-white/5 bg-brand-anthracite p-5 transition hover:border-brand-gold/30"
+      className="border border-black/5 bg-brand-anthracite p-5 transition hover:border-brand-gold/30"
     >
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase tracking-wider text-brand-mist">{label}</p>

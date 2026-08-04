@@ -14,7 +14,7 @@ export function ProductGallery({
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-[4/5] overflow-hidden border border-white/5 bg-brand-anthracite sm:aspect-square">
+      <div className="relative aspect-[4/5] overflow-hidden border border-black/5 bg-brand-anthracite sm:aspect-square">
         <Image
           src={images[active]}
           alt={`${name} — görsel ${active + 1}`}
@@ -34,7 +34,7 @@ export function ProductGallery({
               className={`relative aspect-square overflow-hidden border transition ${
                 active === i
                   ? "border-brand-gold"
-                  : "border-white/10 opacity-70 hover:opacity-100"
+                  : "border-black/10 opacity-70 hover:opacity-100"
               }`}
             >
               <Image

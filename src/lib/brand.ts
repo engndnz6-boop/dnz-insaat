@@ -21,14 +21,14 @@ export const brand = {
     "Bağlı malzeme satışı",
   ],
   colors: {
-    ink: "#0B0D10",
-    anthracite: "#161A20",
-    slate: "#252B34",
-    mist: "#8E96A1",
-    bone: "#F2EEE6",
-    gold: "#C9A14A",
-    goldLight: "#E4C77A",
-    navy: "#152536",
+    ink: "#EEF1F4",
+    anthracite: "#FFFFFF",
+    slate: "#D5DBE3",
+    mist: "#5E6874",
+    bone: "#151920",
+    gold: "#B8923F",
+    goldLight: "#C9A14A",
+    navy: "#1E3348",
   },
 } as const;
 

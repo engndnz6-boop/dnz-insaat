@@ -40,7 +40,7 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      <div className="mt-8 overflow-x-auto border border-white/5">
+      <div className="mt-8 overflow-x-auto border border-black/5">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-brand-anthracite text-xs uppercase tracking-wider text-brand-mist">
             <tr>
@@ -54,7 +54,7 @@ export default function AdminProductsPage() {
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.id} className="border-t border-white/5">
+              <tr key={p.id} className="border-t border-black/5">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-brand-slate">

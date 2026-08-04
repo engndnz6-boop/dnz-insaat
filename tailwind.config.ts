@@ -10,14 +10,14 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          ink: "#0B0D10",
-          anthracite: "#161A20",
-          slate: "#252B34",
-          mist: "#8E96A1",
-          bone: "#F2EEE6",
-          gold: "#C9A14A",
-          "gold-light": "#E4C77A",
-          navy: "#152536",
+          ink: "#EEF1F4",
+          anthracite: "#FFFFFF",
+          slate: "#D5DBE3",
+          mist: "#5E6874",
+          bone: "#151920",
+          gold: "#B8923F",
+          "gold-light": "#C9A14A",
+          navy: "#1E3348",
         },
       },
       fontFamily: {
@@ -25,7 +25,7 @@ const config: Config = {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        soft: "0 20px 50px -20px rgba(14, 15, 17, 0.45)",
+        soft: "0 18px 40px -18px rgba(21, 25, 32, 0.18)",
       },
       animation: {
         "fade-up": "fadeUp 0.7s ease-out forwards",

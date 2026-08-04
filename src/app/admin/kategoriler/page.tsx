@@ -65,7 +65,7 @@ export default function AdminCategoriesPage() {
 
       <form
         onSubmit={onAdd}
-        className="mt-8 grid gap-3 border border-white/5 bg-brand-anthracite/40 p-5 lg:grid-cols-[1fr_1fr_1fr_auto]"
+        className="mt-8 grid gap-3 border border-black/5 bg-brand-anthracite/40 p-5 lg:grid-cols-[1fr_1fr_1fr_auto]"
       >
         <input
           className="input-field"
@@ -104,7 +104,7 @@ export default function AdminCategoriesPage() {
           return (
             <li
               key={cat.id}
-              className="border border-white/5 bg-brand-anthracite/50"
+              className="border border-black/5 bg-brand-anthracite/50"
             >
               <Row
                 cat={cat}
@@ -138,7 +138,7 @@ export default function AdminCategoriesPage() {
               {subs.map((sub) => (
                 <div
                   key={sub.id}
-                  className="border-t border-white/5 pl-4 sm:pl-8"
+                  className="border-t border-black/5 pl-4 sm:pl-8"
                 >
                   <Row
                     cat={sub}

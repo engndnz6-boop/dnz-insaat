@@ -16,8 +16,8 @@ export function Hero() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-ink via-brand-ink/85 to-brand-ink/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-ink via-transparent to-brand-ink/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/20" />
       </div>
 
       <div className="container-page relative flex min-h-[88vh] flex-col justify-end pb-16 pt-28 sm:pb-24 sm:pt-32">
@@ -26,18 +26,18 @@ export function Hero() {
           style={{ animationDelay: "0.05s", animationFillMode: "forwards" }}
         >
           <LogoMark className="h-12 w-auto sm:h-14" priority />
-          <span className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-gold">
+          <span className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-gold-light">
             {brand.tagline}
           </span>
         </div>
         <h1
-          className="max-w-3xl font-display text-4xl font-medium leading-[1.1] text-brand-bone opacity-0 animate-fade-up sm:text-5xl lg:text-6xl"
+          className="max-w-3xl font-display text-4xl font-medium leading-[1.1] text-white opacity-0 animate-fade-up sm:text-5xl lg:text-6xl"
           style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}
         >
           {brand.name}
         </h1>
         <p
-          className="mt-5 max-w-xl text-base leading-relaxed text-brand-bone/80 opacity-0 animate-fade-up sm:text-lg"
+          className="mt-5 max-w-xl text-base leading-relaxed text-white/85 opacity-0 animate-fade-up sm:text-lg"
           style={{ animationDelay: "0.35s", animationFillMode: "forwards" }}
         >
           Alçıpan asma tavan, ışık bandı, taşyünü, karolam, clip-in asma tavan ve

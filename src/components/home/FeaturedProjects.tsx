@@ -8,7 +8,7 @@ function BeforeAfterCard({ project }: { project: Project }) {
   const [pos, setPos] = useState(50);
 
   return (
-    <article className="group overflow-hidden border border-white/5 bg-brand-anthracite">
+    <article className="group overflow-hidden border border-black/5 bg-brand-anthracite shadow-soft">
       <div className="relative aspect-[4/3] select-none overflow-hidden">
         <Image
           src={project.afterImage}
@@ -36,7 +36,7 @@ function BeforeAfterCard({ project }: { project: Project }) {
           className="pointer-events-none absolute inset-y-0 w-0.5 bg-brand-gold"
           style={{ left: `${pos}%` }}
         >
-          <span className="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center border border-brand-gold bg-brand-ink text-[10px] font-bold text-brand-gold">
+          <span className="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center border border-brand-gold bg-[#151920] text-[10px] font-bold text-brand-gold">
             ↔
           </span>
         </div>
@@ -51,10 +51,10 @@ function BeforeAfterCard({ project }: { project: Project }) {
           aria-label="Öncesi sonrası karşılaştırma"
         />
 
-        <span className="absolute left-3 top-3 bg-brand-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-mist">
+        <span className="absolute left-3 top-3 bg-black/70 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/90">
           Önce
         </span>
-        <span className="absolute right-3 top-3 bg-brand-gold px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-ink">
+        <span className="absolute right-3 top-3 bg-brand-gold px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#151920]">
           Sonra
         </span>
       </div>

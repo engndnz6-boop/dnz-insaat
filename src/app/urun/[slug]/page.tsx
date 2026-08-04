@@ -100,13 +100,13 @@ export default function ProductPage() {
           </p>
 
           <ul className="mt-6 flex flex-wrap gap-2">
-            <li className="border border-white/10 px-3 py-1 text-xs text-brand-mist">
+            <li className="border border-black/10 px-3 py-1 text-xs text-brand-mist">
               Boyut: {product.size}
             </li>
             {product.usageAreas.map((area) => (
               <li
                 key={area}
-                className="border border-white/10 px-3 py-1 text-xs text-brand-mist"
+                className="border border-black/10 px-3 py-1 text-xs text-brand-mist"
               >
                 {USAGE_LABELS[area]}
               </li>

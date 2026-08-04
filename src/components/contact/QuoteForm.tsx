@@ -58,7 +58,7 @@ export function QuoteForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5 border border-white/5 bg-brand-anthracite/40 p-6 sm:p-8">
+    <form onSubmit={onSubmit} className="space-y-5 border border-black/5 bg-brand-anthracite/40 p-6 sm:p-8">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className="label-field">

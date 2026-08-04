@@ -27,7 +27,7 @@ export default function IletisimPage() {
         <QuoteForm />
 
         <aside className="space-y-6">
-          <div className="border border-white/5 bg-brand-anthracite/50 p-6">
+          <div className="border border-black/5 bg-brand-anthracite/50 p-6">
             <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
               Direkt İletişim
             </h2>
@@ -55,7 +55,7 @@ export default function IletisimPage() {
             </a>
           </div>
 
-          <div className="border border-white/5 p-6 text-sm leading-relaxed text-brand-mist">
+          <div className="border border-black/5 p-6 text-sm leading-relaxed text-brand-mist">
             <p className="font-medium text-brand-bone">Uygulama alanlarımız</p>
             <p className="mt-2">
               Alçıpan asma tavan, ışık bandı, taşyünü / karolam / clip-in asma

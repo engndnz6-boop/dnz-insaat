@@ -23,7 +23,7 @@ export function Navbar() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-brand-ink/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-black/5 bg-brand-anthracite/95 backdrop-blur-md shadow-sm">
       <div className="container-page flex h-16 items-center justify-between sm:h-20">
         <Link href="/" className="group transition hover:opacity-90">
           <Logo />
@@ -60,7 +60,7 @@ export function Navbar() {
           >
             <ShoppingBag className="h-5 w-5" />
             {totalItems > 0 && (
-              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center bg-brand-gold px-1 text-[10px] font-bold text-brand-ink">
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center bg-brand-gold px-1 text-[10px] font-bold text-[#151920]">
                 {totalItems}
               </span>
             )}
@@ -78,7 +78,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-white/5 bg-brand-anthracite md:hidden">
+        <div className="border-t border-black/5 bg-brand-anthracite md:hidden">
           <nav className="container-page flex flex-col gap-1 py-4">
             {links.map((link) => (
               <Link

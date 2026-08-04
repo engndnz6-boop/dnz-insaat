@@ -50,7 +50,7 @@ export default function AdminPdfCatalogsPage() {
 
       <form
         onSubmit={onSubmit}
-        className="mt-8 space-y-4 border border-white/5 bg-brand-anthracite/40 p-5"
+        className="mt-8 space-y-4 border border-black/5 bg-brand-anthracite/40 p-5"
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -116,7 +116,7 @@ export default function AdminPdfCatalogsPage() {
 
       <ul className="mt-8 space-y-3">
         {pdfCatalogs.length === 0 && (
-          <li className="border border-dashed border-white/10 p-8 text-center text-sm text-brand-mist">
+          <li className="border border-dashed border-black/10 p-8 text-center text-sm text-brand-mist">
             Henüz PDF katalog yok.
           </li>
         )}
@@ -125,7 +125,7 @@ export default function AdminPdfCatalogsPage() {
           return (
             <li
               key={pdf.id}
-              className="flex flex-wrap items-center justify-between gap-3 border border-white/5 bg-brand-anthracite/50 p-4"
+              className="flex flex-wrap items-center justify-between gap-3 border border-black/5 bg-brand-anthracite/50 p-4"
             >
               <div>
                 <p className="font-medium text-brand-bone">{pdf.title}</p>
