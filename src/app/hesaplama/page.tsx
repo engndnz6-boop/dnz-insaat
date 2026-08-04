@@ -1,0 +1,189 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { Calculator, MessageCircle, ShoppingBag } from "lucide-react";
+import {
+  calculators,
+  getCalculator,
+  sumLines,
+  type CalculatorId,
+  type MaterialLine,
+} from "@/lib/calculators";
+import { formatPrice } from "@/lib/utils";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
+import { brand } from "@/lib/brand";
+
+export default function HesaplamaPage() {
+  const [activeId, setActiveId] = useState<CalculatorId>("alcipan-tavan");
+  const [m2, setM2] = useState<string>("50");
+  const [lines, setLines] = useState<MaterialLine[] | null>(null);
+
+  const active = useMemo(() => getCalculator(activeId), [activeId]);
+  const area = Number(m2.replace(",", ".")) || 0;
+  const total = lines ? sumLines(lines) : 0;
+
+  const onCalculate = () => {
+    if (area <= 0) {
+      setLines(null);
+      return;
+    }
+    setLines(active.compute(area));
+  };
+
+  const waMessage = lines
+    ? `${active.title} için yaklaşık metraj talebi:\nAlan: ${area} m²\nTahmini malzeme tutarı: ${formatPrice(total)}\n\nDetaylı teklif istiyorum.`
+    : `${active.title} için teklif istiyorum.`;
+
+  return (
+    <div className="bg-brand-ink">
+      <div className="bg-brand-navy px-4 py-10 sm:px-6 lg:px-8">
+        <div className="container-page">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
+            Analizler ve maliyet
+          </p>
+          <h1 className="mt-2 font-sans text-3xl font-bold text-white sm:text-4xl">
+            Hesaplamalar
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
+            Alan bilgisini girin; yaklaşık malzeme metrajı ve maliyet özetini
+            görün. Sonuçlar referans amaçlıdır — kesin teklif için bize ulaşın.
+          </p>
+        </div>
+      </div>
+
+      <div className="container-page py-10 sm:py-12">
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+          <aside className="h-fit bg-brand-navy p-2">
+            <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
+              Malzeme maliyetleri
+            </p>
+            <nav className="flex flex-col gap-1">
+              {calculators.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveId(c.id);
+                    setLines(null);
+                  }}
+                  className={`px-3 py-3 text-left text-sm font-medium transition ${
+                    activeId === c.id
+                      ? "bg-brand-gold text-white"
+                      : "bg-white/5 text-white/85 hover:bg-white/10"
+                  }`}
+                >
+                  {c.title}
+                </button>
+              ))}
+            </nav>
+            <Link
+              href="/katalog"
+              className="mt-3 flex items-center gap-2 bg-white/10 px-3 py-3 text-sm font-semibold text-white hover:bg-white/15"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Malzeme satışına git
+            </Link>
+          </aside>
+
+          <section className="border border-black/10 bg-white p-6 sm:p-8">
+            <div className="flex items-start gap-3">
+              <div className="bg-brand-navy/10 p-2 text-brand-navy">
+                <Calculator className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-sans text-2xl font-bold text-brand-bone">
+                  {active.title}
+                </h2>
+                <p className="mt-1 text-sm text-brand-mist">{active.description}</p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-end gap-3">
+              <label className="block">
+                <span className="label-field">Alan (m²)</span>
+                <input
+                  type="number"
+                  min={1}
+                  step={0.1}
+                  className="input-field w-40"
+                  value={m2}
+                  onChange={(e) => setM2(e.target.value)}
+                />
+              </label>
+              <button type="button" onClick={onCalculate} className="btn-primary">
+                Hesapla
+              </button>
+            </div>
+            <p className="mt-3 text-xs text-brand-mist">
+              Formu doldurun ve Hesapla’ya basın. Fiyatlar güncel stok/piyasa
+              durumuna göre değişebilir.
+            </p>
+
+            {lines && (
+              <div className="mt-8 overflow-x-auto border border-black/10">
+                <table className="w-full min-w-[520px] text-left text-sm">
+                  <thead className="bg-brand-navy text-xs uppercase tracking-wider text-white/80">
+                    <tr>
+                      <th className="px-4 py-3 font-medium">Malzeme</th>
+                      <th className="px-4 py-3 font-medium">Miktar</th>
+                      <th className="px-4 py-3 font-medium">Birim</th>
+                      <th className="px-4 py-3 font-medium">Birim fiyat</th>
+                      <th className="px-4 py-3 font-medium">Tutar</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lines.map((line) => (
+                      <tr key={line.name} className="border-t border-black/5">
+                        <td className="px-4 py-3 text-brand-bone">{line.name}</td>
+                        <td className="px-4 py-3 text-brand-mist">{line.qty}</td>
+                        <td className="px-4 py-3 text-brand-mist">{line.unit}</td>
+                        <td className="px-4 py-3 text-brand-mist">
+                          {formatPrice(line.unitPrice)}
+                        </td>
+                        <td className="px-4 py-3 font-medium text-brand-navy">
+                          {formatPrice(line.qty * line.unitPrice)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-brand-navy/20 bg-brand-ink">
+                      <td
+                        colSpan={4}
+                        className="px-4 py-3 text-sm font-semibold text-brand-bone"
+                      >
+                        Yaklaşık toplam (KDV hariç)
+                      </td>
+                      <td className="px-4 py-3 text-base font-bold text-brand-navy">
+                        {formatPrice(total)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a
+                href={buildWhatsAppUrl(waMessage)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 bg-[#25D366] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1ebe57]"
+              >
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp ile teklif iste
+              </a>
+              <Link href="/katalog" className="btn-secondary">
+                Malzeme satışı / katalog
+              </Link>
+              <Link href="/iletisim" className="btn-ghost">
+                {brand.phone}
+              </Link>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}

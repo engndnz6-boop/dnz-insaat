@@ -21,10 +21,10 @@ export function FeaturedProducts() {
             ve bağlı malzemeler.
           </p>
         </div>
-        <Link href="/katalog" className="btn-ghost shrink-0">
-          Tümünü Gör
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+          <Link href="/katalog" className="btn-ghost shrink-0">
+            Malzeme satışı
+            <ArrowRight className="h-4 w-4" />
+          </Link>
       </div>
 
       <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

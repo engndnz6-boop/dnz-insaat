@@ -26,6 +26,11 @@ export function Footer() {
           </h3>
           <ul className="mt-4 space-y-2 text-sm text-white/75">
             <li>
+              <Link href="/hesaplama" className="hover:text-white">
+                Hesaplamalar
+              </Link>
+            </li>
+            <li>
               <Link href="/katalog" className="hover:text-white">
                 Ürün Kataloğu
               </Link>

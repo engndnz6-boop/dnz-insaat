@@ -1,5 +1,6 @@
 import { Hero } from "@/components/home/Hero";
 import { CategoryShowcase } from "@/components/home/CategoryShowcase";
+import { ServicesBand } from "@/components/home/ServicesBand";
 import { StatsStrip } from "@/components/home/StatsStrip";
 import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { FeaturedProjects } from "@/components/home/FeaturedProjects";
@@ -13,6 +14,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <ServicesBand />
       <CategoryShowcase />
       <StatsStrip />
       <ProcessSteps />
@@ -33,12 +35,20 @@ export default function HomePage() {
               Asma tavan, ışık bandı, bölme duvar uygulaması veya toplu malzeme
               alımı için DNZ İnşaat ile iletişime geçin.
             </p>
-            <Link
-              href="/iletisim"
-              className="mt-8 inline-flex bg-brand-gold px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-gold-light"
-            >
-              Teklif Formuna Git
-            </Link>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/hesaplama"
+                className="inline-flex bg-brand-gold px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-gold-light"
+              >
+                Maliyet Hesapla
+              </Link>
+              <Link
+                href="/iletisim"
+                className="inline-flex border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Teklif Formu
+              </Link>
+            </div>
           </div>
         </div>
       </section>
