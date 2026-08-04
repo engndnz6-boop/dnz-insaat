@@ -5,7 +5,7 @@ export const brand = {
   tagline: "İnşaat Malzemeleri & Asma Tavan",
   description:
     "DNZ İnşaat malzemeleri: alçıpan, galvaniz profil, clip-in / klipin asma tavan, taşyünü tavan, metal tavan, plastik tavan, karolam, bölme duvar ve malzeme satışı. Ankara Gölbaşı.",
-  url: "https://www.dnzyapimalzemeleri.com.tr",
+  url: "https://www.dnzinsaat.com.tr",
   email: "info@dnzinsaat.com",
   phone: "0533 611 06 15",
   phoneTel: "+905336110615",
