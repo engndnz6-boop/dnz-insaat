@@ -33,14 +33,15 @@ export function Hero() {
           className="max-w-3xl font-sans text-4xl font-bold leading-[1.12] text-white opacity-0 animate-fade-up sm:text-5xl lg:text-[3.5rem]"
           style={{ animationDelay: "0.15s", animationFillMode: "forwards" }}
         >
-          Yapı malzemelerinde güvenilir çözüm ortağınız
+          DNZ İnşaat malzemeleri — alçıpan, profil, asma tavan
         </h1>
         <p
           className="mt-5 max-w-xl text-base leading-relaxed text-white/80 opacity-0 animate-fade-up sm:text-lg"
           style={{ animationDelay: "0.28s", animationFillMode: "forwards" }}
         >
-          Alçıpan asma tavan, ışık bandı, taşyünü, karolam, clip-in sistemler ve
-          bölme duvar uygulamaları. Malzeme satışı ve anahtar teslim uygulama.
+          Alçıpan, galvaniz profil, clip-in / klipin asma tavan, taşyünü tavan,
+          metal tavan, plastik tavan, karolam ve bölme duvar. Malzeme satışı ve
+          anahtar teslim uygulama — Ankara.
         </p>
         <div
           className="mt-8 flex flex-wrap gap-3 opacity-0 animate-fade-up"

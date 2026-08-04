@@ -1,6 +1,7 @@
 import { Hero } from "@/components/home/Hero";
 import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 import { ServicesBand } from "@/components/home/ServicesBand";
+import { SeoTopics } from "@/components/home/SeoTopics";
 import { StatsStrip } from "@/components/home/StatsStrip";
 import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { FeaturedProjects } from "@/components/home/FeaturedProjects";
@@ -14,6 +15,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <SeoTopics />
       <ServicesBand />
       <CategoryShowcase />
       <StatsStrip />
@@ -32,8 +34,9 @@ export default function HomePage() {
               Projeniz için teklif alın
             </h2>
             <p className="mt-3 text-white/75">
-              Asma tavan, ışık bandı, bölme duvar uygulaması veya toplu malzeme
-              alımı için DNZ İnşaat ile iletişime geçin.
+              Alçıpan, galvaniz profil, clip-in asma tavan, taşyünü, metal /
+              plastik tavan veya bölme duvar için DNZ İnşaat ile iletişime
+              geçin.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link

@@ -3,19 +3,19 @@ import { ArrowRight } from "lucide-react";
 
 const categories = [
   {
-    title: "Alçıpan Asma Tavan",
+    title: "Alçıpan & Galvaniz Profil",
     href: "/katalog",
     image:
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80",
   },
   {
-    title: "Işık Bandı Sistemleri",
+    title: "Clip-in / Klipin Asma Tavan",
     href: "/katalog",
     image:
       "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=1200&q=80",
   },
   {
-    title: "Taşyünü & Karolam",
+    title: "Taşyünü, Metal & Plastik Tavan",
     href: "/katalog",
     image:
       "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1200&q=80",
