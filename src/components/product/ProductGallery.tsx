@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+import { ProductImage } from "@/components/product/ProductImage";
 
 export function ProductGallery({
   images,
@@ -11,12 +11,21 @@ export function ProductGallery({
   name: string;
 }) {
   const [active, setActive] = useState(0);
+  const list = images.length ? images : [];
+
+  if (!list.length) {
+    return (
+      <div className="flex aspect-square items-center justify-center border border-black/5 bg-brand-anthracite text-sm text-brand-mist">
+        Görsel yok
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
       <div className="relative aspect-[4/5] overflow-hidden border border-black/5 bg-brand-anthracite sm:aspect-square">
-        <Image
-          src={images[active]}
+        <ProductImage
+          src={list[active]}
           alt={`${name} — görsel ${active + 1}`}
           fill
           priority
@@ -24,11 +33,11 @@ export function ProductGallery({
           sizes="(max-width: 1024px) 100vw, 50vw"
         />
       </div>
-      {images.length > 1 && (
+      {list.length > 1 && (
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-          {images.map((src, i) => (
+          {list.map((src, i) => (
             <button
-              key={src}
+              key={`${src}-${i}`}
               type="button"
               onClick={() => setActive(i)}
               className={`relative aspect-square overflow-hidden border transition ${
@@ -37,7 +46,7 @@ export function ProductGallery({
                   : "border-black/10 opacity-70 hover:opacity-100"
               }`}
             >
-              <Image
+              <ProductImage
                 src={src}
                 alt={`${name} küçük ${i + 1}`}
                 fill

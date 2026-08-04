@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProductImage } from "@/components/product/ProductImage";
 import Link from "next/link";
 import { Minus, Plus, Trash2, MessageCircle, CreditCard } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
@@ -53,8 +53,8 @@ export default function SepetPage() {
                 href={`/urun/${product.slug}`}
                 className="relative h-24 w-full shrink-0 overflow-hidden sm:h-20 sm:w-20"
               >
-                <Image
-                  src={product.images[0]}
+                <ProductImage
+                  src={product.images[0] || ""}
                   alt={product.name}
                   fill
                   className="object-cover"

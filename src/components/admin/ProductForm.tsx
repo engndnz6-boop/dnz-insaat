@@ -15,7 +15,17 @@ import {
   USAGE_LABELS,
 } from "@/lib/utils";
 import { useCatalog } from "@/lib/catalog-context";
-import { savePdfBlob } from "@/lib/pdf-storage";
+import {
+  compressImageFile,
+  saveFileBlob,
+  savePdfBlob,
+  toIdbImageRef,
+} from "@/lib/pdf-storage";
+import { ProductImage } from "@/components/product/ProductImage";
+import { X } from "lucide-react";
+
+const MAX_IMAGES = 8;
+const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
 
 export function ProductForm({
   initial,
@@ -27,6 +37,7 @@ export function ProductForm({
   const { rootCategories, getSubcategories } = useCatalog();
   const [form, setForm] = useState<Product>(initial);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pendingImages, setPendingImages] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -48,7 +59,36 @@ export function ProductForm({
     setError("");
     setSaving(true);
     try {
-      let next = { ...form, slug: form.slug.trim() || slugify(form.name), price: Number(form.price) || 0 };
+      let next = {
+        ...form,
+        slug: form.slug.trim() || slugify(form.name),
+        price: Number(form.price) || 0,
+      };
+
+      if (pendingImages.length) {
+        const savedRefs: string[] = [];
+        for (let i = 0; i < pendingImages.length; i++) {
+          const file = pendingImages[i];
+          if (!file.type.startsWith("image/")) {
+            throw new Error("Sadece görsel dosyaları yüklenebilir.");
+          }
+          const blob = await compressImageFile(file);
+          if (blob.size > MAX_IMAGE_BYTES) {
+            throw new Error(
+              `"${file.name}" sıkıştırıldıktan sonra hala çok büyük (max 2.5 MB).`
+            );
+          }
+          const key = `product-img-${form.id}-${Date.now()}-${i}`;
+          await saveFileBlob(key, blob);
+          savedRefs.push(toIdbImageRef(key));
+        }
+        next = { ...next, images: [...next.images, ...savedRefs] };
+      }
+
+      if (!next.images.length) {
+        throw new Error("En az bir ürün görseli ekleyin (yükleme veya URL).");
+      }
+
       if (pdfFile) {
         if (pdfFile.size > 4 * 1024 * 1024) {
           throw new Error("Ürün PDF en fazla 4 MB olabilir.");
@@ -209,21 +249,108 @@ export function ProductForm({
             onChange={(e) => set("size", e.target.value)}
           />
         </Field>
-        <Field label="Görsel URL (virgülle birden fazla)">
-          <input
-            className="input-field"
-            value={form.images.join(", ")}
-            onChange={(e) =>
-              set(
-                "images",
-                e.target.value
+        <div className="sm:col-span-2 space-y-3">
+          <Field label="Ürün fotoğrafları (bilgisayardan yükle)">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/jpg"
+              multiple
+              className="input-field file:mr-3 file:border-0 file:bg-brand-gold file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#151920]"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (!files?.length) return;
+                const room = Math.max(0, MAX_IMAGES - form.images.length);
+                setPendingImages((prev) =>
+                  [...prev, ...Array.from(files)].slice(0, room)
+                );
+                e.target.value = "";
+              }}
+            />
+            <p className="mt-1 text-xs text-brand-mist">
+              JPG / PNG / WEBP · en fazla {MAX_IMAGES} görsel · otomatik sıkıştırılır
+              {pendingImages.length > 0
+                ? ` · ${pendingImages.length} dosya seçildi (kayıtta yüklenecek)`
+                : ""}
+            </p>
+          </Field>
+
+          {(form.images.length > 0 || pendingImages.length > 0) && (
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {form.images.map((src, i) => (
+                <div
+                  key={`${src}-${i}`}
+                  className="relative aspect-square overflow-hidden border border-black/10 bg-brand-ink"
+                >
+                  <ProductImage
+                    src={src}
+                    alt={`Görsel ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="120px"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        images: f.images.filter((_, idx) => idx !== i),
+                      }))
+                    }
+                    className="absolute right-1 top-1 bg-black/70 p-1 text-white"
+                    aria-label="Görseli kaldır"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+              {pendingImages.map((file, i) => (
+                <div
+                  key={`${file.name}-${i}`}
+                  className="relative flex aspect-square items-center justify-center border border-dashed border-brand-gold/50 bg-brand-ink/40 p-2 text-center text-[10px] text-brand-mist"
+                >
+                  {file.name}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPendingImages((prev) =>
+                        prev.filter((_, idx) => idx !== i)
+                      )
+                    }
+                    className="absolute right-1 top-1 bg-black/70 p-1 text-white"
+                    aria-label="Seçimi kaldır"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <Field label="veya görsel URL (virgülle birden fazla)">
+            <input
+              className="input-field"
+              placeholder="https://...jpg, https://...png"
+              value={form.images
+                .filter(
+                  (src) =>
+                    src.startsWith("http") ||
+                    src.startsWith("/") ||
+                    src.startsWith("data:")
+                )
+                .join(", ")}
+              onChange={(e) => {
+                const urls = e.target.value
                   .split(",")
                   .map((s) => s.trim())
-                  .filter(Boolean)
-              )
-            }
-          />
-        </Field>
+                  .filter(Boolean);
+                const localRefs = form.images.filter((src) =>
+                  src.startsWith("idb:")
+                );
+                set("images", [...localRefs, ...urls]);
+              }}
+            />
+          </Field>
+        </div>
         <Field label="Teknik PDF dosyası (yükle)">
           <input
             type="file"

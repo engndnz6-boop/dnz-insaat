@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProductImage } from "@/components/product/ProductImage";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
@@ -21,8 +21,8 @@ export function ProductCard({ product }: { product: Product }) {
       className="group flex flex-col overflow-hidden border border-black/5 bg-brand-anthracite shadow-soft transition hover:border-brand-gold/30"
     >
       <div className="relative aspect-[4/5] overflow-hidden">
-        <Image
-          src={product.images[0]}
+        <ProductImage
+          src={product.images[0] || ""}
           alt={product.name}
           fill
           className="object-cover transition duration-500 group-hover:scale-105"

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProductImage } from "@/components/product/ProductImage";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
 import { useProducts } from "@/lib/products-context";
@@ -58,8 +58,8 @@ export default function AdminProductsPage() {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-brand-slate">
-                      <Image
-                        src={p.images[0]}
+                      <ProductImage
+                        src={p.images[0] || ""}
                         alt=""
                         fill
                         className="object-cover"
