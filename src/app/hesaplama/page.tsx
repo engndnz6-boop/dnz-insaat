@@ -1,39 +1,64 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Calculator, MessageCircle, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import {
-  calculators,
-  getCalculator,
-  sumLines,
-  type CalculatorId,
-  type MaterialLine,
-} from "@/lib/calculators";
+  Calculator,
+  MessageCircle,
+  ShoppingBag,
+} from "lucide-react";
+import { computeLines, sumLines, type MaterialLine } from "@/lib/calculators";
+import { useCalculators } from "@/lib/calculators-context";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { brand } from "@/lib/brand";
 
 export default function HesaplamaPage() {
-  const [activeId, setActiveId] = useState<CalculatorId>("alcipan-tavan");
+  const { systems, ready } = useCalculators();
+  const [activeId, setActiveId] = useState<string>("");
   const [m2, setM2] = useState<string>("50");
   const [lines, setLines] = useState<MaterialLine[] | null>(null);
 
-  const active = useMemo(() => getCalculator(activeId), [activeId]);
+  const resolvedId = activeId || systems[0]?.id || "";
+  const active = useMemo(
+    () => systems.find((s) => s.id === resolvedId) || systems[0],
+    [systems, resolvedId]
+  );
+
   const area = Number(m2.replace(",", ".")) || 0;
   const total = lines ? sumLines(lines) : 0;
 
   const onCalculate = () => {
-    if (area <= 0) {
+    if (!active || area <= 0) {
       setLines(null);
       return;
     }
-    setLines(active.compute(area));
+    setLines(computeLines(active, area));
   };
 
-  const waMessage = lines
+  const waMessage = lines && active
     ? `${active.title} için yaklaşık metraj talebi:\nAlan: ${area} m²\nTahmini malzeme tutarı: ${formatPrice(total)}\n\nDetaylı teklif istiyorum.`
-    : `${active.title} için teklif istiyorum.`;
+    : `${active?.title || "Sistem"} için teklif istiyorum.`;
+
+  if (!ready) {
+    return (
+      <div className="container-page py-20 text-brand-mist">Yükleniyor…</div>
+    );
+  }
+
+  if (!systems.length || !active) {
+    return (
+      <div className="container-page py-20">
+        <h1 className="section-title">Hesaplamalar</h1>
+        <p className="section-subtitle">
+          Henüz tanımlı sistem yok. Admin panelinden sistem ekleyin.
+        </p>
+        <Link href="/admin/hesaplamalar" className="btn-primary mt-6">
+          Admin — Hesaplamalar
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-brand-ink">
@@ -47,7 +72,7 @@ export default function HesaplamaPage() {
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
             Alan bilgisini girin; yaklaşık malzeme metrajı ve maliyet özetini
-            görün. Sonuçlar referans amaçlıdır — kesin teklif için bize ulaşın.
+            görün. Sarfiyat katsayıları admin panelinden düzenlenir.
           </p>
         </div>
       </div>
@@ -59,7 +84,7 @@ export default function HesaplamaPage() {
               Malzeme maliyetleri
             </p>
             <nav className="flex flex-col gap-1">
-              {calculators.map((c) => (
+              {systems.map((c) => (
                 <button
                   key={c.id}
                   type="button"
@@ -68,7 +93,7 @@ export default function HesaplamaPage() {
                     setLines(null);
                   }}
                   className={`px-3 py-3 text-left text-sm font-medium transition ${
-                    activeId === c.id
+                    resolvedId === c.id
                       ? "bg-brand-gold text-white"
                       : "bg-white/5 text-white/85 hover:bg-white/10"
                   }`}
@@ -95,7 +120,9 @@ export default function HesaplamaPage() {
                 <h2 className="font-sans text-2xl font-bold text-brand-bone">
                   {active.title}
                 </h2>
-                <p className="mt-1 text-sm text-brand-mist">{active.description}</p>
+                <p className="mt-1 text-sm text-brand-mist">
+                  {active.description}
+                </p>
               </div>
             </div>
 
@@ -115,10 +142,19 @@ export default function HesaplamaPage() {
                 Hesapla
               </button>
             </div>
-            <p className="mt-3 text-xs text-brand-mist">
-              Formu doldurun ve Hesapla’ya basın. Fiyatlar güncel stok/piyasa
-              durumuna göre değişebilir.
-            </p>
+
+            {active.materials.length > 0 && (
+              <div className="mt-4 overflow-x-auto border border-dashed border-black/10 bg-brand-ink/50 p-3 text-xs text-brand-mist">
+                <p className="font-semibold text-brand-bone">Sarfiyat (1 m² için)</p>
+                <ul className="mt-2 space-y-1">
+                  {active.materials.map((m) => (
+                    <li key={m.id}>
+                      {m.name}: <strong>{m.ratePerM2}</strong> {m.unit}/m²
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {lines && (
               <div className="mt-8 overflow-x-auto border border-black/10">

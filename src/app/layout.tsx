@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { CartProvider } from "@/lib/cart-context";
 import { ProductsProvider } from "@/lib/products-context";
 import { CatalogProvider } from "@/lib/catalog-context";
+import { CalculatorsProvider } from "@/lib/calculators-context";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
@@ -45,12 +46,14 @@ export default function RootLayout({
       <body className="font-sans">
         <ProductsProvider>
           <CatalogProvider>
-            <CartProvider>
-              <Navbar />
-              <main className="min-h-[70vh]">{children}</main>
-              <Footer />
-              <WhatsAppFloat />
-            </CartProvider>
+            <CalculatorsProvider>
+              <CartProvider>
+                <Navbar />
+                <main className="min-h-[70vh]">{children}</main>
+                <Footer />
+                <WhatsAppFloat />
+              </CartProvider>
+            </CalculatorsProvider>
           </CatalogProvider>
         </ProductsProvider>
       </body>

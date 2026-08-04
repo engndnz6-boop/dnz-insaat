@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Package, ShoppingBag, Plus } from "lucide-react";
+import { Package, ShoppingBag, Plus, Calculator } from "lucide-react";
 import { useProducts } from "@/lib/products-context";
+import { useCalculators } from "@/lib/calculators-context";
 import type { StoredOrder } from "@/lib/checkout";
 import { formatPrice } from "@/lib/utils";
 
 export default function AdminHomePage() {
   const { products } = useProducts();
+  const { systems } = useCalculators();
   const [orders, setOrders] = useState<StoredOrder[]>([]);
 
   useEffect(() => {
@@ -28,15 +30,21 @@ export default function AdminHomePage() {
     <div>
       <h1 className="font-display text-3xl text-brand-bone">Özet</h1>
       <p className="mt-2 text-sm text-brand-mist">
-        Ürün kataloğu ve sipariş yönetimi (localStorage demo).
+        Ürün kataloğu, hesaplama sistemleri ve sipariş yönetimi.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           label="Ürün"
           value={String(products.length)}
           icon={Package}
           href="/admin/urunler"
+        />
+        <Stat
+          label="Hesaplama sistemi"
+          value={String(systems.length)}
+          icon={Calculator}
+          href="/admin/hesaplamalar"
         />
         <Stat
           label="Sipariş"
@@ -57,7 +65,11 @@ export default function AdminHomePage() {
           <Plus className="h-4 w-4" />
           Yeni Ürün
         </Link>
-        <Link href="/admin/urunler" className="btn-secondary">
+        <Link href="/admin/hesaplamalar" className="btn-secondary">
+          <Calculator className="h-4 w-4" />
+          Hesaplamaları Düzenle
+        </Link>
+        <Link href="/admin/urunler" className="btn-ghost">
           Ürünleri Yönet
         </Link>
       </div>

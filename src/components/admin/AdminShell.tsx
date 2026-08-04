@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Tags,
   FileText,
+  Calculator,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
@@ -125,6 +126,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     { href: "/admin", label: "Özet", icon: LayoutDashboard },
     { href: "/admin/urunler", label: "Ürünler", icon: Package },
     { href: "/admin/kategoriler", label: "Kategoriler", icon: Tags },
+    { href: "/admin/hesaplamalar", label: "Hesaplamalar", icon: Calculator },
     { href: "/admin/kataloglar", label: "PDF Katalog", icon: FileText },
     { href: "/admin/siparisler", label: "Siparişler", icon: ShoppingBag },
   ];
