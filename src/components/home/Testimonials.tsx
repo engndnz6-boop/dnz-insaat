@@ -6,9 +6,7 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
     <section className="border-y border-black/5 bg-brand-anthracite/60 py-20 sm:py-28">
       <div className="container-page">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
-            Referanslar
-          </p>
+          <p className="section-kicker">Referanslar</p>
           <h2 className="section-title mt-3">Müşteri Yorumları</h2>
           <p className="section-subtitle">
             Mimarlar, müteahhitler ve ev sahiplerinden gelen gerçek geri

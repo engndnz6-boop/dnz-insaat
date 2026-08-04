@@ -78,9 +78,7 @@ export function FeaturedProjects({ projects }: { projects: Project[] }) {
   return (
     <section id="projeler" className="container-page scroll-mt-24 py-20 sm:py-28">
       <div className="max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
-          Öne Çıkan Projeler
-        </p>
+        <p className="section-kicker">Öne çıkan projeler</p>
         <h2 className="section-title mt-3">Öncesi / Sonrası</h2>
         <p className="section-subtitle">
           Tamamladığımız konut, ofis ve dış cephe dönüşümlerinden seçkiler.

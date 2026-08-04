@@ -28,7 +28,7 @@ export function ProductCard({ product }: { product: Product }) {
           className="object-cover transition duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
-        <span className="absolute left-3 top-3 bg-brand-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-gold">
+        <span className="absolute left-3 top-3 bg-brand-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-navy">
           {badge}
         </span>
       </div>
@@ -44,7 +44,7 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-mist">
           {product.shortDescription}
         </p>
-        <p className="mt-auto pt-4 text-sm font-semibold text-brand-gold">
+        <p className="mt-auto pt-4 text-sm font-semibold text-brand-navy">
           {formatPrice(product.price)}
           <span className="ml-1 text-xs font-normal text-brand-mist">
             / birim
