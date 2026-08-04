@@ -10,7 +10,17 @@ npm run dev
 ```
 
 - Site: http://localhost:3000  
-- Admin: http://localhost:3000/admin (şifre: `dnz2026`)
+- Admin: http://localhost:3000/admin
+
+## Admin şifresi
+
+Şifre kodda tutulmaz. `.env.local` dosyasına ekleyin:
+
+```bash
+ADMIN_PASSWORD=guclu-bir-sifre
+```
+
+Canlıda (Vercel): Project → Settings → Environment Variables → `ADMIN_PASSWORD`
 
 ## Marka
 

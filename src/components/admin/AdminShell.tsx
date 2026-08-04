@@ -13,12 +13,6 @@ import {
   FileText,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
-import { adminConfig } from "@/lib/brand";
-
-function isAuthed(): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(adminConfig.sessionKey) === "1";
-}
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -27,25 +21,52 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [checked, setChecked] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setAuthed(isAuthed());
-    setChecked(true);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/session", { cache: "no-store" });
+        const data = (await res.json()) as { authenticated?: boolean };
+        if (!cancelled) setAuthed(Boolean(data.authenticated));
+      } catch {
+        if (!cancelled) setAuthed(false);
+      } finally {
+        if (!cancelled) setChecked(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const login = (e: React.FormEvent) => {
+  const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === adminConfig.password) {
-      sessionStorage.setItem(adminConfig.sessionKey, "1");
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error || "Hatalı şifre.");
+        return;
+      }
+      setPassword("");
       setAuthed(true);
-      setError("");
-    } else {
-      setError("Hatalı şifre.");
+    } catch {
+      setError("Giriş yapılamadı. Tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const logout = () => {
-    sessionStorage.removeItem(adminConfig.sessionKey);
+  const logout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
     setAuthed(false);
     router.push("/admin");
   };
@@ -70,7 +91,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             Yönetim Paneli
           </h1>
           <p className="mt-2 text-sm text-brand-mist">
-            Demo şifre: <code className="text-brand-gold">{adminConfig.password}</code>
+            Devam etmek için yönetici şifrenizi girin.
           </p>
           <label htmlFor="admin-pass" className="label-field mt-6">
             Şifre
@@ -82,10 +103,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoFocus
+            autoComplete="current-password"
           />
           {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
-          <button type="submit" className="btn-primary mt-6 w-full">
-            Giriş Yap
+          <button
+            type="submit"
+            className="btn-primary mt-6 w-full"
+            disabled={loading || !password}
+          >
+            {loading ? "Kontrol ediliyor…" : "Giriş Yap"}
           </button>
           <Link href="/" className="btn-ghost mt-3 w-full text-xs">
             Siteye Dön

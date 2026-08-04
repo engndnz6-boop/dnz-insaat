@@ -32,12 +32,6 @@ export const brand = {
   },
 } as const;
 
-export const adminConfig = {
-  /** Demo giriş — production'da sunucu tarafı auth kullanın */
-  password: "dnz2026",
-  sessionKey: "dnz-admin-auth",
-};
-
 export const checkoutConfig = {
   vatRate: 0.2,
   shippingFlat: 250,
