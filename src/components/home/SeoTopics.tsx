@@ -1,25 +1,26 @@
 import Link from "next/link";
+import { brand } from "@/lib/brand";
 
 const topics = [
   {
-    title: "Alçıpan & galvaniz profil",
-    text: "Alçıpan plaka, UW/CW ve tavan C (CD) galvaniz profil, askı ve aksesuar satışı.",
+    title: "Alçıpan, alçı, boya & profil",
+    text: "Alçıpan, alçı, boya, galvaniz profil, kutu profil, ABS ve UMS profil satışı.",
     href: "/katalog",
   },
   {
-    title: "Clip-in / klipin asma tavan",
-    text: "Clipin (klipin) metal asma tavan panelleri, ray ve taşıyıcı sistemler.",
+    title: "Asma tavan sistemleri",
+    text: "Clip-in, petek, karolam, taşyünü, vinil asma tavan ve plastik lambiri.",
     href: "/katalog",
   },
   {
-    title: "Taşyünü, metal ve plastik tavan",
-    text: "Taşyünü tavan, metal tavan, plastik tavan ve karolam asma tavan çözümleri.",
+    title: "Duvar, seramik & parke",
+    text: "Bölme duvar, alçıpan giydirme duvar, seramik, parke ve genel malzeme.",
     href: "/katalog",
   },
   {
-    title: "Bölme duvar",
-    text: "Alçıpan bölme duvar malzemeleri, profil ve yalıtım dolguları.",
-    href: "/katalog",
+    title: "Tadilat & tamirat",
+    text: "Ev, okul ve ofis tadilatı; elektrik / su tamiratı, kombi yedek parça, anahtar teslim.",
+    href: "/iletisim",
   },
 ];
 
@@ -33,9 +34,11 @@ export function SeoTopics() {
           Ne arıyorsanız buradan ulaşın
         </h2>
         <p className="mx-auto mt-3 max-w-3xl text-center text-brand-mist">
-          Alçıpan yazan, profil veya galvaniz profil arayan, clip-in / klipin asma
-          tavan, taşyünü tavan, metal tavan, plastik tavan ya da bölme duvar
-          arayan herkes DNZ İnşaat üzerinden ürün, metraj ve teklife ulaşabilir.
+          Alçıpan, profil, alçı, boya, asma tavan, karolam tavan, petek asma
+          tavan, clipin asma tavan, taşyünü ve vinil asma tavan, plastik
+          lambiri, bölme duvar, alçıpan giydirme duvar, seramik, parke, malzeme,
+          yedek parça, kombi parçası, elektrik ve su tamiratı, ev–okul–ofis
+          tadilatı ve anahtar teslim için DNZ İnşaat — Ankara Gölbaşı.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -54,6 +57,19 @@ export function SeoTopics() {
             </Link>
           ))}
         </div>
+
+        <ul className="mt-10 flex flex-wrap justify-center gap-2" aria-label="Arama konuları">
+          {brand.keywords.map((kw) => (
+            <li key={kw}>
+              <Link
+                href="/katalog"
+                className="inline-block border border-black/10 bg-white px-3 py-1.5 text-xs text-brand-mist transition hover:border-brand-navy/30 hover:text-brand-navy"
+              >
+                {kw}
+              </Link>
+            </li>
+          ))}
+        </ul>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/katalog" className="btn-primary">

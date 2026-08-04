@@ -26,7 +26,7 @@ const sans = Outfit({
 });
 
 const titleDefault =
-  "DNZ İnşaat Malzemeleri | Alçıpan, Profil, Clip-in Asma Tavan Ankara";
+  "DNZ İnşaat | Alçıpan, Profil, Asma Tavan, Tadilat Ankara Gölbaşı";
 
 export const metadata: Metadata = {
   metadataBase: new URL(brand.url),

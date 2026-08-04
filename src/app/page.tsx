@@ -34,9 +34,9 @@ export default function HomePage() {
               Projeniz için teklif alın
             </h2>
             <p className="mt-3 text-white/75">
-              Alçıpan, galvaniz profil, clip-in asma tavan, taşyünü, metal /
-              plastik tavan veya bölme duvar için DNZ İnşaat ile iletişime
-              geçin.
+              Alçıpan, profil, asma tavan, bölme duvar, seramik, parke, elektrik
+              / su tamiratı veya anahtar teslim tadilat için DNZ İnşaat ile
+              iletişime geçin.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link

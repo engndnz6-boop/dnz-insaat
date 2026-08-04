@@ -39,9 +39,9 @@ export function Hero() {
           className="mt-5 max-w-xl text-base leading-relaxed text-white/80 opacity-0 animate-fade-up sm:text-lg"
           style={{ animationDelay: "0.28s", animationFillMode: "forwards" }}
         >
-          Alçıpan, galvaniz profil, clip-in / klipin asma tavan, taşyünü tavan,
-          metal tavan, plastik tavan, karolam ve bölme duvar. Malzeme satışı ve
-          anahtar teslim uygulama — Ankara.
+          Alçıpan, profil, asma tavan, karolam / petek / clip-in / taşyünü /
+          vinil tavan, bölme duvar, seramik, parke, tadilat ve malzeme.
+          Anahtar teslim — Ankara Gölbaşı.
         </p>
         <div
           className="mt-8 flex flex-wrap gap-3 opacity-0 animate-fade-up"
