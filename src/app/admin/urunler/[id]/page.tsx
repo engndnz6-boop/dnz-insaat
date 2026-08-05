@@ -33,8 +33,8 @@ export default function EditProductPage() {
       <div className="mt-8">
         <ProductForm
           initial={product}
-          onSave={(next) => {
-            upsertProduct(next);
+          onSave={async (next) => {
+            await upsertProduct(next);
             router.push("/admin/urunler");
           }}
         />

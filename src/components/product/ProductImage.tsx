@@ -19,9 +19,24 @@ type Props = {
   height?: number;
 };
 
+function isExternalHotlink(src: string): boolean {
+  try {
+    const host = new URL(src).hostname;
+    return (
+      host === "api.onedrive.com" ||
+      host.endsWith("onedrive.live.com") ||
+      host === "1drv.ms" ||
+      host.endsWith("sharepoint.com") ||
+      host.endsWith("sharepoint-df.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
- * http(s)/path görselleri next/image ile,
- * idb: ve data: görselleri native img ile gösterir.
+ * http(s)/path → next/image;
+ * OneDrive / idb: / data: → native img (yönlendirme ve blob uyumu).
  */
 export function ProductImage({
   src,
@@ -78,9 +93,12 @@ export function ProductImage({
     );
   }
 
-  const local = resolved.startsWith("blob:") || resolved.startsWith("data:");
+  const useNative =
+    resolved.startsWith("blob:") ||
+    resolved.startsWith("data:") ||
+    isExternalHotlink(resolved);
 
-  if (local) {
+  if (useNative) {
     // eslint-disable-next-line @next/next/no-img-element
     return (
       <img

@@ -23,6 +23,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [onedrive, setOnedrive] = useState<{
+    ok: boolean;
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +45,33 @@ export function AdminShell({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!authed) {
+      setOnedrive(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/onedrive", { cache: "no-store" });
+        const data = (await res.json()) as { ok?: boolean; message?: string };
+        if (!cancelled) {
+          setOnedrive({
+            ok: Boolean(data.ok),
+            message: data.message || "",
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setOnedrive({ ok: false, message: "OneDrive durumu alınamadı." });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authed]);
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,6 +222,22 @@ export function AdminShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
       </header>
+      {onedrive && (
+        <div
+          className={`border-b px-4 py-2 text-center text-xs ${
+            onedrive.ok
+              ? "border-brand-gold/20 bg-brand-gold/10 text-brand-gold"
+              : "border-red-500/20 bg-red-500/10 text-red-200"
+          }`}
+        >
+          OneDrive: {onedrive.message}
+          {!onedrive.ok && (
+            <span className="ml-1 opacity-80">
+              · README’deki Azure kurulum adımlarını tamamlayın
+            </span>
+          )}
+        </div>
+      )}
       <div className="container-page py-8">{children}</div>
     </div>
   );

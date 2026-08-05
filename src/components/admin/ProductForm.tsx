@@ -26,35 +26,68 @@ import { X } from "lucide-react";
 const MAX_IMAGES = 8;
 const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
 
-/** OneDrive varsa oraya; yoksa tarayıcı IndexedDB’ye kaydet */
+/** OneDrive varsa oraya; yapılandırılmamışsa tarayıcı IndexedDB’ye kaydet */
 async function storeImage(blob: Blob, key: string): Promise<string> {
+  const body = new FormData();
+  body.append("file", blob, `${key}.jpg`);
+  body.append("kind", "image");
+
+  let res: Response;
   try {
-    const body = new FormData();
-    body.append("file", blob, `${key}.jpg`);
-    body.append("kind", "image");
-    const res = await fetch("/api/admin/upload", { method: "POST", body });
-    const data = (await res.json()) as { url?: string };
-    if (res.ok && data.url) return data.url;
+    res = await fetch("/api/admin/upload", { method: "POST", body });
   } catch {
-    /* yerel yedek */
+    await saveFileBlob(key, blob);
+    return toIdbImageRef(key);
   }
-  await saveFileBlob(key, blob);
-  return toIdbImageRef(key);
+
+  const data = (await res.json().catch(() => ({}))) as {
+    url?: string;
+    error?: string;
+  };
+
+  if (res.ok && data.url) return data.url;
+
+  // OneDrive kurulu değilse yerel yedek
+  if (res.status === 503) {
+    await saveFileBlob(key, blob);
+    return toIdbImageRef(key);
+  }
+
+  throw new Error(
+    data.error ||
+      `Fotoğraf OneDrive’a yüklenemedi (HTTP ${res.status}). Admin’de OneDrive bandını kontrol edin.`
+  );
 }
 
-async function storePdf(file: File, key: string): Promise<{ url?: string; storageKey?: string }> {
+async function storePdf(
+  file: File,
+  key: string
+): Promise<{ url?: string; storageKey?: string }> {
+  const body = new FormData();
+  body.append("file", file, file.name);
+  body.append("kind", "pdf");
+
+  let res: Response;
   try {
-    const body = new FormData();
-    body.append("file", file, file.name);
-    body.append("kind", "pdf");
-    const res = await fetch("/api/admin/upload", { method: "POST", body });
-    const data = (await res.json()) as { url?: string };
-    if (res.ok && data.url) return { url: data.url };
+    res = await fetch("/api/admin/upload", { method: "POST", body });
   } catch {
-    /* yerel yedek */
+    await saveFileBlob(key, file);
+    return { storageKey: key };
   }
-  await saveFileBlob(key, file);
-  return { storageKey: key };
+
+  const data = (await res.json().catch(() => ({}))) as {
+    url?: string;
+    error?: string;
+  };
+
+  if (res.ok && data.url) return { url: data.url };
+
+  if (res.status === 503) {
+    await saveFileBlob(key, file);
+    return { storageKey: key };
+  }
+
+  throw new Error(data.error || `PDF OneDrive’a yüklenemedi (HTTP ${res.status}).`);
 }
 
 export function ProductForm({

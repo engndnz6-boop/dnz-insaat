@@ -8,8 +8,15 @@ import { useCatalog } from "@/lib/catalog-context";
 import { formatPrice } from "@/lib/utils";
 
 export default function AdminProductsPage() {
-  const { products, deleteProduct, resetToSeed } = useProducts();
+  const { products, deleteProduct, resetToSeed, source } = useProducts();
   const { getCategory } = useCatalog();
+
+  const sourceLabel =
+    source === "onedrive"
+      ? "OneDrive’da saklanır"
+      : source === "local"
+        ? "yalnızca bu tarayıcıda (OneDrive bağlı değil)"
+        : "varsayılan liste";
 
   return (
     <div>
@@ -17,7 +24,7 @@ export default function AdminProductsPage() {
         <div>
           <h1 className="font-display text-3xl text-brand-bone">Ürünler</h1>
           <p className="mt-2 text-sm text-brand-mist">
-            {products.length} ürün · değişiklikler tarayıcıda saklanır
+            {products.length} ürün · {sourceLabel}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
