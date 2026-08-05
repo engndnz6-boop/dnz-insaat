@@ -45,19 +45,25 @@ export function pieceAreaM2(widthCm?: number, heightCm?: number): number {
 
 export function computeLines(
   system: CalculatorSystem,
-  m2: number
+  m2: number,
+  ebatOverride?: { widthCm?: number; heightCm?: number }
 ): MaterialLine[] {
   return system.materials.map((m) => {
     const raw = m2 * m.ratePerM2;
-    const area = pieceAreaM2(m.pieceWidthCm, m.pieceHeightCm);
+    const widthCm = ebatOverride?.widthCm || m.pieceWidthCm;
+    const heightCm = ebatOverride?.heightCm || m.pieceHeightCm;
+    const area = pieceAreaM2(widthCm, heightCm);
     const usePiece =
       m.roundMode === "piece" ||
-      (area > 0 && (m.pieceWidthCm || 0) > 0 && (m.pieceHeightCm || 0) > 0);
+      (area > 0 && (widthCm || 0) > 0 && (heightCm || 0) > 0);
 
     if (usePiece && area > 0) {
       const pieces = Math.max(1, Math.ceil(raw / area - 1e-9));
       return {
-        name: m.name,
+        name:
+          widthCm && heightCm
+            ? `${m.name} (${widthCm}×${heightCm} cm)`
+            : m.name,
         unit: m.unit === "m²" ? "adet" : m.unit || "adet",
         qty: pieces,
         unitPrice: m.unitPrice,

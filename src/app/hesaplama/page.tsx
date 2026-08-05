@@ -1,13 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Calculator,
   MessageCircle,
   ShoppingBag,
 } from "lucide-react";
-import { computeLines, sumLines, type MaterialLine } from "@/lib/calculators";
+import {
+  computeLines,
+  pieceAreaM2,
+  sumLines,
+  type MaterialLine,
+} from "@/lib/calculators";
 import { useCalculators } from "@/lib/calculators-context";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
@@ -16,7 +21,11 @@ import { brand } from "@/lib/brand";
 export default function HesaplamaPage() {
   const { systems, ready } = useCalculators();
   const [activeId, setActiveId] = useState<string>("");
+  const [enM, setEnM] = useState<string>("");
+  const [boyM, setBoyM] = useState<string>("");
   const [m2, setM2] = useState<string>("50");
+  const [ebatEnCm, setEbatEnCm] = useState<string>("120");
+  const [ebatBoyCm, setEbatBoyCm] = useState<string>("250");
   const [lines, setLines] = useState<MaterialLine[] | null>(null);
 
   const resolvedId = activeId || systems[0]?.id || "";
@@ -25,7 +34,34 @@ export default function HesaplamaPage() {
     [systems, resolvedId]
   );
 
-  const area = Number(m2.replace(",", ".")) || 0;
+  // Sistem değişince varsayılan plaka ebatını yükle
+  useEffect(() => {
+    if (!active) return;
+    const plated = active.materials.find(
+      (m) => m.pieceWidthCm && m.pieceHeightCm
+    );
+    if (plated?.pieceWidthCm && plated?.pieceHeightCm) {
+      setEbatEnCm(String(plated.pieceWidthCm));
+      setEbatBoyCm(String(plated.pieceHeightCm));
+    }
+    setLines(null);
+  }, [active?.id]);
+
+  const areaFromRoom = useMemo(() => {
+    const e = Number(String(enM).replace(",", ".")) || 0;
+    const b = Number(String(boyM).replace(",", ".")) || 0;
+    if (e > 0 && b > 0) return Math.round(e * b * 100) / 100;
+    return 0;
+  }, [enM, boyM]);
+
+  useEffect(() => {
+    if (areaFromRoom > 0) setM2(String(areaFromRoom));
+  }, [areaFromRoom]);
+
+  const area = Number(String(m2).replace(",", ".")) || 0;
+  const ebatW = Number(ebatEnCm) || 0;
+  const ebatH = Number(ebatBoyCm) || 0;
+  const plateM2 = pieceAreaM2(ebatW, ebatH);
   const total = lines ? sumLines(lines) : 0;
 
   const onCalculate = () => {
@@ -33,12 +69,21 @@ export default function HesaplamaPage() {
       setLines(null);
       return;
     }
-    setLines(computeLines(active, area));
+    setLines(
+      computeLines(active, area, {
+        widthCm: ebatW || undefined,
+        heightCm: ebatH || undefined,
+      })
+    );
   };
 
-  const waMessage = lines && active
-    ? `${active.title} için yaklaşık metraj talebi:\nAlan: ${area} m²\nTahmini malzeme tutarı: ${formatPrice(total)}\n\nDetaylı teklif istiyorum.`
-    : `${active?.title || "Sistem"} için teklif istiyorum.`;
+  const waMessage =
+    lines && active
+      ? `${active.title} için yaklaşık metraj talebi:\nAlan: ${area} m²` +
+        (enM && boyM ? ` (${enM}×${boyM} m)` : "") +
+        (ebatW && ebatH ? `\nPlaka ebatı: ${ebatW}×${ebatH} cm` : "") +
+        `\nTahmini malzeme tutarı: ${formatPrice(total)}\n\nDetaylı teklif istiyorum.`
+      : `${active?.title || "Sistem"} için teklif istiyorum.`;
 
   if (!ready) {
     return (
@@ -71,8 +116,8 @@ export default function HesaplamaPage() {
             Hesaplamalar
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
-            Alan bilgisini girin; yaklaşık malzeme metrajı ve maliyet özetini
-            görün. Sarfiyat katsayıları admin panelinden düzenlenir.
+            Oda en × boy veya m² girin. Plaka ebatına göre adet yukarı
+            tamamlanır (ör. 120×250 cm).
           </p>
         </div>
       </div>
@@ -126,18 +171,98 @@ export default function HesaplamaPage() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-end gap-3">
-              <label className="block">
-                <span className="label-field">Alan (m²)</span>
-                <input
-                  type="number"
-                  min={1}
-                  step={0.1}
-                  className="input-field w-40"
-                  value={m2}
-                  onChange={(e) => setM2(e.target.value)}
-                />
-              </label>
+            <div className="mt-8 space-y-5">
+              <div>
+                <p className="label-field">1) Oda ebatı (metre)</p>
+                <div className="mt-2 flex flex-wrap items-end gap-3">
+                  <label className="block">
+                    <span className="text-xs text-brand-mist">En (m)</span>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="input-field w-32"
+                      placeholder="ör. 4"
+                      value={enM}
+                      onChange={(e) => setEnM(e.target.value)}
+                    />
+                  </label>
+                  <span className="pb-3 text-brand-mist">×</span>
+                  <label className="block">
+                    <span className="text-xs text-brand-mist">Boy (m)</span>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="input-field w-32"
+                      placeholder="ör. 5"
+                      value={boyM}
+                      onChange={(e) => setBoyM(e.target.value)}
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs text-brand-mist">veya Alan (m²)</span>
+                    <input
+                      type="number"
+                      min={1}
+                      step={0.1}
+                      className="input-field w-32"
+                      value={m2}
+                      onChange={(e) => {
+                        setM2(e.target.value);
+                        setEnM("");
+                        setBoyM("");
+                      }}
+                    />
+                  </label>
+                </div>
+                {areaFromRoom > 0 && (
+                  <p className="mt-2 text-xs text-brand-navy">
+                    Hesaplanan alan: <strong>{areaFromRoom} m²</strong>
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <p className="label-field">
+                  2) Plaka / panel ebatı (cm) — katlara tamamlama
+                </p>
+                <div className="mt-2 flex flex-wrap items-end gap-3">
+                  <label className="block">
+                    <span className="text-xs text-brand-mist">En (cm)</span>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      className="input-field w-32"
+                      value={ebatEnCm}
+                      onChange={(e) => setEbatEnCm(e.target.value)}
+                    />
+                  </label>
+                  <span className="pb-3 text-brand-mist">×</span>
+                  <label className="block">
+                    <span className="text-xs text-brand-mist">Boy (cm)</span>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      className="input-field w-32"
+                      value={ebatBoyCm}
+                      onChange={(e) => setEbatBoyCm(e.target.value)}
+                    />
+                  </label>
+                  {plateM2 > 0 && (
+                    <p className="pb-3 text-xs text-brand-mist">
+                      1 plaka = <strong>{plateM2} m²</strong>
+                    </p>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-brand-mist">
+                  Örnek: 50 m² alan, 120×250 cm plaka (3 m²) →{" "}
+                  <strong>17 adet</strong> (yukarı tamamlanır).
+                </p>
+              </div>
+
               <button type="button" onClick={onCalculate} className="btn-primary">
                 Hesapla
               </button>
@@ -145,13 +270,15 @@ export default function HesaplamaPage() {
 
             {active.materials.length > 0 && (
               <div className="mt-4 overflow-x-auto border border-dashed border-black/10 bg-brand-ink/50 p-3 text-xs text-brand-mist">
-                <p className="font-semibold text-brand-bone">Sarfiyat (1 m² için)</p>
+                <p className="font-semibold text-brand-bone">
+                  Sarfiyat (1 m² için)
+                </p>
                 <ul className="mt-2 space-y-1">
                   {active.materials.map((m) => (
                     <li key={m.id}>
                       {m.name}: <strong>{m.ratePerM2}</strong> {m.unit}/m²
                       {m.pieceWidthCm && m.pieceHeightCm
-                        ? ` · ebat ${m.pieceWidthCm}×${m.pieceHeightCm} cm (katlara tamamlanır)`
+                        ? ` · varsayılan ebat ${m.pieceWidthCm}×${m.pieceHeightCm} cm`
                         : ""}
                     </li>
                   ))}
@@ -174,9 +301,13 @@ export default function HesaplamaPage() {
                   <tbody>
                     {lines.map((line) => (
                       <tr key={line.name} className="border-t border-black/5">
-                        <td className="px-4 py-3 text-brand-bone">{line.name}</td>
+                        <td className="px-4 py-3 text-brand-bone">
+                          {line.name}
+                        </td>
                         <td className="px-4 py-3 text-brand-mist">{line.qty}</td>
-                        <td className="px-4 py-3 text-brand-mist">{line.unit}</td>
+                        <td className="px-4 py-3 text-brand-mist">
+                          {line.unit}
+                        </td>
                         <td className="px-4 py-3 text-brand-mist">
                           {formatPrice(line.unitPrice)}
                         </td>
