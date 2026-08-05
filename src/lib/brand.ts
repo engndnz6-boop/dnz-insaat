@@ -8,7 +8,7 @@ export const brand = {
   /** Vercel/DNS: dnzinşaat.com.tr punycode */
   url: "https://www.xn--dnzinaat-rwb.com.tr",
   domainDisplay: "dnzinşaat.com.tr",
-  email: "info@dnzinsaat.com",
+  email: "dnzyapimalzemeleri@gmail.com",
   phone: "0533 611 06 15",
   phoneTel: "+905336110615",
   address: "Karşıyaka Mah. Şehit Ali Gaffar Okkan Cad. No: 42/A, Gölbaşı / Ankara",

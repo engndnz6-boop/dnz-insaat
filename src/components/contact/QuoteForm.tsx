@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Send, CheckCircle2 } from "lucide-react";
-import { buildWhatsAppUrl, quoteInquiryMessage } from "@/lib/whatsapp";
+import { Send } from "lucide-react";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 
 const PROJECT_TYPES = [
   "Alçıpan asma tavan",
@@ -15,8 +15,31 @@ const PROJECT_TYPES = [
   "Diğer",
 ];
 
+function buildQuoteWhatsAppText(form: {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  projectType: string;
+  message: string;
+}) {
+  return [
+    "Merhaba, siteden teklif talebi:",
+    `Ad: ${form.name}`,
+    `Telefon: ${form.phone}`,
+    `E-posta: ${form.email}`,
+    form.company ? `Firma: ${form.company}` : null,
+    `Proje: ${form.projectType}`,
+    "",
+    form.message,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function QuoteForm() {
-  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -26,39 +49,38 @@ export function QuoteForm() {
     message: "",
   });
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // İlk etapta mock: formu WhatsApp mesajına da yönlendirebiliriz
-    setSubmitted(true);
+    setError("");
+    setSending(true);
+
+    const waUrl = buildWhatsAppUrl(buildQuoteWhatsAppText(form));
+
+    try {
+      await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch {
+      /* WhatsApp yine açılsın */
+    }
+
+    // Otomatik WhatsApp yönlendirme
+    window.location.href = waUrl;
   };
 
-  if (submitted) {
-    return (
-      <div className="border border-brand-gold/30 bg-brand-anthracite p-8 text-center">
-        <CheckCircle2 className="mx-auto h-10 w-10 text-brand-gold" />
-        <h3 className="mt-4 font-display text-2xl text-brand-bone">
-          Talebiniz alındı
-        </h3>
-        <p className="mt-2 text-sm text-brand-mist">
-          En kısa sürede sizinle iletişime geçeceğiz. Acil durumlar için
-          WhatsApp üzerinden de yazabilirsiniz.
-        </p>
-        <a
-          href={buildWhatsAppUrl(
-            `${quoteInquiryMessage()}\n\nAd: ${form.name}\nProje: ${form.projectType}\n${form.message}`
-          )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-primary mt-6"
-        >
-          WhatsApp&apos;tan Devam Et
-        </a>
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={onSubmit} className="space-y-5 border border-black/5 bg-brand-anthracite/40 p-6 sm:p-8">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-5 border border-black/5 bg-brand-anthracite/40 p-6 sm:p-8"
+    >
+      <p className="text-xs text-brand-mist">
+        Gönderince talep{" "}
+        <strong className="text-brand-bone">dnzyapimalzemeleri@gmail.com</strong>{" "}
+        adresine iletilir ve WhatsApp’a yönlendirilirsiniz.
+      </p>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className="label-field">
@@ -145,9 +167,15 @@ export function QuoteForm() {
         />
       </div>
 
-      <button type="submit" className="btn-primary w-full sm:w-auto">
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={sending}
+        className="btn-primary w-full sm:w-auto"
+      >
         <Send className="h-4 w-4" />
-        Teklif Talebi Gönder
+        {sending ? "Yönlendiriliyor…" : "Teklif Talebi Gönder"}
       </button>
     </form>
   );
