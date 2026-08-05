@@ -182,8 +182,44 @@ export function ProductForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 border border-black/5 bg-brand-anthracite/40 p-6">
+      <fieldset className="border border-black/10 p-4">
+        <legend className="label-field px-1">Kayıt türü *</legend>
+        <div className="mt-2 flex flex-wrap gap-3">
+          <label className="flex cursor-pointer items-center gap-2 border border-black/10 bg-brand-ink px-4 py-3 text-sm">
+            <input
+              type="radio"
+              name="kind"
+              checked={form.kind !== "project"}
+              onChange={() => set("kind", "sale")}
+              className="accent-[#C9A14A]"
+            />
+            <span>
+              <strong className="text-brand-bone">Satış ürünü</strong>
+              <span className="mt-0.5 block text-xs text-brand-mist">
+                Alçı plaka, profil… — katalogda fiyat ve özellik
+              </span>
+            </span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 border border-black/10 bg-brand-ink px-4 py-3 text-sm">
+            <input
+              type="radio"
+              name="kind"
+              checked={form.kind === "project"}
+              onChange={() => set("kind", "project")}
+              className="accent-[#C9A14A]"
+            />
+            <span>
+              <strong className="text-brand-bone">İmalat / proje</strong>
+              <span className="mt-0.5 block text-xs text-brand-mist">
+                Yapılan iş fotoğrafı — Projeler bölümünde görünür
+              </span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Ürün adı *">
+        <Field label="Ürün / iş adı *">
           <input
             required
             className="input-field"
@@ -198,6 +234,26 @@ export function ProductForm({
             }}
           />
         </Field>
+        {form.kind === "project" ? (
+          <>
+            <Field label="Lokasyon">
+              <input
+                className="input-field"
+                placeholder="Gölbaşı / Ankara"
+                value={form.projectLocation || ""}
+                onChange={(e) => set("projectLocation", e.target.value)}
+              />
+            </Field>
+            <Field label="İş türü etiketi">
+              <input
+                className="input-field"
+                placeholder="Alçıpan asma tavan imalatı"
+                value={form.projectCategory || ""}
+                onChange={(e) => set("projectCategory", e.target.value)}
+              />
+            </Field>
+          </>
+        ) : null}
         <Field label="Ana kategori *">
           <select
             required
@@ -263,10 +319,10 @@ export function ProductForm({
             onChange={(e) => set("shortDescription", e.target.value)}
           />
         </Field>
-        <Field label="Fiyat (TRY) *">
+        <Field label={form.kind === "project" ? "Referans tutar (opsiyonel)" : "Fiyat (TRY) *"}>
           <input
             type="number"
-            required
+            required={form.kind !== "project"}
             min={0}
             className="input-field"
             value={form.price}
@@ -334,8 +390,10 @@ export function ProductForm({
               }}
             />
             <p className="mt-1 text-xs text-brand-mist">
-              JPG / PNG / WEBP · max {MAX_IMAGES} · OneDrive yoksa bu cihazda
-              saklanır
+              {form.kind === "project"
+                ? "Yapılmış iş fotoğrafları (sonra / önce). Projeler’de görünür."
+                : "Satış ürünü fotoğrafları. Katalogda görünür."}{" "}
+              · JPG / PNG / WEBP · max {MAX_IMAGES}
               {pendingImages.length > 0
                 ? ` · ${pendingImages.length} dosya seçildi (kayıtta yüklenecek)`
                 : ""}

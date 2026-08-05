@@ -22,5 +22,5 @@ export default function KatalogPage() {
     );
   }
 
-  return <ProductCatalog products={products} />;
+  return <ProductCatalog products={products.filter((p) => p.kind !== "project")} />;
 }

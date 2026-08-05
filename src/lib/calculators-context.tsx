@@ -17,7 +17,7 @@ import {
   type CalculatorSystem,
 } from "@/lib/calculators";
 
-const STORAGE_KEY = "dnz-insaat-calculators-v1";
+const STORAGE_KEY = "dnz-insaat-calculators-v2";
 
 interface CalculatorsContextValue {
   systems: CalculatorSystem[];
@@ -104,6 +104,8 @@ export function CalculatorsProvider({ children }: { children: ReactNode }) {
         ratePerM2: material?.ratePerM2 ?? 1,
         unitPrice: material?.unitPrice ?? 0,
         roundMode: material?.roundMode || "round",
+        pieceWidthCm: material?.pieceWidthCm,
+        pieceHeightCm: material?.pieceHeightCm,
       };
       setSystems((prev) =>
         prev.map((s) =>

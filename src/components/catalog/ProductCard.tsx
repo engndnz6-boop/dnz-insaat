@@ -45,10 +45,18 @@ export function ProductCard({ product }: { product: Product }) {
           {product.shortDescription}
         </p>
         <p className="mt-auto pt-4 text-sm font-semibold text-brand-navy">
-          {formatPrice(product.price)}
-          <span className="ml-1 text-xs font-normal text-brand-mist">
-            / birim
-          </span>
+          {product.kind === "project" ? (
+            <span className="text-xs font-semibold uppercase tracking-wider text-brand-gold">
+              İmalat / proje
+            </span>
+          ) : (
+            <>
+              {formatPrice(product.price)}
+              <span className="ml-1 text-xs font-normal text-brand-mist">
+                / birim
+              </span>
+            </>
+          )}
         </p>
       </div>
     </Link>

@@ -68,17 +68,21 @@ export default function ProductPage() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-gold">
-            {[
-              category?.name,
-              product.subcategoryId
-                ? getCategory(product.subcategoryId)?.name
-                : null,
-              product.brand,
-            ]
-              .filter(Boolean)
-              .join(" · ") || MATERIAL_LABELS[product.material]}
+            {product.kind === "project"
+              ? [product.projectCategory || "İmalat", product.projectLocation]
+                  .filter(Boolean)
+                  .join(" · ")
+              : [
+                  category?.name,
+                  product.subcategoryId
+                    ? getCategory(product.subcategoryId)?.name
+                    : null,
+                  product.brand,
+                ]
+                  .filter(Boolean)
+                  .join(" · ") || MATERIAL_LABELS[product.material]}
           </p>
-          {(product.brand || product.model) && (
+          {(product.brand || product.model) && product.kind !== "project" && (
             <p className="mt-2 text-sm text-brand-mist">
               {product.brand}
               {product.brand && product.model ? " / " : ""}
@@ -92,17 +96,25 @@ export default function ProductPage() {
             {product.description}
           </p>
 
-          <p className="mt-6 font-display text-3xl text-brand-gold">
-            {formatPrice(product.price)}
-            <span className="ml-2 font-sans text-sm font-normal text-brand-mist">
-              / birim · KDV hariç
-            </span>
-          </p>
+          {product.kind === "project" ? (
+            <p className="mt-6 text-sm font-semibold uppercase tracking-wider text-brand-gold">
+              İmalat / proje örneği
+            </p>
+          ) : (
+            <p className="mt-6 font-display text-3xl text-brand-gold">
+              {formatPrice(product.price)}
+              <span className="ml-2 font-sans text-sm font-normal text-brand-mist">
+                / birim · KDV hariç
+              </span>
+            </p>
+          )}
 
           <ul className="mt-6 flex flex-wrap gap-2">
-            <li className="border border-black/10 px-3 py-1 text-xs text-brand-mist">
-              Boyut: {product.size}
-            </li>
+            {product.kind !== "project" && (
+              <li className="border border-black/10 px-3 py-1 text-xs text-brand-mist">
+                Boyut: {product.size}
+              </li>
+            )}
             {product.usageAreas.map((area) => (
               <li
                 key={area}
@@ -111,19 +123,23 @@ export default function ProductPage() {
                 {USAGE_LABELS[area]}
               </li>
             ))}
-            <li
-              className={`px-3 py-1 text-xs ${
-                product.inStock
-                  ? "bg-brand-gold/15 text-brand-gold"
-                  : "bg-red-500/15 text-red-300"
-              }`}
-            >
-              {product.inStock ? "Stokta" : "Tükendi"}
-            </li>
+            {product.kind !== "project" && (
+              <li
+                className={`px-3 py-1 text-xs ${
+                  product.inStock
+                    ? "bg-brand-gold/15 text-brand-gold"
+                    : "bg-red-500/15 text-red-300"
+                }`}
+              >
+                {product.inStock ? "Stokta" : "Tükendi"}
+              </li>
+            )}
           </ul>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <AddToCartButton product={product} />
+            {product.kind !== "project" && (
+              <AddToCartButton product={product} />
+            )}
             <WhatsAppInquiryButton productName={product.name} />
           </div>
 

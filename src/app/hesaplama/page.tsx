@@ -150,6 +150,9 @@ export default function HesaplamaPage() {
                   {active.materials.map((m) => (
                     <li key={m.id}>
                       {m.name}: <strong>{m.ratePerM2}</strong> {m.unit}/m²
+                      {m.pieceWidthCm && m.pieceHeightCm
+                        ? ` · ebat ${m.pieceWidthCm}×${m.pieceHeightCm} cm (katlara tamamlanır)`
+                        : ""}
                     </li>
                   ))}
                 </ul>

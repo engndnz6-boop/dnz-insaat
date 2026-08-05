@@ -15,8 +15,12 @@ export type CalculatorMaterial = {
   /** 1 m² alan için miktar katsayısı (örn. 0.85) */
   ratePerM2: number;
   unitPrice: number;
-  /** Yuvarlama: round = 2 hane, ceil = yukarı tam sayı */
-  roundMode: "round" | "ceil";
+  /** Yuvarlama: round = 2 hane, ceil = yukarı tam sayı, piece = ebat katlarına */
+  roundMode: "round" | "ceil" | "piece";
+  /** Plaka / panel eni (cm) — örn. 120 */
+  pieceWidthCm?: number;
+  /** Plaka / panel boyu (cm) — örn. 250 */
+  pieceHeightCm?: number;
 };
 
 export type CalculatorSystem = {
@@ -31,12 +35,35 @@ function round(n: number, digits = 2) {
   return Math.round(n * p) / p;
 }
 
+/** Ebat cm → tek parça alanı m² */
+export function pieceAreaM2(widthCm?: number, heightCm?: number): number {
+  const w = Number(widthCm) || 0;
+  const h = Number(heightCm) || 0;
+  if (w <= 0 || h <= 0) return 0;
+  return (w / 100) * (h / 100);
+}
+
 export function computeLines(
   system: CalculatorSystem,
   m2: number
 ): MaterialLine[] {
   return system.materials.map((m) => {
     const raw = m2 * m.ratePerM2;
+    const area = pieceAreaM2(m.pieceWidthCm, m.pieceHeightCm);
+    const usePiece =
+      m.roundMode === "piece" ||
+      (area > 0 && (m.pieceWidthCm || 0) > 0 && (m.pieceHeightCm || 0) > 0);
+
+    if (usePiece && area > 0) {
+      const pieces = Math.max(1, Math.ceil(raw / area - 1e-9));
+      return {
+        name: m.name,
+        unit: m.unit === "m²" ? "adet" : m.unit || "adet",
+        qty: pieces,
+        unitPrice: m.unitPrice,
+      };
+    }
+
     const qty = m.roundMode === "ceil" ? Math.ceil(raw) : round(raw);
     return {
       name: m.name,
@@ -76,10 +103,12 @@ export const seedCalculators: CalculatorSystem[] = [
       {
         id: "alc-plaka",
         name: "Alçı plaka",
-        unit: "m²",
+        unit: "adet",
         ratePerM2: 1,
-        unitPrice: 185,
-        roundMode: "round",
+        unitPrice: 280,
+        roundMode: "piece",
+        pieceWidthCm: 120,
+        pieceHeightCm: 250,
       },
       {
         id: "alc-cd",
@@ -131,10 +160,12 @@ export const seedCalculators: CalculatorSystem[] = [
       {
         id: "ib-plaka",
         name: "Alçıpan (detay)",
-        unit: "m²",
+        unit: "adet",
         ratePerM2: 0.45,
-        unitPrice: 185,
-        roundMode: "round",
+        unitPrice: 280,
+        roundMode: "piece",
+        pieceWidthCm: 120,
+        pieceHeightCm: 250,
       },
       {
         id: "ib-led",
@@ -263,10 +294,12 @@ export const seedCalculators: CalculatorSystem[] = [
       {
         id: "bd-plaka",
         name: "Alçıpan plaka (çift yüz)",
-        unit: "m²",
+        unit: "adet",
         ratePerM2: 2.1,
-        unitPrice: 185,
-        roundMode: "round",
+        unitPrice: 280,
+        roundMode: "piece",
+        pieceWidthCm: 120,
+        pieceHeightCm: 250,
       },
       {
         id: "bd-profil",

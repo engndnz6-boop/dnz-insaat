@@ -24,6 +24,8 @@ interface ProductsContextValue {
   getBySlug: (slug: string) => Product | undefined;
   getById: (id: string) => Product | undefined;
   getFeatured: () => Product[];
+  getProjects: () => Product[];
+  getSaleProducts: () => Product[];
   getByCategory: (categoryId: string) => Product[];
   upsertProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -37,10 +39,13 @@ function normalizeProduct(
 ): Product {
   return {
     ...p,
+    kind: p.kind === "project" ? "project" : "sale",
     categoryId: p.categoryId || categoryIdFromMaterial(p.material),
     subcategoryId: p.subcategoryId || undefined,
     brand: p.brand || "",
     model: p.model || "",
+    projectLocation: p.projectLocation || "",
+    projectCategory: p.projectCategory || "",
   };
 }
 
@@ -57,6 +62,9 @@ export function createEmptyProduct(categoryId?: string): Product {
     images: [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
     ],
+    kind: "sale",
+    projectLocation: "",
+    projectCategory: "",
     categoryId: categoryId || "cat-alcipan-tavan",
     subcategoryId: undefined,
     brand: "",
@@ -169,12 +177,25 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
   );
 
   const getFeatured = useCallback(
-    () => products.filter((p) => p.featured),
+    () => products.filter((p) => p.featured && p.kind !== "project"),
+    [products]
+  );
+
+  const getProjects = useCallback(
+    () => products.filter((p) => p.kind === "project"),
+    [products]
+  );
+
+  const getSaleProducts = useCallback(
+    () => products.filter((p) => p.kind !== "project"),
     [products]
   );
 
   const getByCategory = useCallback(
-    (categoryId: string) => products.filter((p) => p.categoryId === categoryId),
+    (categoryId: string) =>
+      products.filter(
+        (p) => p.kind !== "project" && p.categoryId === categoryId
+      ),
     [products]
   );
 
@@ -214,6 +235,8 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
       getBySlug,
       getById,
       getFeatured,
+      getProjects,
+      getSaleProducts,
       getByCategory,
       upsertProduct,
       deleteProduct,
@@ -226,6 +249,8 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
       getBySlug,
       getById,
       getFeatured,
+      getProjects,
+      getSaleProducts,
       getByCategory,
       upsertProduct,
       deleteProduct,

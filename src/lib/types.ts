@@ -58,6 +58,8 @@ export interface PdfCatalog {
   createdAt: string;
 }
 
+export type ProductKind = "sale" | "project";
+
 export interface Product {
   id: string;
   slug: string;
@@ -67,6 +69,15 @@ export interface Product {
   price: number;
   currency: "TRY";
   images: string[];
+  /**
+   * sale = malzeme satışı (katalog, fiyat, adet)
+   * project = imalat / yapılan iş (projeler bölümü, uygulama fotoğrafı)
+   */
+  kind?: ProductKind;
+  /** İmalat kayıtları için konum (örn. Gölbaşı / Ankara) */
+  projectLocation?: string;
+  /** İmalat kayıtları için iş türü etiketi */
+  projectCategory?: string;
   /** Ana kategori */
   categoryId: string;
   /** Alt kategori (opsiyonel) */

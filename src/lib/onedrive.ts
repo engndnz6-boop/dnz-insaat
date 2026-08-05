@@ -67,7 +67,11 @@ async function graphFetch(
       Authorization: `Bearer ${token}`,
       ...(headers || {}),
     },
-    body: rawBody ?? rest.body,
+    body: (rawBody
+      ? Buffer.isBuffer(rawBody)
+        ? new Uint8Array(rawBody)
+        : rawBody
+      : rest.body) as BodyInit | null | undefined,
     cache: "no-store",
   });
   return res;

@@ -52,6 +52,7 @@ export default function AdminProductsPage() {
           <thead className="bg-brand-anthracite text-xs uppercase tracking-wider text-brand-mist">
             <tr>
               <th className="px-4 py-3 font-medium">Ürün</th>
+              <th className="px-4 py-3 font-medium">Tür</th>
               <th className="px-4 py-3 font-medium">Kategori</th>
               <th className="px-4 py-3 font-medium">Marka / Model</th>
               <th className="px-4 py-3 font-medium">Fiyat</th>
@@ -78,6 +79,17 @@ export default function AdminProductsPage() {
                       <p className="text-xs text-brand-mist">{p.slug}</p>
                     </div>
                   </div>
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`text-xs font-semibold uppercase tracking-wider ${
+                      p.kind === "project"
+                        ? "text-brand-gold"
+                        : "text-brand-navy"
+                    }`}
+                  >
+                    {p.kind === "project" ? "İmalat" : "Satış"}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-brand-mist">
                   <span className="block">
