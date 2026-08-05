@@ -4,8 +4,35 @@ import {
   isOneDriveConfigured,
   isOneDriveShareContentUrl,
 } from "@/lib/onedrive";
+import { extractOgImage, isImgbbPageUrl } from "@/lib/image-url";
 
 export const runtime = "nodejs";
+
+async function fetchImageBytes(url: string): Promise<{
+  bytes: ArrayBuffer;
+  contentType: string;
+}> {
+  const res = await fetch(url, {
+    method: "GET",
+    cache: "no-store",
+    redirect: "follow",
+    headers: {
+      // Bazı CDN’ler bot isteğini reddeder
+      "User-Agent":
+        "Mozilla/5.0 (compatible; DNZSiteImageProxy/1.0; +https://dnzinşaat.com.tr)",
+      Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Görsel alınamadı (${res.status})`);
+  }
+  const bytes = await res.arrayBuffer();
+  let contentType = res.headers.get("content-type") || "";
+  if (!contentType.startsWith("image/")) {
+    contentType = "image/jpeg";
+  }
+  return { bytes, contentType };
+}
 
 export async function GET(request: Request) {
   const urlObj = new URL(request.url);
@@ -73,26 +100,70 @@ export async function GET(request: Request) {
     }
   }
 
-  const res = await fetch(parsed.toString(), {
-    method: "GET",
-    cache: "no-store",
-  });
+  // imgbb sayfa linki (ibb.co/xxx) → og:image ile gerçek fotoğrafa çöz
+  if (isImgbbPageUrl(url)) {
+    try {
+      const pageRes = await fetch(url, {
+        method: "GET",
+        cache: "no-store",
+        redirect: "follow",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml",
+        },
+      });
+      if (!pageRes.ok) {
+        return NextResponse.json(
+          { error: "ImgBB sayfası okunamadı." },
+          { status: 502 }
+        );
+      }
+      const html = await pageRes.text();
+      const og = extractOgImage(html);
+      if (!og) {
+        return NextResponse.json(
+          {
+            error:
+              "ImgBB’de Direct link bulunamadı. i.ibb.co/... adresini kullanın.",
+          },
+          { status: 422 }
+        );
+      }
+      const file = await fetchImageBytes(og);
+      return new Response(file.bytes, {
+        status: 200,
+        headers: {
+          "Content-Type": file.contentType,
+          "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        },
+      });
+    } catch (err) {
+      return NextResponse.json(
+        {
+          error:
+            err instanceof Error ? err.message : "ImgBB görseli çözülemedi",
+        },
+        { status: 502 }
+      );
+    }
+  }
 
-  if (!res.ok || !res.body) {
+  try {
+    const file = await fetchImageBytes(parsed.toString());
+    return new Response(file.bytes, {
+      status: 200,
+      headers: {
+        "Content-Type": file.contentType,
+        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      },
+    });
+  } catch (err) {
     return NextResponse.json(
-      { error: "Görsel proxy edilemedi." },
+      {
+        error: err instanceof Error ? err.message : "Görsel proxy edilemedi.",
+      },
       { status: 502 }
     );
   }
-
-  const contentType =
-    res.headers.get("content-type") || "application/octet-stream";
-
-  return new Response(res.body, {
-    status: res.status,
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=3600, s-maxage=3600",
-    },
-  });
 }

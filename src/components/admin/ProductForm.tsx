@@ -455,17 +455,10 @@ export function ProductForm({
               }}
             />
             <p className="mt-1 text-xs text-brand-mist">
-              1){" "}
-              <a
-                href="https://imgbb.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-brand-navy underline"
-              >
-                imgbb.com
-              </a>{" "}
-              → fotoğraf yükle → <strong>Direct link</strong> kopyala → buraya
-              yapıştır. Birden fazla URL’yi <strong>|</strong> ile ayırın.{" "}
+              ImgBB kullanıyorsanız <strong>Direct link</strong> alın
+              (başlar: <code className="text-brand-gold">https://i.ibb.co/...</code>
+              ). <code className="text-brand-gold">ibb.co/...</code> sayfa linki
+              değil. Birden fazla URL’yi <strong>|</strong> ile ayırın.{" "}
               {form.kind === "project"
                 ? "İmalat: 1. foto sonra, 2. foto önce."
                 : "Satış ürünü kataloğunda görünür."}

@@ -7,6 +7,7 @@ import {
   getFileBlob,
   isIdbImageRef,
 } from "@/lib/pdf-storage";
+import { toDisplayImageSrc } from "@/lib/image-url";
 
 type Props = {
   src: string;
@@ -19,37 +20,19 @@ type Props = {
   height?: number;
 };
 
-/** Harici URL’ler (ImgBB, Drive, OneDrive…) — next/image domain listesine bağlı kalmaz */
 function useNativeImg(src: string): boolean {
   return (
     src.startsWith("blob:") ||
     src.startsWith("data:") ||
     src.startsWith("http://") ||
     src.startsWith("https://") ||
-    // Dinamik API ile dönen görsellerde Next Image yerine <img> daha sorunsuz çalışır
     src.startsWith("/api/")
   );
 }
 
-function isOneDriveShareContentUrl(src: string): boolean {
-  // createAnonymousContentUrl() bu formatta URL döndürür:
-  // https://api.onedrive.com/v1.0/shares/u!<...>/root/content
-  try {
-    const u = new URL(src);
-    return (
-      (u.hostname === "api.onedrive.com" ||
-        u.hostname.endsWith("onedrive.live.com")) &&
-      u.pathname.includes("/shares/") &&
-      u.pathname.includes("/content")
-    );
-  } catch {
-    return false;
-  }
-}
-
 /**
  * Yerel path → next/image;
- * http(s) / idb / data / blob → native img (herhangi bir URL çalışır).
+ * http(s) / idb / data / blob / api → native img.
  */
 export function ProductImage({
   src,
@@ -64,10 +47,12 @@ export function ProductImage({
   const [resolved, setResolved] = useState<string | null>(
     !src || isIdbImageRef(src) ? null : src
   );
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let objectUrl: string | null = null;
     let cancelled = false;
+    setFailed(false);
 
     if (!src) {
       setResolved(null);
@@ -97,7 +82,7 @@ export function ProductImage({
     };
   }, [src]);
 
-  if (!resolved) {
+  if (!resolved || failed) {
     return (
       <span
         className={`block bg-brand-slate/40 ${fill ? "absolute inset-0" : ""} ${className || ""}`}
@@ -106,9 +91,7 @@ export function ProductImage({
     );
   }
 
-  const imgSrc = isOneDriveShareContentUrl(resolved)
-    ? `/api/image-proxy?url=${encodeURIComponent(resolved)}`
-    : resolved;
+  const imgSrc = toDisplayImageSrc(resolved);
 
   if (useNativeImg(imgSrc)) {
     // eslint-disable-next-line @next/next/no-img-element
@@ -117,6 +100,7 @@ export function ProductImage({
         src={imgSrc}
         alt={alt}
         className={`${fill ? "absolute inset-0 h-full w-full object-cover" : ""} ${className || ""}`}
+        onError={() => setFailed(true)}
       />
     );
   }
@@ -130,6 +114,7 @@ export function ProductImage({
         className={className}
         sizes={sizes}
         priority={priority}
+        onError={() => setFailed(true)}
       />
     );
   }
@@ -143,6 +128,7 @@ export function ProductImage({
       className={className}
       sizes={sizes}
       priority={priority}
+      onError={() => setFailed(true)}
     />
   );
 }
