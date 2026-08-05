@@ -7,12 +7,7 @@ import {
   MessageCircle,
   ShoppingBag,
 } from "lucide-react";
-import {
-  computeLines,
-  pieceAreaM2,
-  sumLines,
-  type MaterialLine,
-} from "@/lib/calculators";
+import { computeLines, sumLines, type MaterialLine } from "@/lib/calculators";
 import { useCalculators } from "@/lib/calculators-context";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
@@ -24,8 +19,6 @@ export default function HesaplamaPage() {
   const [enM, setEnM] = useState<string>("");
   const [boyM, setBoyM] = useState<string>("");
   const [m2, setM2] = useState<string>("50");
-  const [ebatEnCm, setEbatEnCm] = useState<string>("120");
-  const [ebatBoyCm, setEbatBoyCm] = useState<string>("250");
   const [lines, setLines] = useState<MaterialLine[] | null>(null);
 
   const resolvedId = activeId || systems[0]?.id || "";
@@ -34,16 +27,7 @@ export default function HesaplamaPage() {
     [systems, resolvedId]
   );
 
-  // Sistem değişince varsayılan plaka ebatını yükle
   useEffect(() => {
-    if (!active) return;
-    const plated = active.materials.find(
-      (m) => m.pieceWidthCm && m.pieceHeightCm
-    );
-    if (plated?.pieceWidthCm && plated?.pieceHeightCm) {
-      setEbatEnCm(String(plated.pieceWidthCm));
-      setEbatBoyCm(String(plated.pieceHeightCm));
-    }
     setLines(null);
   }, [active?.id]);
 
@@ -59,9 +43,6 @@ export default function HesaplamaPage() {
   }, [areaFromRoom]);
 
   const area = Number(String(m2).replace(",", ".")) || 0;
-  const ebatW = Number(ebatEnCm) || 0;
-  const ebatH = Number(ebatBoyCm) || 0;
-  const plateM2 = pieceAreaM2(ebatW, ebatH);
   const total = lines ? sumLines(lines) : 0;
 
   const onCalculate = () => {
@@ -69,19 +50,14 @@ export default function HesaplamaPage() {
       setLines(null);
       return;
     }
-    setLines(
-      computeLines(active, area, {
-        widthCm: ebatW || undefined,
-        heightCm: ebatH || undefined,
-      })
-    );
+    // Ebat / katlara tamamlama admin’deki malzeme ayarlarından uygulanır
+    setLines(computeLines(active, area));
   };
 
   const waMessage =
     lines && active
       ? `${active.title} için yaklaşık metraj talebi:\nAlan: ${area} m²` +
         (enM && boyM ? ` (${enM}×${boyM} m)` : "") +
-        (ebatW && ebatH ? `\nPlaka ebatı: ${ebatW}×${ebatH} cm` : "") +
         `\nTahmini malzeme tutarı: ${formatPrice(total)}\n\nDetaylı teklif istiyorum.`
       : `${active?.title || "Sistem"} için teklif istiyorum.`;
 
@@ -116,8 +92,8 @@ export default function HesaplamaPage() {
             Hesaplamalar
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
-            Oda en × boy veya m² girin. Plaka ebatına göre adet yukarı
-            tamamlanır (ör. 120×250 cm).
+            Oda en × boy veya m² girin; yaklaşık malzeme metrajı ve maliyet
+            özetini görün.
           </p>
         </div>
       </div>
@@ -173,7 +149,7 @@ export default function HesaplamaPage() {
 
             <div className="mt-8 space-y-5">
               <div>
-                <p className="label-field">1) Oda ebatı (metre)</p>
+                <p className="label-field">Oda ebatı (metre) veya alan</p>
                 <div className="mt-2 flex flex-wrap items-end gap-3">
                   <label className="block">
                     <span className="text-xs text-brand-mist">En (m)</span>
@@ -223,46 +199,6 @@ export default function HesaplamaPage() {
                 )}
               </div>
 
-              <div>
-                <p className="label-field">
-                  2) Plaka / panel ebatı (cm) — katlara tamamlama
-                </p>
-                <div className="mt-2 flex flex-wrap items-end gap-3">
-                  <label className="block">
-                    <span className="text-xs text-brand-mist">En (cm)</span>
-                    <input
-                      type="number"
-                      min={1}
-                      step={1}
-                      className="input-field w-32"
-                      value={ebatEnCm}
-                      onChange={(e) => setEbatEnCm(e.target.value)}
-                    />
-                  </label>
-                  <span className="pb-3 text-brand-mist">×</span>
-                  <label className="block">
-                    <span className="text-xs text-brand-mist">Boy (cm)</span>
-                    <input
-                      type="number"
-                      min={1}
-                      step={1}
-                      className="input-field w-32"
-                      value={ebatBoyCm}
-                      onChange={(e) => setEbatBoyCm(e.target.value)}
-                    />
-                  </label>
-                  {plateM2 > 0 && (
-                    <p className="pb-3 text-xs text-brand-mist">
-                      1 plaka = <strong>{plateM2} m²</strong>
-                    </p>
-                  )}
-                </div>
-                <p className="mt-2 text-xs text-brand-mist">
-                  Örnek: 50 m² alan, 120×250 cm plaka (3 m²) →{" "}
-                  <strong>17 adet</strong> (yukarı tamamlanır).
-                </p>
-              </div>
-
               <button type="button" onClick={onCalculate} className="btn-primary">
                 Hesapla
               </button>
@@ -277,9 +213,6 @@ export default function HesaplamaPage() {
                   {active.materials.map((m) => (
                     <li key={m.id}>
                       {m.name}: <strong>{m.ratePerM2}</strong> {m.unit}/m²
-                      {m.pieceWidthCm && m.pieceHeightCm
-                        ? ` · varsayılan ebat ${m.pieceWidthCm}×${m.pieceHeightCm} cm`
-                        : ""}
                     </li>
                   ))}
                 </ul>
