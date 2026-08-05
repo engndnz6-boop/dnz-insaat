@@ -46,6 +46,7 @@ function normalizeProduct(
     model: p.model || "",
     projectLocation: p.projectLocation || "",
     projectCategory: p.projectCategory || "",
+    videoUrl: p.videoUrl || "",
   };
 }
 
@@ -60,6 +61,7 @@ export function createEmptyProduct(categoryId?: string): Product {
     price: 0,
     currency: "TRY",
     images: [],
+    videoUrl: "",
     kind: "sale",
     projectLocation: "",
     projectCategory: "",

@@ -31,6 +31,11 @@ export function ProductCard({ product }: { product: Product }) {
         <span className="absolute left-3 top-3 bg-brand-ink/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-navy">
           {badge}
         </span>
+        {product.videoUrl ? (
+          <span className="absolute bottom-3 right-3 bg-brand-gold px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#151920]">
+            Video
+          </span>
+        ) : null}
       </div>
       <div className="flex flex-1 flex-col p-4">
         <h3 className="font-display text-lg text-brand-bone transition group-hover:text-brand-gold">

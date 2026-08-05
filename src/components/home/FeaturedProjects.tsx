@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { Product, Project } from "@/lib/types";
 import { useProducts } from "@/lib/products-context";
 import { ProductImage } from "@/components/product/ProductImage";
+import { ProductVideo } from "@/components/product/ProductVideo";
 
 function productToProject(p: Product): Project {
   const after = p.images[0] || "";
@@ -16,20 +18,35 @@ function productToProject(p: Product): Project {
     beforeImage: before,
     afterImage: after,
     description: p.shortDescription || p.description,
+    videoUrl: p.videoUrl || "",
   };
 }
 
-function BeforeAfterCard({ project }: { project: Project }) {
+function BeforeAfterCard({
+  project,
+  slug,
+}: {
+  project: Project;
+  slug?: string;
+}) {
   const [pos, setPos] = useState(50);
+  const [showVideo, setShowVideo] = useState(false);
   const hasPair =
     Boolean(project.beforeImage) &&
     Boolean(project.afterImage) &&
     project.beforeImage !== project.afterImage;
+  const hasVideo = Boolean(project.videoUrl);
 
   return (
     <article className="group overflow-hidden border border-black/5 bg-brand-anthracite shadow-soft">
       <div className="relative aspect-[4/3] select-none overflow-hidden">
-        {hasPair ? (
+        {showVideo && hasVideo ? (
+          <ProductVideo
+            url={project.videoUrl!}
+            title={project.title}
+            className="absolute inset-0 aspect-auto h-full border-0"
+          />
+        ) : hasPair ? (
           <>
             <ProductImage
               src={project.afterImage}
@@ -103,6 +120,25 @@ function BeforeAfterCard({ project }: { project: Project }) {
         <p className="mt-2 text-sm leading-relaxed text-brand-mist">
           {project.description}
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {hasVideo ? (
+            <button
+              type="button"
+              onClick={() => setShowVideo((v) => !v)}
+              className="bg-brand-gold px-3 py-1.5 text-xs font-semibold text-[#151920] transition hover:bg-brand-gold-light"
+            >
+              {showVideo ? "Fotoğrafa dön" : "Videoyu izle"}
+            </button>
+          ) : null}
+          {slug ? (
+            <Link
+              href={`/urun/${slug}`}
+              className="border border-black/10 px-3 py-1.5 text-xs font-semibold text-brand-mist transition hover:text-brand-bone"
+            >
+              Detay
+            </Link>
+          ) : null}
+        </div>
       </div>
     </article>
   );
@@ -115,10 +151,16 @@ export function FeaturedProjects({
 }) {
   const { getProjects, ready } = useProducts();
   const items = useMemo(() => {
-    const fromAdmin = getProjects().map(productToProject);
-    const seedIds = new Set(fromAdmin.map((p) => p.id));
-    const seeds = seedProjects.filter((p) => !seedIds.has(p.id));
-    return [...fromAdmin, ...seeds];
+    const fromAdmin = getProjects();
+    const mapped = fromAdmin.map((p) => ({
+      project: productToProject(p),
+      slug: p.slug,
+    }));
+    const seedIds = new Set(mapped.map((x) => x.project.id));
+    const seeds = seedProjects
+      .filter((p) => !seedIds.has(p.id))
+      .map((p) => ({ project: p, slug: undefined as string | undefined }));
+    return [...mapped, ...seeds];
   }, [getProjects, seedProjects]);
 
   return (
@@ -140,8 +182,12 @@ export function FeaturedProjects({
                 className="aspect-[4/3] animate-pulse bg-brand-anthracite"
               />
             ))
-          : items.map((project) => (
-              <BeforeAfterCard key={project.id} project={project} />
+          : items.map(({ project, slug }) => (
+              <BeforeAfterCard
+                key={project.id}
+                project={project}
+                slug={slug}
+              />
             ))}
       </div>
     </section>

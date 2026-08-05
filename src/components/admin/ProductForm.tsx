@@ -540,6 +540,30 @@ export function ProductForm({
             </p>
           </Field>
         </div>
+        <div className="sm:col-span-2">
+          <Field label="Video linki (YouTube / Vimeo / MP4)">
+            <input
+              className="input-field"
+              placeholder="https://www.youtube.com/watch?v=... veya https://youtu.be/..."
+              value={form.videoUrl || ""}
+              onChange={(e) => set("videoUrl", e.target.value.trim())}
+            />
+            <p className="mt-1 text-xs text-brand-mist">
+              YouTube veya Vimeo paylaşım linkini yapıştırın. Ürün / proje
+              sayfasında video görünür. (Büyük video dosyası yerine link
+              önerilir.)
+            </p>
+            {form.videoUrl ? (
+              <button
+                type="button"
+                className="mt-2 text-xs text-brand-gold underline"
+                onClick={() => set("videoUrl", "")}
+              >
+                Videoyu kaldır
+              </button>
+            ) : null}
+          </Field>
+        </div>
         <Field label="Teknik PDF dosyası (yükle)">
           <input
             type="file"

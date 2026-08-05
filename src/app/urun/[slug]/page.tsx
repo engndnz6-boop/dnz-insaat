@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FileDown } from "lucide-react";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { ProductVideo } from "@/components/product/ProductVideo";
 import { TechnicalSpecsTable } from "@/components/product/TechnicalSpecs";
 import { AddToCartButton } from "@/components/product/AddToCartButton";
 import { WhatsAppInquiryButton } from "@/components/product/WhatsAppInquiryButton";
@@ -64,7 +65,17 @@ export default function ProductPage() {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-        <ProductGallery images={product.images} name={product.name} />
+        <div className="space-y-4">
+          <ProductGallery images={product.images} name={product.name} />
+          {product.videoUrl ? (
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">
+                Video
+              </p>
+              <ProductVideo url={product.videoUrl} title={product.name} />
+            </div>
+          ) : null}
+        </div>
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-gold">

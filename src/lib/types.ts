@@ -69,6 +69,8 @@ export interface Product {
   price: number;
   currency: "TRY";
   images: string[];
+  /** YouTube / Vimeo / MP4 video linki */
+  videoUrl?: string;
   /**
    * sale = malzeme satışı (katalog, fiyat, adet)
    * project = imalat / yapılan iş (projeler bölümü, uygulama fotoğrafı)
@@ -106,6 +108,8 @@ export interface Project {
   beforeImage: string;
   afterImage: string;
   description: string;
+  /** YouTube / Vimeo / MP4 */
+  videoUrl?: string;
 }
 
 export interface Testimonial {
