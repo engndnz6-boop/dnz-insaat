@@ -21,6 +21,8 @@ export type CalculatorMaterial = {
   pieceWidthCm?: number;
   /** Plaka / panel boyu (cm) — örn. 250 */
   pieceHeightCm?: number;
+  /** Profil vb. tek boy (metre) — örn. 3 → miktar 3’ün katına tamamlanır */
+  pieceLengthM?: number;
 };
 
 export type CalculatorSystem = {
@@ -43,29 +45,63 @@ export function pieceAreaM2(widthCm?: number, heightCm?: number): number {
   return (w / 100) * (h / 100);
 }
 
+function isLinearUnit(unit: string) {
+  const u = unit.toLowerCase().trim();
+  return u === "mt" || u === "m" || u === "metre" || u === "m.";
+}
+
+/**
+ * Profil boyu (metre).
+ * pieceLengthM varsa onu kullan.
+ * Yoksa: birim mt ve sadece “boy cm” dolu + küçük sayı (≤12) → metre kabul et
+ * (admin’de yanlışlıkla boy=3 yazılan eski kayıtlar).
+ */
+export function resolvePieceLengthM(m: CalculatorMaterial): number {
+  if (m.pieceLengthM && m.pieceLengthM > 0) return Number(m.pieceLengthM);
+  if (
+    isLinearUnit(m.unit) &&
+    !m.pieceWidthCm &&
+    m.pieceHeightCm &&
+    m.pieceHeightCm > 0 &&
+    m.pieceHeightCm <= 12
+  ) {
+    return Number(m.pieceHeightCm);
+  }
+  return 0;
+}
+
 export function computeLines(
   system: CalculatorSystem,
   m2: number,
-  ebatOverride?: { widthCm?: number; heightCm?: number }
+  ebatOverride?: { widthCm?: number; heightCm?: number; lengthM?: number }
 ): MaterialLine[] {
   return system.materials.map((m) => {
     const raw = m2 * m.ratePerM2;
     const widthCm = ebatOverride?.widthCm || m.pieceWidthCm;
     const heightCm = ebatOverride?.heightCm || m.pieceHeightCm;
     const area = pieceAreaM2(widthCm, heightCm);
-    const usePiece =
-      m.roundMode === "piece" ||
-      (area > 0 && (widthCm || 0) > 0 && (heightCm || 0) > 0);
+    const lengthM =
+      ebatOverride?.lengthM || resolvePieceLengthM({ ...m, pieceWidthCm: widthCm, pieceHeightCm: heightCm });
 
-    if (usePiece && area > 0) {
+    // 1) Plaka: en × boy (cm) → adet
+    if (area > 0 && (widthCm || 0) > 0 && (heightCm || 0) > 0) {
       const pieces = Math.max(1, Math.ceil(raw / area - 1e-9));
       return {
-        name:
-          widthCm && heightCm
-            ? `${m.name} (${widthCm}×${heightCm} cm)`
-            : m.name,
+        name: `${m.name} (${widthCm}×${heightCm} cm)`,
         unit: m.unit === "m²" ? "adet" : m.unit || "adet",
         qty: pieces,
+        unitPrice: m.unitPrice,
+      };
+    }
+
+    // 2) Profil: boy (m) → metre miktarını boyun katına tamamla
+    if (lengthM > 0) {
+      const pieces = Math.max(1, Math.ceil(raw / lengthM - 1e-9));
+      const qtyMeters = round(pieces * lengthM, 2);
+      return {
+        name: `${m.name} (${lengthM} m boy)`,
+        unit: isLinearUnit(m.unit) ? m.unit : "mt",
+        qty: qtyMeters,
         unitPrice: m.unitPrice,
       };
     }
@@ -122,7 +158,8 @@ export const seedCalculators: CalculatorSystem[] = [
         unit: "mt",
         ratePerM2: 0.85,
         unitPrice: 42,
-        roundMode: "round",
+        roundMode: "piece",
+        pieceLengthM: 3,
       },
       {
         id: "alc-aski",
@@ -161,7 +198,8 @@ export const seedCalculators: CalculatorSystem[] = [
         unit: "mt",
         ratePerM2: 1.15,
         unitPrice: 95,
-        roundMode: "round",
+        roundMode: "piece",
+        pieceLengthM: 3,
       },
       {
         id: "ib-plaka",

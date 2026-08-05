@@ -151,14 +151,15 @@ export default function AdminHesaplamalarPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[960px] text-left text-sm">
+              <table className="w-full min-w-[1100px] text-left text-sm">
                 <thead className="bg-brand-navy text-xs uppercase tracking-wider text-white/80">
                   <tr>
                     <th className="px-3 py-2 font-medium">Malzeme</th>
                     <th className="px-3 py-2 font-medium">Birim</th>
                     <th className="px-3 py-2 font-medium">Sarfiyat / m²</th>
-                    <th className="px-3 py-2 font-medium">Ebat en cm</th>
-                    <th className="px-3 py-2 font-medium">Ebat boy cm</th>
+                    <th className="px-3 py-2 font-medium">Plaka en cm</th>
+                    <th className="px-3 py-2 font-medium">Plaka boy cm</th>
+                    <th className="px-3 py-2 font-medium">Profil boy m</th>
                     <th className="px-3 py-2 font-medium">Birim fiyat ₺</th>
                     <th className="px-3 py-2 font-medium">Yuvarlama</th>
                     <th className="px-3 py-2 font-medium" />
@@ -240,6 +241,30 @@ export default function AdminHesaplamalarPage() {
                       <td className="px-2 py-2">
                         <input
                           type="number"
+                          step="0.1"
+                          min="0"
+                          className="input-field py-2"
+                          placeholder="3"
+                          title="Profil için 3 metre"
+                          value={m.pieceLengthM ?? ""}
+                          onChange={(e) =>
+                            updateMaterial(active.id, m.id, {
+                              pieceLengthM: e.target.value
+                                ? Number(e.target.value)
+                                : undefined,
+                              ...(e.target.value
+                                ? {
+                                    pieceWidthCm: undefined,
+                                    pieceHeightCm: undefined,
+                                  }
+                                : {}),
+                            })
+                          }
+                        />
+                      </td>
+                      <td className="px-2 py-2">
+                        <input
+                          type="number"
                           step="0.01"
                           min="0"
                           className="input-field py-2"
@@ -266,7 +291,7 @@ export default function AdminHesaplamalarPage() {
                         >
                           <option value="round">Ondalık</option>
                           <option value="ceil">Yukarı tam</option>
-                          <option value="piece">Ebat katı (adet)</option>
+                          <option value="piece">Ebat katı</option>
                         </select>
                       </td>
                       <td className="px-2 py-2">
@@ -289,9 +314,9 @@ export default function AdminHesaplamalarPage() {
             </div>
 
             <p className="text-xs text-brand-mist">
-              Ebat örneği: alçı plaka 120×250 cm → alan ebatın katlarına göre
-              adet tamamlanır (örn. 50 m² ≈ 17 plaka). Yuvarlama ={" "}
-              <strong>Ebat katı</strong> seçin; birim fiyatı plaka başına yazın.
+              <strong>Plaka:</strong> en×boy cm → adet.{" "}
+              <strong>Profil:</strong> profil boy m = 3 → metre 3&apos;ün katına
+              tamamlanır (55×0,85=46,75 → 48 mt).
             </p>
 
             <button
