@@ -25,8 +25,26 @@ function useNativeImg(src: string): boolean {
     src.startsWith("blob:") ||
     src.startsWith("data:") ||
     src.startsWith("http://") ||
-    src.startsWith("https://")
+    src.startsWith("https://") ||
+    // Dinamik API ile dönen görsellerde Next Image yerine <img> daha sorunsuz çalışır
+    src.startsWith("/api/")
   );
+}
+
+function isOneDriveShareContentUrl(src: string): boolean {
+  // createAnonymousContentUrl() bu formatta URL döndürür:
+  // https://api.onedrive.com/v1.0/shares/u!<...>/root/content
+  try {
+    const u = new URL(src);
+    return (
+      (u.hostname === "api.onedrive.com" ||
+        u.hostname.endsWith("onedrive.live.com")) &&
+      u.pathname.includes("/shares/") &&
+      u.pathname.includes("/content")
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -88,11 +106,15 @@ export function ProductImage({
     );
   }
 
-  if (useNativeImg(resolved)) {
+  const imgSrc = isOneDriveShareContentUrl(resolved)
+    ? `/api/image-proxy?url=${encodeURIComponent(resolved)}`
+    : resolved;
+
+  if (useNativeImg(imgSrc)) {
     // eslint-disable-next-line @next/next/no-img-element
     return (
       <img
-        src={resolved}
+        src={imgSrc}
         alt={alt}
         className={`${fill ? "absolute inset-0 h-full w-full object-cover" : ""} ${className || ""}`}
       />

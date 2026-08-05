@@ -1,6 +1,38 @@
 const GRAPH = "https://graph.microsoft.com/v1.0";
 const DEFAULT_FOLDER = "DNZ-Site";
 
+export function buildOneDriveProxyUrl(itemId: string, fileName?: string): string {
+  const params = new URLSearchParams({ id: itemId });
+  if (fileName) params.set("name", fileName);
+  return `/api/onedrive-file?${params.toString()}`;
+}
+
+/** Eski createLink → api.onedrive.com/shares/.../content URL'leri */
+export function isOneDriveShareContentUrl(src: string): boolean {
+  try {
+    const u = new URL(src);
+    return (
+      (u.hostname === "api.onedrive.com" ||
+        u.hostname.endsWith("onedrive.live.com") ||
+        u.hostname.endsWith("sharepoint.com")) &&
+      u.pathname.includes("/shares/") &&
+      u.pathname.includes("/content")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function extractShareIdFromContentUrl(src: string): string | null {
+  try {
+    const u = new URL(src);
+    const m = u.pathname.match(/\/shares\/(u![^/]+)\//i);
+    return m?.[1] || null;
+  } catch {
+    return null;
+  }
+}
+
 export function isOneDriveConfigured(): boolean {
   return Boolean(
     process.env.MICROSOFT_CLIENT_ID?.trim() &&
@@ -240,8 +272,84 @@ export async function uploadToOneDrive(opts: {
     throw new Error(data.error?.message || `Yükleme başarısız (${res.status})`);
   }
 
-  const url = await createAnonymousContentUrl(data.id);
+  const url = buildOneDriveProxyUrl(data.id, fileName);
   return { url, itemId: data.id };
+}
+
+export async function downloadOneDriveItem(itemId: string): Promise<{
+  bytes: ArrayBuffer;
+  contentType: string;
+  etag?: string | null;
+}> {
+  if (!isOneDriveConfigured()) {
+    throw new Error("OneDrive yapılandırılmamış.");
+  }
+
+  const res = await graphFetch(
+    `/me/drive/items/${encodeURIComponent(itemId)}/content`,
+    { method: "GET", redirect: "follow" }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`OneDrive dosyası okunamadı: ${err}`);
+  }
+
+  const bytes = await res.arrayBuffer();
+  let contentType = res.headers.get("content-type") || "";
+  if (
+    !contentType ||
+    contentType.includes("octet-stream") ||
+    contentType.includes("json")
+  ) {
+    contentType = "image/jpeg";
+  }
+
+  return {
+    bytes,
+    contentType,
+    etag: res.headers.get("etag"),
+  };
+}
+
+/**
+ * Eski anonim paylaşım linkleri tarayıcıda 401 verir.
+ * Graph oturumu ile aynı içeriği çeker.
+ */
+export async function downloadOneDriveShareContentUrl(src: string): Promise<{
+  bytes: ArrayBuffer;
+  contentType: string;
+}> {
+  if (!isOneDriveConfigured()) {
+    throw new Error("OneDrive yapılandırılmamış.");
+  }
+
+  const shareId = extractShareIdFromContentUrl(src);
+  if (!shareId) {
+    throw new Error("Geçersiz OneDrive paylaşım URL’si.");
+  }
+
+  const res = await graphFetch(
+    `/shares/${encodeURIComponent(shareId)}/driveItem/content`,
+    { method: "GET", redirect: "follow" }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`OneDrive paylaşım dosyası okunamadı: ${err}`);
+  }
+
+  const bytes = await res.arrayBuffer();
+  let contentType = res.headers.get("content-type") || "";
+  if (
+    !contentType ||
+    contentType.includes("octet-stream") ||
+    contentType.includes("json")
+  ) {
+    contentType = "image/jpeg";
+  }
+
+  return { bytes, contentType };
 }
 
 export async function readJsonFromOneDrive<T>(fileName: string): Promise<T | null> {
