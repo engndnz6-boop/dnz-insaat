@@ -26,37 +26,56 @@ import { X } from "lucide-react";
 const MAX_IMAGES = 8;
 const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
 
+function isPlaceholderImage(src: string): boolean {
+  return src.includes("images.unsplash.com");
+}
+
 /** OneDrive varsa oraya; yapılandırılmamışsa tarayıcı IndexedDB’ye kaydet */
 async function storeImage(blob: Blob, key: string): Promise<string> {
   const body = new FormData();
-  body.append("file", blob, `${key}.jpg`);
+  // Tip her zaman image/jpeg olsun (bazı tarayıcılarda boş type 400 veriyor)
+  const file = new File([blob], `${key}.jpg`, {
+    type: blob.type || "image/jpeg",
+  });
+  body.append("file", file);
   body.append("kind", "image");
 
-  let res: Response;
-  try {
-    res = await fetch("/api/admin/upload", { method: "POST", body });
-  } catch {
-    await saveFileBlob(key, blob);
-    return toIdbImageRef(key);
+  let lastError = "";
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch("/api/admin/upload", { method: "POST", body });
+    } catch {
+      await saveFileBlob(key, blob);
+      return toIdbImageRef(key);
+    }
+
+    const data = (await res.json().catch(() => ({}))) as {
+      url?: string;
+      error?: string;
+    };
+
+    if (res.ok && data.url) return data.url;
+
+    // OneDrive kurulu değilse yerel yedek
+    if (res.status === 503) {
+      await saveFileBlob(key, blob);
+      return toIdbImageRef(key);
+    }
+
+    lastError =
+      data.error ||
+      `Fotoğraf OneDrive’a yüklenemedi (HTTP ${res.status}). Admin’de OneDrive bandını kontrol edin.`;
+
+    // Geçici hata ise bir kez daha dene
+    if (attempt === 1 && (res.status === 429 || res.status >= 500)) {
+      await new Promise((r) => setTimeout(r, 800));
+      continue;
+    }
+    break;
   }
 
-  const data = (await res.json().catch(() => ({}))) as {
-    url?: string;
-    error?: string;
-  };
-
-  if (res.ok && data.url) return data.url;
-
-  // OneDrive kurulu değilse yerel yedek
-  if (res.status === 503) {
-    await saveFileBlob(key, blob);
-    return toIdbImageRef(key);
-  }
-
-  throw new Error(
-    data.error ||
-      `Fotoğraf OneDrive’a yüklenemedi (HTTP ${res.status}). Admin’de OneDrive bandını kontrol edin.`
-  );
+  throw new Error(lastError);
 }
 
 async function storePdf(
@@ -102,9 +121,14 @@ export function ProductForm({
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pendingImages, setPendingImages] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
+  const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
 
   const subcategories = getSubcategories(form.categoryId);
+  const imageSlotsLeft = Math.max(
+    0,
+    MAX_IMAGES - form.images.length - pendingImages.length
+  );
 
   const set = <K extends keyof Product>(key: K, value: Product[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -120,6 +144,7 @@ export function ProductForm({
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setProgress("");
     setSaving(true);
     try {
       let next = {
@@ -132,19 +157,45 @@ export function ProductForm({
         const savedUrls: string[] = [];
         for (let i = 0; i < pendingImages.length; i++) {
           const file = pendingImages[i];
-          if (!file.type.startsWith("image/")) {
-            throw new Error("Sadece görsel dosyaları yüklenebilir.");
+          setProgress(
+            `Fotoğraf ${i + 1}/${pendingImages.length} yükleniyor…`
+          );
+          // iPhone HEIC vb. — type boş olabilir; uzantıdan da kabul et
+          const looksImage =
+            file.type.startsWith("image/") ||
+            /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name);
+          if (!looksImage) {
+            throw new Error(
+              `"${file.name}" görsel değil. JPG / PNG / WEBP seçin.`
+            );
           }
-          const blob = await compressImageFile(file);
+          let blob: Blob;
+          try {
+            blob = await compressImageFile(file);
+          } catch {
+            throw new Error(
+              `"${file.name}" okunamadı. JPG veya PNG olarak kaydedip tekrar deneyin.`
+            );
+          }
           if (blob.size > MAX_IMAGE_BYTES) {
             throw new Error(
               `"${file.name}" sıkıştırıldıktan sonra hala çok büyük (max 2.5 MB).`
             );
           }
           const key = `img-${form.id}-${Date.now()}-${i}`;
-          savedUrls.push(await storeImage(blob, key));
+          try {
+            savedUrls.push(await storeImage(blob, key));
+          } catch (err) {
+            throw new Error(
+              `Fotoğraf ${i + 1}/${pendingImages.length} ("${file.name}") yüklenemedi: ${
+                err instanceof Error ? err.message : "bilinmeyen hata"
+              }`
+            );
+          }
         }
-        next = { ...next, images: [...next.images, ...savedUrls] };
+        // Yeni yüklenenler varsa örnek Unsplash görselini at
+        const kept = next.images.filter((src) => !isPlaceholderImage(src));
+        next = { ...next, images: [...kept, ...savedUrls].slice(0, MAX_IMAGES) };
       }
 
       if (!next.images.length) {
@@ -152,6 +203,7 @@ export function ProductForm({
       }
 
       if (pdfFile) {
+        setProgress("PDF yükleniyor…");
         if (pdfFile.size > 4 * 1024 * 1024) {
           throw new Error("Ürün PDF en fazla 4 MB olabilir.");
         }
@@ -163,11 +215,17 @@ export function ProductForm({
           pdfStorageKey: stored.storageKey,
         };
       }
+
+      setProgress("Kaydediliyor…");
       await onSave(next);
+      setForm(next);
+      setPendingImages([]);
+      setPdfFile(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kayıt hatası");
     } finally {
       setSaving(false);
+      setProgress("");
     }
   };
 
@@ -373,7 +431,7 @@ export function ProductForm({
           />
         </Field>
         <div className="sm:col-span-2 space-y-3">
-          <Field label="Fotoğraf URL (önerilen — Azure / OneDrive gerekmez)">
+          <Field label="Fotoğraf URL (opsiyonel)">
             <input
               className="input-field"
               placeholder="https://i.ibb.co/....jpg"
@@ -384,16 +442,16 @@ export function ProductForm({
                     src.startsWith("/") ||
                     src.startsWith("data:")
                 )
-                .join(", ")}
+                .join(" | ")}
               onChange={(e) => {
                 const urls = e.target.value
-                  .split(",")
+                  .split("|")
                   .map((s) => s.trim())
                   .filter(Boolean);
                 const localRefs = form.images.filter((src) =>
                   src.startsWith("idb:")
                 );
-                set("images", [...localRefs, ...urls]);
+                set("images", [...localRefs, ...urls].slice(0, MAX_IMAGES));
               }}
             />
             <p className="mt-1 text-xs text-brand-mist">
@@ -407,7 +465,7 @@ export function ProductForm({
                 imgbb.com
               </a>{" "}
               → fotoğraf yükle → <strong>Direct link</strong> kopyala → buraya
-              yapıştır. Birden fazla URL’yi virgülle ayırın.{" "}
+              yapıştır. Birden fazla URL’yi <strong>|</strong> ile ayırın.{" "}
               {form.kind === "project"
                 ? "İmalat: 1. foto sonra, 2. foto önce."
                 : "Satış ürünü kataloğunda görünür."}
@@ -457,27 +515,35 @@ export function ProductForm({
             </div>
           )}
 
-          <Field label="veya bilgisayardan dosya (OneDrive yoksa sadece bu cihazda)">
+          <Field label="Bilgisayardan fotoğraf ekle (birden fazla seçebilirsiniz)">
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp,image/jpg"
+              accept="image/jpeg,image/png,image/webp,image/jpg,image/heic,image/heif,.jpg,.jpeg,.png,.webp"
               multiple
+              disabled={imageSlotsLeft <= 0 || saving}
               className="input-field file:mr-3 file:border-0 file:bg-brand-gold file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#151920]"
               onChange={(e) => {
                 const files = e.target.files;
                 if (!files?.length) return;
-                const room = Math.max(0, MAX_IMAGES - form.images.length);
-                setPendingImages((prev) =>
-                  [...prev, ...Array.from(files)].slice(0, room)
-                );
+                setPendingImages((prev) => {
+                  const room = Math.max(
+                    0,
+                    MAX_IMAGES - form.images.length - prev.length
+                  );
+                  return [...prev, ...Array.from(files)].slice(
+                    0,
+                    prev.length + room
+                  );
+                });
                 e.target.value = "";
               }}
             />
             <p className="mt-1 text-xs text-brand-mist">
-              JPG / PNG / WEBP · max {MAX_IMAGES}
+              JPG / PNG / WEBP · en fazla {MAX_IMAGES} fotoğraf
               {pendingImages.length > 0
-                ? ` · ${pendingImages.length} dosya seçildi (kayıtta yüklenecek)`
+                ? ` · ${pendingImages.length} dosya seçildi (Kaydet deyince yüklenecek)`
                 : ""}
+              {imageSlotsLeft <= 0 ? " · limit doldu" : ""}
             </p>
           </Field>
         </div>
@@ -583,10 +649,13 @@ export function ProductForm({
       </div>
 
       {error && <p className="text-sm text-red-300">{error}</p>}
+      {progress && !error && (
+        <p className="text-sm text-brand-gold">{progress}</p>
+      )}
 
       <div className="flex flex-wrap gap-3">
         <button type="submit" disabled={saving} className="btn-primary">
-          {saving ? "Kaydediliyor…" : "Kaydet"}
+          {saving ? progress || "Kaydediliyor…" : "Kaydet"}
         </button>
         <Link href="/admin/urunler" className="btn-secondary">
           İptal

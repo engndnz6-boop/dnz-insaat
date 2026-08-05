@@ -59,9 +59,7 @@ export function createEmptyProduct(categoryId?: string): Product {
     description: "",
     price: 0,
     currency: "TRY",
-    images: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80",
-    ],
+    images: [],
     kind: "sale",
     projectLocation: "",
     projectCategory: "",

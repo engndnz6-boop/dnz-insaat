@@ -42,7 +42,11 @@ export async function POST(request: Request) {
 
   const kind = String(form.get("kind") || "image");
   const isPdf = kind === "pdf" || file.type === "application/pdf";
-  const isImage = file.type.startsWith("image/");
+  const name = (file.name || "").toLowerCase();
+  const isImage =
+    file.type.startsWith("image/") ||
+    /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(name) ||
+    kind === "image";
 
   if (!isPdf && !isImage) {
     return NextResponse.json(
