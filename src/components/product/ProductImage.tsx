@@ -19,24 +19,19 @@ type Props = {
   height?: number;
 };
 
-function isExternalHotlink(src: string): boolean {
-  try {
-    const host = new URL(src).hostname;
-    return (
-      host === "api.onedrive.com" ||
-      host.endsWith("onedrive.live.com") ||
-      host === "1drv.ms" ||
-      host.endsWith("sharepoint.com") ||
-      host.endsWith("sharepoint-df.com")
-    );
-  } catch {
-    return false;
-  }
+/** Harici URL’ler (ImgBB, Drive, OneDrive…) — next/image domain listesine bağlı kalmaz */
+function useNativeImg(src: string): boolean {
+  return (
+    src.startsWith("blob:") ||
+    src.startsWith("data:") ||
+    src.startsWith("http://") ||
+    src.startsWith("https://")
+  );
 }
 
 /**
- * http(s)/path → next/image;
- * OneDrive / idb: / data: → native img (yönlendirme ve blob uyumu).
+ * Yerel path → next/image;
+ * http(s) / idb / data / blob → native img (herhangi bir URL çalışır).
  */
 export function ProductImage({
   src,
@@ -93,12 +88,7 @@ export function ProductImage({
     );
   }
 
-  const useNative =
-    resolved.startsWith("blob:") ||
-    resolved.startsWith("data:") ||
-    isExternalHotlink(resolved);
-
-  if (useNative) {
+  if (useNativeImg(resolved)) {
     // eslint-disable-next-line @next/next/no-img-element
     return (
       <img

@@ -373,30 +373,44 @@ export function ProductForm({
           />
         </Field>
         <div className="sm:col-span-2 space-y-3">
-          <Field label="Ürün fotoğrafları (bilgisayardan yükle)">
+          <Field label="Fotoğraf URL (önerilen — Azure / OneDrive gerekmez)">
             <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/jpg"
-              multiple
-              className="input-field file:mr-3 file:border-0 file:bg-brand-gold file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#151920]"
+              className="input-field"
+              placeholder="https://i.ibb.co/....jpg"
+              value={form.images
+                .filter(
+                  (src) =>
+                    src.startsWith("http") ||
+                    src.startsWith("/") ||
+                    src.startsWith("data:")
+                )
+                .join(", ")}
               onChange={(e) => {
-                const files = e.target.files;
-                if (!files?.length) return;
-                const room = Math.max(0, MAX_IMAGES - form.images.length);
-                setPendingImages((prev) =>
-                  [...prev, ...Array.from(files)].slice(0, room)
+                const urls = e.target.value
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean);
+                const localRefs = form.images.filter((src) =>
+                  src.startsWith("idb:")
                 );
-                e.target.value = "";
+                set("images", [...localRefs, ...urls]);
               }}
             />
             <p className="mt-1 text-xs text-brand-mist">
+              1){" "}
+              <a
+                href="https://imgbb.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-brand-navy underline"
+              >
+                imgbb.com
+              </a>{" "}
+              → fotoğraf yükle → <strong>Direct link</strong> kopyala → buraya
+              yapıştır. Birden fazla URL’yi virgülle ayırın.{" "}
               {form.kind === "project"
-                ? "Yapılmış iş fotoğrafları (sonra / önce). Projeler’de görünür."
-                : "Satış ürünü fotoğrafları. Katalogda görünür."}{" "}
-              · JPG / PNG / WEBP · max {MAX_IMAGES}
-              {pendingImages.length > 0
-                ? ` · ${pendingImages.length} dosya seçildi (kayıtta yüklenecek)`
-                : ""}
+                ? "İmalat: 1. foto sonra, 2. foto önce."
+                : "Satış ürünü kataloğunda görünür."}
             </p>
           </Field>
 
@@ -443,29 +457,28 @@ export function ProductForm({
             </div>
           )}
 
-          <Field label="veya görsel URL (virgülle birden fazla)">
+          <Field label="veya bilgisayardan dosya (OneDrive yoksa sadece bu cihazda)">
             <input
-              className="input-field"
-              placeholder="https://...jpg, https://...png"
-              value={form.images
-                .filter(
-                  (src) =>
-                    src.startsWith("http") ||
-                    src.startsWith("/") ||
-                    src.startsWith("data:")
-                )
-                .join(", ")}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/jpg"
+              multiple
+              className="input-field file:mr-3 file:border-0 file:bg-brand-gold file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#151920]"
               onChange={(e) => {
-                const urls = e.target.value
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean);
-                const localRefs = form.images.filter((src) =>
-                  src.startsWith("idb:")
+                const files = e.target.files;
+                if (!files?.length) return;
+                const room = Math.max(0, MAX_IMAGES - form.images.length);
+                setPendingImages((prev) =>
+                  [...prev, ...Array.from(files)].slice(0, room)
                 );
-                set("images", [...localRefs, ...urls]);
+                e.target.value = "";
               }}
             />
+            <p className="mt-1 text-xs text-brand-mist">
+              JPG / PNG / WEBP · max {MAX_IMAGES}
+              {pendingImages.length > 0
+                ? ` · ${pendingImages.length} dosya seçildi (kayıtta yüklenecek)`
+                : ""}
+            </p>
           </Field>
         </div>
         <Field label="Teknik PDF dosyası (yükle)">
