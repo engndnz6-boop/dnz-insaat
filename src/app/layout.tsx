@@ -4,6 +4,7 @@ import { CartProvider } from "@/lib/cart-context";
 import { ProductsProvider } from "@/lib/products-context";
 import { CatalogProvider } from "@/lib/catalog-context";
 import { CalculatorsProvider } from "@/lib/calculators-context";
+import { SiteSettingsProvider } from "@/lib/site-settings-context";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
@@ -26,7 +27,7 @@ const sans = Outfit({
 });
 
 const titleDefault =
-  "DNZ İnşaat | Alçıpan, Profil, Asma Tavan, Tadilat Ankara Gölbaşı";
+  "DNZ İnşaat Malzemeleri | Alçıpan, Profil, Asma Tavan Ankara Gölbaşı";
 
 export const metadata: Metadata = {
   metadataBase: new URL(brand.url),
@@ -90,18 +91,20 @@ export default function RootLayout({
     <html lang="tr" className={`${display.variable} ${sans.variable}`}>
       <body className="font-sans">
         <JsonLd />
-        <ProductsProvider>
-          <CatalogProvider>
-            <CalculatorsProvider>
-              <CartProvider>
-                <Navbar />
-                <main className="min-h-[70vh]">{children}</main>
-                <Footer />
-                <WhatsAppFloat />
-              </CartProvider>
-            </CalculatorsProvider>
-          </CatalogProvider>
-        </ProductsProvider>
+        <SiteSettingsProvider>
+          <ProductsProvider>
+            <CatalogProvider>
+              <CalculatorsProvider>
+                <CartProvider>
+                  <Navbar />
+                  <main className="min-h-[70vh]">{children}</main>
+                  <Footer />
+                  <WhatsAppFloat />
+                </CartProvider>
+              </CalculatorsProvider>
+            </CatalogProvider>
+          </ProductsProvider>
+        </SiteSettingsProvider>
       </body>
     </html>
   );

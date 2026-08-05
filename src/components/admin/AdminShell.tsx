@@ -12,6 +12,7 @@ import {
   Tags,
   FileText,
   Calculator,
+  Settings,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
@@ -155,6 +156,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const nav = [
     { href: "/admin", label: "Özet", icon: LayoutDashboard },
+    { href: "/admin/site", label: "Site", icon: Settings },
     { href: "/admin/urunler", label: "Ürünler", icon: Package },
     { href: "/admin/kategoriler", label: "Kategoriler", icon: Tags },
     { href: "/admin/hesaplamalar", label: "Hesaplamalar", icon: Calculator },
