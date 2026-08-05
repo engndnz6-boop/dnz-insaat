@@ -18,7 +18,6 @@ import { useCatalog } from "@/lib/catalog-context";
 import {
   compressImageFile,
   saveFileBlob,
-  savePdfBlob,
   toIdbImageRef,
 } from "@/lib/pdf-storage";
 import { ProductImage } from "@/components/product/ProductImage";
@@ -27,12 +26,43 @@ import { X } from "lucide-react";
 const MAX_IMAGES = 8;
 const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
 
+/** OneDrive varsa oraya; yoksa tarayıcı IndexedDB’ye kaydet */
+async function storeImage(blob: Blob, key: string): Promise<string> {
+  try {
+    const body = new FormData();
+    body.append("file", blob, `${key}.jpg`);
+    body.append("kind", "image");
+    const res = await fetch("/api/admin/upload", { method: "POST", body });
+    const data = (await res.json()) as { url?: string };
+    if (res.ok && data.url) return data.url;
+  } catch {
+    /* yerel yedek */
+  }
+  await saveFileBlob(key, blob);
+  return toIdbImageRef(key);
+}
+
+async function storePdf(file: File, key: string): Promise<{ url?: string; storageKey?: string }> {
+  try {
+    const body = new FormData();
+    body.append("file", file, file.name);
+    body.append("kind", "pdf");
+    const res = await fetch("/api/admin/upload", { method: "POST", body });
+    const data = (await res.json()) as { url?: string };
+    if (res.ok && data.url) return { url: data.url };
+  } catch {
+    /* yerel yedek */
+  }
+  await saveFileBlob(key, file);
+  return { storageKey: key };
+}
+
 export function ProductForm({
   initial,
   onSave,
 }: {
   initial: Product;
-  onSave: (product: Product) => void;
+  onSave: (product: Product) => void | Promise<void>;
 }) {
   const { rootCategories, getSubcategories } = useCatalog();
   const [form, setForm] = useState<Product>(initial);
@@ -66,7 +96,7 @@ export function ProductForm({
       };
 
       if (pendingImages.length) {
-        const savedRefs: string[] = [];
+        const savedUrls: string[] = [];
         for (let i = 0; i < pendingImages.length; i++) {
           const file = pendingImages[i];
           if (!file.type.startsWith("image/")) {
@@ -78,11 +108,10 @@ export function ProductForm({
               `"${file.name}" sıkıştırıldıktan sonra hala çok büyük (max 2.5 MB).`
             );
           }
-          const key = `product-img-${form.id}-${Date.now()}-${i}`;
-          await saveFileBlob(key, blob);
-          savedRefs.push(toIdbImageRef(key));
+          const key = `img-${form.id}-${Date.now()}-${i}`;
+          savedUrls.push(await storeImage(blob, key));
         }
-        next = { ...next, images: [...next.images, ...savedRefs] };
+        next = { ...next, images: [...next.images, ...savedUrls] };
       }
 
       if (!next.images.length) {
@@ -93,13 +122,18 @@ export function ProductForm({
         if (pdfFile.size > 4 * 1024 * 1024) {
           throw new Error("Ürün PDF en fazla 4 MB olabilir.");
         }
-        const key = `product-pdf-${form.id}`;
-        await savePdfBlob(key, pdfFile);
-        next = { ...next, pdfStorageKey: key, pdfUrl: "" };
+        const key = `pdf-${form.id}-${Date.now()}`;
+        const stored = await storePdf(pdfFile, key);
+        next = {
+          ...next,
+          pdfUrl: stored.url || "",
+          pdfStorageKey: stored.storageKey,
+        };
       }
-      onSave(next);
+      await onSave(next);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kayıt hatası");
+    } finally {
       setSaving(false);
     }
   };
@@ -267,7 +301,8 @@ export function ProductForm({
               }}
             />
             <p className="mt-1 text-xs text-brand-mist">
-              JPG / PNG / WEBP · en fazla {MAX_IMAGES} görsel · otomatik sıkıştırılır
+              JPG / PNG / WEBP · max {MAX_IMAGES} · OneDrive yoksa bu cihazda
+              saklanır
               {pendingImages.length > 0
                 ? ` · ${pendingImages.length} dosya seçildi (kayıtta yüklenecek)`
                 : ""}

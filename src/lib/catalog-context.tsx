@@ -69,12 +69,10 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(c) as Category[];
         if (Array.isArray(parsed) && parsed.length > 0) {
           const normalized = parsed.map(normalizeCategory);
-          // Eski kayıtta alt kategori yoksa seed alt kategorilerini ekle
+          // Seed'de olup yerel kayıtta olmayan kategorileri ekle
           const ids = new Set(normalized.map((x) => x.id));
-          const missingSubs = seedCategories.filter(
-            (s) => s.parentId && !ids.has(s.id)
-          );
-          setCategories([...normalized, ...missingSubs.map(normalizeCategory)]);
+          const missing = seedCategories.filter((s) => !ids.has(s.id));
+          setCategories([...normalized, ...missing.map(normalizeCategory)]);
         }
       }
       const p = localStorage.getItem(PDF_KEY);

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ProductForm } from "@/components/admin/ProductForm";
 import {
@@ -10,7 +11,7 @@ import {
 export default function NewProductPage() {
   const router = useRouter();
   const { upsertProduct } = useProducts();
-  const empty = createEmptyProduct();
+  const empty = useMemo(() => createEmptyProduct(), []);
 
   return (
     <div>
@@ -18,8 +19,8 @@ export default function NewProductPage() {
       <div className="mt-8">
         <ProductForm
           initial={empty}
-          onSave={(product) => {
-            upsertProduct(product);
+          onSave={async (product) => {
+            await upsertProduct(product);
             router.push("/admin/urunler");
           }}
         />
