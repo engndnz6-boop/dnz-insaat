@@ -19,7 +19,7 @@ async function fetchImageBytes(url: string): Promise<{
     headers: {
       // Bazı CDN’ler bot isteğini reddeder
       "User-Agent":
-        "Mozilla/5.0 (compatible; DNZSiteImageProxy/1.0; +https://dnzinşaat.com.tr)",
+        "Mozilla/5.0 (compatible; DNZSiteImageProxy/1.0)",
       Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
     },
   });
