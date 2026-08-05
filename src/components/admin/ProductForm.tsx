@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type {
   ColorOption,
   MaterialType,
@@ -372,24 +372,15 @@ export function ProductForm({
                 </div>
               ))}
               {pendingImages.map((file, i) => (
-                <div
-                  key={`${file.name}-${i}`}
-                  className="relative flex aspect-square items-center justify-center border border-dashed border-brand-gold/50 bg-brand-ink/40 p-2 text-center text-[10px] text-brand-mist"
-                >
-                  {file.name}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPendingImages((prev) =>
-                        prev.filter((_, idx) => idx !== i)
-                      )
-                    }
-                    className="absolute right-1 top-1 bg-black/70 p-1 text-white"
-                    aria-label="Seçimi kaldır"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+                <PendingImageThumb
+                  key={`${file.name}-${file.size}-${i}`}
+                  file={file}
+                  onRemove={() =>
+                    setPendingImages((prev) =>
+                      prev.filter((_, idx) => idx !== i)
+                    )
+                  }
+                />
               ))}
             </div>
           )}
@@ -531,6 +522,47 @@ export function ProductForm({
         </Link>
       </div>
     </form>
+  );
+}
+
+function PendingImageThumb({
+  file,
+  onRemove,
+}: {
+  file: File;
+  onRemove: () => void;
+}) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setSrc(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  return (
+    <div className="relative aspect-square overflow-hidden border border-brand-gold/50 bg-brand-ink">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={file.name}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center p-2 text-center text-[10px] text-brand-mist">
+          {file.name}
+        </span>
+      )}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute right-1 top-1 bg-black/70 p-1 text-white"
+        aria-label="Seçimi kaldır"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
   );
 }
 
