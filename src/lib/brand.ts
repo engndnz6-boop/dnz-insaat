@@ -55,6 +55,12 @@ export const brand = {
     "Ankara asma tavan",
     "Gölbaşı inşaat malzemeleri",
     "Ankara alçıpan",
+    "alçıpan satışı Ankara",
+    "inşaat malzemeleri Ankara",
+    "Gölbaşı alçıpan",
+    "Gölbaşı asma tavan",
+    "galvaniz profil Ankara",
+    "bölme duvar Ankara",
   ],
   services: [
     "Alçıpan asma tavan",

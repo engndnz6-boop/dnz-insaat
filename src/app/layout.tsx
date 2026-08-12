@@ -40,9 +40,6 @@ export const metadata: Metadata = {
   authors: [{ name: brand.name }],
   creator: brand.name,
   publisher: brand.name,
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "tr_TR",

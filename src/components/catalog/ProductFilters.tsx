@@ -31,9 +31,29 @@ const empty: Filters = {
   usage: "",
 };
 
-export function ProductCatalog({ products }: { products: Product[] }) {
+type ProductCatalogProps = {
+  products: Product[];
+  initialCategoryId?: string;
+  hideCategoryPicker?: boolean;
+  hideHeader?: boolean;
+  title?: string;
+  subtitle?: string;
+  backHref?: string;
+};
+
+export function ProductCatalog({
+  products,
+  initialCategoryId = "",
+  hideCategoryPicker = false,
+  hideHeader = false,
+  title = "Sistem & Malzeme Kataloğu",
+  subtitle = "Ana kategori, alt kategori ve markaya göre filtreleyin (ör. Elektrik → Anahtar Prizler → Viko).",
+}: ProductCatalogProps) {
   const { rootCategories, getSubcategories, getCategory } = useCatalog();
-  const [filters, setFilters] = useState<Filters>(empty);
+  const [filters, setFilters] = useState<Filters>({
+    ...empty,
+    category: initialCategoryId,
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const sizes = useMemo(
@@ -144,17 +164,21 @@ export function ProductCatalog({ products }: { products: Product[] }) {
 
   return (
     <div className="container-page py-12 sm:py-16">
+      {!hideHeader && (
       <div className="max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
-          Ürün Kataloğu
-        </p>
-        <h1 className="section-title mt-3">Sistem & Malzeme Kataloğu</h1>
-        <p className="section-subtitle">
-          Ana kategori, alt kategori ve markaya göre filtreleyin (ör. Elektrik →
-          Anahtar Prizler → Viko).
-        </p>
+        {!hideCategoryPicker && (
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
+            Ürün Kataloğu
+          </p>
+        )}
+        <h1 className={`section-title ${hideCategoryPicker ? "" : "mt-3"}`}>
+          {title}
+        </h1>
+        <p className="section-subtitle">{subtitle}</p>
       </div>
+      )}
 
+      {!hideCategoryPicker && (
       <div className="mt-8 flex gap-2 overflow-x-auto pb-2">
         <button
           type="button"
@@ -182,8 +206,9 @@ export function ProductCatalog({ products }: { products: Product[] }) {
           </button>
         ))}
       </div>
+      )}
 
-      {subOptions.length > 0 && (
+      {!hideCategoryPicker && subOptions.length > 0 && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
           <button
             type="button"

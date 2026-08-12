@@ -4,25 +4,25 @@ import { ArrowRight } from "lucide-react";
 const categories = [
   {
     title: "Alçıpan & Galvaniz Profil",
-    href: "/katalog",
+    href: "/kategori/alcipan-asma-tavan-malzemeleri",
     image:
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80",
   },
   {
     title: "Clip-in / Klipin Asma Tavan",
-    href: "/katalog",
+    href: "/kategori/clipin-petek-asma-tavan",
     image:
       "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=1200&q=80",
   },
   {
-    title: "Taşyünü, Metal & Plastik Tavan",
-    href: "/katalog",
+    title: "Taşyünü, Karolam & Vinil Tavan",
+    href: "/kategori/tasyunu-asma-tavan-malzemeleri",
     image:
       "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1200&q=80",
   },
   {
     title: "Bölme Duvar",
-    href: "/katalog",
+    href: "/kategori/bolme-duvar-malzemeleri",
     image:
       "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=80",
   },
@@ -49,7 +49,7 @@ export function CategoryShowcase() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={cat.image}
-                alt={cat.title}
+                alt={`${cat.title} — Ankara Gölbaşı`}
                 className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/40 to-transparent" />

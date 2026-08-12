@@ -1,13 +1,7 @@
-import type { Metadata } from "next";
 import { QuoteForm } from "@/components/contact/QuoteForm";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { buildWhatsAppUrl, quoteInquiryMessage } from "@/lib/whatsapp";
 import { brand } from "@/lib/brand";
-
-export const metadata: Metadata = {
-  title: "İletişim & Teklif Al",
-  description: `Toplu alım ve projelendirme işleri için teklif formu. ${brand.name} ile iletişime geçin.`,
-};
 
 export default function IletisimPage() {
   return (

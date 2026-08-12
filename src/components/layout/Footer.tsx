@@ -36,6 +36,30 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link
+                href="/kategori/alcipan-asma-tavan-malzemeleri"
+                className="hover:text-white"
+              >
+                Alçıpan Asma Tavan
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/kategori/bolme-duvar-malzemeleri"
+                className="hover:text-white"
+              >
+                Bölme Duvar Malzemeleri
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/kategori/clipin-petek-asma-tavan"
+                className="hover:text-white"
+              >
+                Clip-in Asma Tavan
+              </Link>
+            </li>
+            <li>
               <Link href="/kataloglar" className="hover:text-white">
                 PDF Kataloglar
               </Link>
