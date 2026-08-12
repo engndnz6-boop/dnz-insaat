@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import type {
   ColorOption,
   MaterialType,
@@ -22,7 +22,7 @@ import {
 } from "@/lib/pdf-storage";
 import { uploadVideoToOneDrive } from "@/lib/video-upload";
 import { ProductImage } from "@/components/product/ProductImage";
-import { X } from "lucide-react";
+import { ImagePlus, Trash2 } from "lucide-react";
 
 const MAX_IMAGES = 8;
 const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
@@ -120,17 +120,17 @@ export function ProductForm({
   const { rootCategories, getSubcategories } = useCatalog();
   const [form, setForm] = useState<Product>(initial);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [pendingImages, setPendingImages] = useState<File[]>([]);
   const [pendingVideo, setPendingVideo] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
+  const [showUrlField, setShowUrlField] = useState(false);
+  const [urlDraft, setUrlDraft] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const subcategories = getSubcategories(form.categoryId);
-  const imageSlotsLeft = Math.max(
-    0,
-    MAX_IMAGES - form.images.length - pendingImages.length
-  );
+  const imageSlotsLeft = Math.max(0, MAX_IMAGES - form.images.length);
 
   const set = <K extends keyof Product>(key: K, value: Product[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -143,6 +143,73 @@ export function ProductForm({
     }));
   };
 
+  const removeImageAt = (index: number) => {
+    setForm((f) => ({
+      ...f,
+      images: f.images.filter((_, idx) => idx !== index),
+    }));
+  };
+
+  const clearAllImages = () => {
+    if (!form.images.length) return;
+    if (!confirm("Tüm ürün fotoğrafları silinsin mi?")) return;
+    setForm((f) => ({ ...f, images: [] }));
+  };
+
+  const uploadFilesNow = async (fileList: FileList | File[]) => {
+    const files = Array.from(fileList);
+    if (!files.length) return;
+
+    setError("");
+    setUploadingImages(true);
+    try {
+      const room = Math.max(0, MAX_IMAGES - form.images.length);
+      const toUpload = files.slice(0, room);
+      if (!toUpload.length) {
+        throw new Error(`En fazla ${MAX_IMAGES} fotoğraf eklenebilir.`);
+      }
+
+      const savedUrls: string[] = [];
+      for (let i = 0; i < toUpload.length; i++) {
+        const file = toUpload[i];
+        setProgress(`Fotoğraf ${i + 1}/${toUpload.length} yükleniyor…`);
+        const looksImage =
+          file.type.startsWith("image/") ||
+          /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name);
+        if (!looksImage) {
+          throw new Error(`"${file.name}" görsel değil. JPG / PNG seçin.`);
+        }
+        let blob: Blob;
+        try {
+          blob = await compressImageFile(file);
+        } catch {
+          throw new Error(
+            `"${file.name}" okunamadı. JPG veya PNG deneyin.`
+          );
+        }
+        if (blob.size > MAX_IMAGE_BYTES) {
+          throw new Error(`"${file.name}" çok büyük (max 2.5 MB).`);
+        }
+        const key = `img-${form.id}-${Date.now()}-${i}`;
+        savedUrls.push(await storeImage(blob, key));
+      }
+
+      setForm((f) => {
+        const kept = f.images.filter((src) => !isPlaceholderImage(src));
+        return {
+          ...f,
+          images: [...kept, ...savedUrls].slice(0, MAX_IMAGES),
+        };
+      });
+      setProgress("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fotoğraf yüklenemedi");
+      setProgress("");
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -153,55 +220,11 @@ export function ProductForm({
         ...form,
         slug: form.slug.trim() || slugify(form.name),
         price: Number(form.price) || 0,
+        images: form.images.filter((src) => !isPlaceholderImage(src)),
       };
 
-      if (pendingImages.length) {
-        const savedUrls: string[] = [];
-        for (let i = 0; i < pendingImages.length; i++) {
-          const file = pendingImages[i];
-          setProgress(
-            `Fotoğraf ${i + 1}/${pendingImages.length} yükleniyor…`
-          );
-          // iPhone HEIC vb. — type boş olabilir; uzantıdan da kabul et
-          const looksImage =
-            file.type.startsWith("image/") ||
-            /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name);
-          if (!looksImage) {
-            throw new Error(
-              `"${file.name}" görsel değil. JPG / PNG / WEBP seçin.`
-            );
-          }
-          let blob: Blob;
-          try {
-            blob = await compressImageFile(file);
-          } catch {
-            throw new Error(
-              `"${file.name}" okunamadı. JPG veya PNG olarak kaydedip tekrar deneyin.`
-            );
-          }
-          if (blob.size > MAX_IMAGE_BYTES) {
-            throw new Error(
-              `"${file.name}" sıkıştırıldıktan sonra hala çok büyük (max 2.5 MB).`
-            );
-          }
-          const key = `img-${form.id}-${Date.now()}-${i}`;
-          try {
-            savedUrls.push(await storeImage(blob, key));
-          } catch (err) {
-            throw new Error(
-              `Fotoğraf ${i + 1}/${pendingImages.length} ("${file.name}") yüklenemedi: ${
-                err instanceof Error ? err.message : "bilinmeyen hata"
-              }`
-            );
-          }
-        }
-        // Yeni yüklenenler varsa örnek Unsplash görselini at
-        const kept = next.images.filter((src) => !isPlaceholderImage(src));
-        next = { ...next, images: [...kept, ...savedUrls].slice(0, MAX_IMAGES) };
-      }
-
       if (!next.images.length) {
-        throw new Error("En az bir ürün görseli ekleyin (yükleme veya URL).");
+        throw new Error("En az bir ürün görseli ekleyin.");
       }
 
       if (pendingVideo) {
@@ -237,7 +260,6 @@ export function ProductForm({
       setProgress("Kaydediliyor…");
       await onSave(next);
       setForm(next);
-      setPendingImages([]);
       setPendingVideo(null);
       setPdfFile(null);
     } catch (err) {
@@ -294,6 +316,150 @@ export function ProductForm({
           </label>
         </div>
       </fieldset>
+
+      {/* Fotoğraflar — üstte, kolay ekle / sil */}
+      <section className="border border-black/10 bg-brand-ink/40 p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-brand-bone">
+              Ürün fotoğrafları
+            </h2>
+            <p className="mt-1 text-xs text-brand-mist">
+              Seçince hemen yüklenir · Silmek için kırmızı Sil’e basın · En sonda
+              Kaydet
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={uploadingImages || saving || imageSlotsLeft <= 0}
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 bg-brand-gold px-4 py-2.5 text-sm font-semibold text-[#151920] disabled:opacity-50"
+            >
+              <ImagePlus className="h-4 w-4" />
+              {uploadingImages ? "Yükleniyor…" : "Fotoğraf ekle"}
+            </button>
+            {form.images.length > 0 ? (
+              <button
+                type="button"
+                disabled={uploadingImages || saving}
+                onClick={clearAllImages}
+                className="inline-flex items-center gap-2 border border-red-400/40 px-3 py-2.5 text-sm text-red-300"
+              >
+                <Trash2 className="h-4 w-4" />
+                Tümünü sil
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/jpg,image/heic,image/heif,.jpg,.jpeg,.png,.webp"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const files = e.target.files;
+            if (files?.length) void uploadFilesNow(files);
+            e.target.value = "";
+          }}
+        />
+
+        {form.images.length === 0 ? (
+          <button
+            type="button"
+            disabled={uploadingImages || saving}
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-4 flex min-h-[140px] w-full flex-col items-center justify-center gap-2 border border-dashed border-black/20 bg-brand-anthracite/50 px-4 py-8 text-sm text-brand-mist hover:border-brand-gold/40 hover:text-brand-bone"
+          >
+            <ImagePlus className="h-8 w-8 text-brand-gold" />
+            Fotoğraf seçmek için dokunun
+            <span className="text-xs opacity-70">JPG / PNG · max {MAX_IMAGES}</span>
+          </button>
+        ) : (
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {form.images.map((src, i) => (
+              <div
+                key={`${src}-${i}`}
+                className="overflow-hidden border border-black/10 bg-brand-anthracite"
+              >
+                <div className="relative aspect-square">
+                  <ProductImage
+                    src={src}
+                    alt={`Görsel ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="160px"
+                  />
+                  <span className="absolute left-2 top-2 bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                    {i + 1}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  disabled={uploadingImages || saving}
+                  onClick={() => removeImageAt(i)}
+                  className="flex w-full items-center justify-center gap-1.5 bg-red-600/90 py-2.5 text-sm font-semibold text-white hover:bg-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Sil
+                </button>
+              </div>
+            ))}
+            {imageSlotsLeft > 0 ? (
+              <button
+                type="button"
+                disabled={uploadingImages || saving}
+                onClick={() => fileInputRef.current?.click()}
+                className="flex aspect-square flex-col items-center justify-center gap-2 border border-dashed border-black/20 text-xs text-brand-mist hover:border-brand-gold/40 hover:text-brand-bone"
+              >
+                <ImagePlus className="h-6 w-6" />
+                Daha ekle
+              </button>
+            ) : null}
+          </div>
+        )}
+
+        <div className="mt-3">
+          <button
+            type="button"
+            className="text-xs text-brand-gold underline"
+            onClick={() => setShowUrlField((v) => !v)}
+          >
+            {showUrlField ? "URL alanını gizle" : "URL ile fotoğraf ekle (opsiyonel)"}
+          </button>
+          {showUrlField ? (
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <input
+                className="input-field flex-1"
+                placeholder="https://i.ibb.co/....jpg"
+                value={urlDraft}
+                onChange={(e) => setUrlDraft(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn-secondary text-xs"
+                onClick={() => {
+                  const url = urlDraft.trim();
+                  if (!url) return;
+                  if (!/^https?:\/\//i.test(url) && !url.startsWith("/")) {
+                    setError("Geçerli bir http(s) URL girin.");
+                    return;
+                  }
+                  setForm((f) => ({
+                    ...f,
+                    images: [...f.images, url].slice(0, MAX_IMAGES),
+                  }));
+                  setUrlDraft("");
+                }}
+              >
+                URL ekle
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </section>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Ürün / iş adı *">
@@ -449,116 +615,6 @@ export function ProductForm({
             onChange={(e) => set("size", e.target.value)}
           />
         </Field>
-        <div className="sm:col-span-2 space-y-3">
-          <Field label="Fotoğraf URL (opsiyonel)">
-            <input
-              className="input-field"
-              placeholder="https://i.ibb.co/....jpg"
-              value={form.images
-                .filter(
-                  (src) =>
-                    src.startsWith("http") ||
-                    src.startsWith("/") ||
-                    src.startsWith("data:")
-                )
-                .join(" | ")}
-              onChange={(e) => {
-                const urls = e.target.value
-                  .split("|")
-                  .map((s) => s.trim())
-                  .filter(Boolean);
-                const localRefs = form.images.filter((src) =>
-                  src.startsWith("idb:")
-                );
-                set("images", [...localRefs, ...urls].slice(0, MAX_IMAGES));
-              }}
-            />
-            <p className="mt-1 text-xs text-brand-mist">
-              ImgBB kullanıyorsanız <strong>Direct link</strong> alın
-              (başlar: <code className="text-brand-gold">https://i.ibb.co/...</code>
-              ). <code className="text-brand-gold">ibb.co/...</code> sayfa linki
-              değil. Birden fazla URL’yi <strong>|</strong> ile ayırın.{" "}
-              {form.kind === "project"
-                ? "İmalat: 1. foto sonra, 2. foto önce."
-                : "Satış ürünü kataloğunda görünür."}
-            </p>
-          </Field>
-
-          {(form.images.length > 0 || pendingImages.length > 0) && (
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {form.images.map((src, i) => (
-                <div
-                  key={`${src}-${i}`}
-                  className="relative aspect-square overflow-hidden border border-black/10 bg-brand-ink"
-                >
-                  <ProductImage
-                    src={src}
-                    alt={`Görsel ${i + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="120px"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm((f) => ({
-                        ...f,
-                        images: f.images.filter((_, idx) => idx !== i),
-                      }))
-                    }
-                    className="absolute right-1 top-1 bg-black/70 p-1 text-white"
-                    aria-label="Görseli kaldır"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
-              {pendingImages.map((file, i) => (
-                <PendingImageThumb
-                  key={`${file.name}-${file.size}-${i}`}
-                  file={file}
-                  onRemove={() =>
-                    setPendingImages((prev) =>
-                      prev.filter((_, idx) => idx !== i)
-                    )
-                  }
-                />
-              ))}
-            </div>
-          )}
-
-          <Field label="Bilgisayardan fotoğraf ekle (birden fazla seçebilirsiniz)">
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/jpg,image/heic,image/heif,.jpg,.jpeg,.png,.webp"
-              multiple
-              disabled={imageSlotsLeft <= 0 || saving}
-              className="input-field file:mr-3 file:border-0 file:bg-brand-gold file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#151920]"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (!files?.length) return;
-                setPendingImages((prev) => {
-                  const room = Math.max(
-                    0,
-                    MAX_IMAGES - form.images.length - prev.length
-                  );
-                  return [...prev, ...Array.from(files)].slice(
-                    0,
-                    prev.length + room
-                  );
-                });
-                e.target.value = "";
-              }}
-            />
-            <p className="mt-1 text-xs text-brand-mist">
-              JPG / PNG / WEBP · en fazla {MAX_IMAGES} fotoğraf
-              {pendingImages.length > 0
-                ? ` · ${pendingImages.length} dosya seçildi (Kaydet deyince yüklenecek)`
-                : ""}
-              {imageSlotsLeft <= 0 ? " · limit doldu" : ""}
-            </p>
-          </Field>
-        </div>
         <div className="sm:col-span-2 space-y-3">
           <Field label="Video dosyası yükle (telefon / bilgisayar)">
             <input
@@ -718,55 +774,22 @@ export function ProductForm({
       )}
 
       <div className="flex flex-wrap gap-3">
-        <button type="submit" disabled={saving} className="btn-primary">
-          {saving ? progress || "Kaydediliyor…" : "Kaydet"}
+        <button
+          type="submit"
+          disabled={saving || uploadingImages}
+          className="btn-primary"
+        >
+          {saving
+            ? progress || "Kaydediliyor…"
+            : uploadingImages
+              ? "Fotoğraf yükleniyor…"
+              : "Kaydet"}
         </button>
         <Link href="/admin/urunler" className="btn-secondary">
           İptal
         </Link>
       </div>
     </form>
-  );
-}
-
-function PendingImageThumb({
-  file,
-  onRemove,
-}: {
-  file: File;
-  onRemove: () => void;
-}) {
-  const [src, setSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    const url = URL.createObjectURL(file);
-    setSrc(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-
-  return (
-    <div className="relative aspect-square overflow-hidden border border-brand-gold/50 bg-brand-ink">
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt={file.name}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
-        <span className="absolute inset-0 flex items-center justify-center p-2 text-center text-[10px] text-brand-mist">
-          {file.name}
-        </span>
-      )}
-      <button
-        type="button"
-        onClick={onRemove}
-        className="absolute right-1 top-1 bg-black/70 p-1 text-white"
-        aria-label="Seçimi kaldır"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </div>
   );
 }
 
