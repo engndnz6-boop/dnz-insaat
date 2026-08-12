@@ -276,6 +276,78 @@ export async function uploadToOneDrive(opts: {
   return { url, itemId: data.id };
 }
 
+/** Büyük dosyalar (video) için Graph upload session — tarayıcı doğrudan OneDrive’a yükler */
+export async function createOneDriveUploadSession(opts: {
+  fileName: string;
+  subfolder?: string;
+}): Promise<{ uploadUrl: string; fileName: string }> {
+  if (!isOneDriveConfigured()) {
+    throw new Error("OneDrive yapılandırılmamış.");
+  }
+
+  await ensureFolder();
+  if (opts.subfolder) {
+    await ensureSubfolder(opts.subfolder);
+  }
+
+  const fileName = `${Date.now()}-${safeFileName(opts.fileName)}`;
+  const encodedPath = `/me/drive/root:/${[
+    folderRoot(),
+    ...(opts.subfolder ? [opts.subfolder] : []),
+    fileName,
+  ]
+    .map((s) => encodeURIComponent(s))
+    .join("/")}:/createUploadSession`;
+
+  const res = await graphFetch(encodedPath, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      item: {
+        "@microsoft.graph.conflictBehavior": "rename",
+        name: fileName,
+      },
+    }),
+  });
+
+  const data = (await res.json()) as {
+    uploadUrl?: string;
+    error?: { message?: string };
+  };
+  if (!res.ok || !data.uploadUrl) {
+    throw new Error(
+      data.error?.message || `Upload session oluşturulamadı (${res.status})`
+    );
+  }
+
+  return { uploadUrl: data.uploadUrl, fileName };
+}
+
+/** Video oynatma için geçici indirme URL’si (Range destekli) */
+export async function getOneDriveContentRedirectUrl(
+  itemId: string
+): Promise<string | null> {
+  if (!isOneDriveConfigured()) {
+    throw new Error("OneDrive yapılandırılmamış.");
+  }
+
+  const token = await getAccessToken();
+  const res = await fetch(
+    `${GRAPH}/me/drive/items/${encodeURIComponent(itemId)}/content`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      redirect: "manual",
+      cache: "no-store",
+    }
+  );
+
+  if (res.status >= 300 && res.status < 400) {
+    return res.headers.get("location");
+  }
+  return null;
+}
+
 export async function downloadOneDriveItem(itemId: string): Promise<{
   bytes: ArrayBuffer;
   contentType: string;
@@ -302,7 +374,8 @@ export async function downloadOneDriveItem(itemId: string): Promise<{
     contentType.includes("octet-stream") ||
     contentType.includes("json")
   ) {
-    contentType = "image/jpeg";
+    // Caller (route) dosya adına göre düzeltebilir; varsayılan jpeg eski görseller için
+    contentType = "application/octet-stream";
   }
 
   return {

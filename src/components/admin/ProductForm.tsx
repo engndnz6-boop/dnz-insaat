@@ -20,6 +20,7 @@ import {
   saveFileBlob,
   toIdbImageRef,
 } from "@/lib/pdf-storage";
+import { uploadVideoToOneDrive } from "@/lib/video-upload";
 import { ProductImage } from "@/components/product/ProductImage";
 import { X } from "lucide-react";
 
@@ -120,6 +121,7 @@ export function ProductForm({
   const [form, setForm] = useState<Product>(initial);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pendingImages, setPendingImages] = useState<File[]>([]);
+  const [pendingVideo, setPendingVideo] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
@@ -202,6 +204,22 @@ export function ProductForm({
         throw new Error("En az bir ürün görseli ekleyin (yükleme veya URL).");
       }
 
+      if (pendingVideo) {
+        setProgress("Video yükleniyor…");
+        try {
+          const videoUrl = await uploadVideoToOneDrive(pendingVideo, (pct) => {
+            setProgress(`Video yükleniyor… %${pct}`);
+          });
+          next = { ...next, videoUrl };
+        } catch (err) {
+          throw new Error(
+            err instanceof Error
+              ? err.message
+              : "Video yüklenemedi. YouTube linki de yapıştırabilirsiniz."
+          );
+        }
+      }
+
       if (pdfFile) {
         setProgress("PDF yükleniyor…");
         if (pdfFile.size > 4 * 1024 * 1024) {
@@ -220,6 +238,7 @@ export function ProductForm({
       await onSave(next);
       setForm(next);
       setPendingImages([]);
+      setPendingVideo(null);
       setPdfFile(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kayıt hatası");
@@ -540,20 +559,48 @@ export function ProductForm({
             </p>
           </Field>
         </div>
-        <div className="sm:col-span-2">
-          <Field label="Video linki (YouTube / Vimeo / MP4)">
+        <div className="sm:col-span-2 space-y-3">
+          <Field label="Video dosyası yükle (telefon / bilgisayar)">
+            <input
+              type="file"
+              accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+              disabled={saving}
+              className="input-field file:mr-3 file:border-0 file:bg-brand-gold file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#151920]"
+              onChange={(e) => {
+                const f = e.target.files?.[0] || null;
+                setPendingVideo(f);
+                e.target.value = "";
+              }}
+            />
+            <p className="mt-1 text-xs text-brand-mist">
+              MP4 / MOV / WEBM · en fazla 200 MB
+              {pendingVideo
+                ? ` · seçildi: ${pendingVideo.name} (${Math.round(pendingVideo.size / (1024 * 1024))} MB) — Kaydet deyince yüklenir`
+                : ""}
+            </p>
+            {pendingVideo ? (
+              <button
+                type="button"
+                className="mt-1 text-xs text-brand-gold underline"
+                onClick={() => setPendingVideo(null)}
+              >
+                Seçimi kaldır
+              </button>
+            ) : null}
+          </Field>
+          <Field label="veya video linki (YouTube / Vimeo / MP4 URL)">
             <input
               className="input-field"
               placeholder="https://www.youtube.com/watch?v=... veya https://youtu.be/..."
               value={form.videoUrl || ""}
               onChange={(e) => set("videoUrl", e.target.value.trim())}
+              disabled={!!pendingVideo}
             />
             <p className="mt-1 text-xs text-brand-mist">
-              YouTube veya Vimeo paylaşım linkini yapıştırın. Ürün / proje
-              sayfasında video görünür. (Büyük video dosyası yerine link
-              önerilir.)
+              Dosya seçtiyseniz link gerekmez. YouTube’a yükleyip link de
+              yapıştırabilirsiniz.
             </p>
-            {form.videoUrl ? (
+            {form.videoUrl && !pendingVideo ? (
               <button
                 type="button"
                 className="mt-2 text-xs text-brand-gold underline"
