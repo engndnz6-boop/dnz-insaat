@@ -92,8 +92,7 @@ export default function HesaplamaPage() {
             Hesaplamalar
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
-            Oda en × boy veya m² girin; yaklaşık malzeme metrajı ve maliyet
-            özetini görün.
+            Oda en × boy veya m² girin; yaklaşık maliyet için teklif alın.
           </p>
         </div>
       </div>
@@ -204,66 +203,22 @@ export default function HesaplamaPage() {
               </button>
             </div>
 
-            {active.materials.length > 0 && (
-              <div className="mt-4 overflow-x-auto border border-dashed border-black/10 bg-brand-ink/50 p-3 text-xs text-brand-mist">
-                <p className="font-semibold text-brand-bone">
-                  Sarfiyat (1 m² için)
-                </p>
-                <ul className="mt-2 space-y-1">
-                  {active.materials.map((m) => (
-                    <li key={m.id}>
-                      {m.name}: <strong>{m.ratePerM2}</strong> {m.unit}/m²
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
             {lines && (
-              <div className="mt-8 overflow-x-auto border border-black/10">
-                <table className="w-full min-w-[520px] text-left text-sm">
-                  <thead className="bg-brand-navy text-xs uppercase tracking-wider text-white/80">
-                    <tr>
-                      <th className="px-4 py-3 font-medium">Malzeme</th>
-                      <th className="px-4 py-3 font-medium">Miktar</th>
-                      <th className="px-4 py-3 font-medium">Birim</th>
-                      <th className="px-4 py-3 font-medium">Birim fiyat</th>
-                      <th className="px-4 py-3 font-medium">Tutar</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lines.map((line) => (
-                      <tr key={line.name} className="border-t border-black/5">
-                        <td className="px-4 py-3 text-brand-bone">
-                          {line.name}
-                        </td>
-                        <td className="px-4 py-3 text-brand-mist">{line.qty}</td>
-                        <td className="px-4 py-3 text-brand-mist">
-                          {line.unit}
-                        </td>
-                        <td className="px-4 py-3 text-brand-mist">
-                          {formatPrice(line.unitPrice)}
-                        </td>
-                        <td className="px-4 py-3 font-medium text-brand-navy">
-                          {formatPrice(line.qty * line.unitPrice)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-brand-navy/20 bg-brand-ink">
-                      <td
-                        colSpan={4}
-                        className="px-4 py-3 text-sm font-semibold text-brand-bone"
-                      >
-                        Yaklaşık toplam (KDV hariç)
-                      </td>
-                      <td className="px-4 py-3 text-base font-bold text-brand-navy">
-                        {formatPrice(total)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
+              <div className="mt-8 border border-black/10 bg-brand-ink/50 p-5">
+                <p className="text-sm text-brand-mist">
+                  Alan:{" "}
+                  <strong className="text-brand-bone">
+                    {area} m²
+                    {enM && boyM ? ` (${enM}×${boyM} m)` : ""}
+                  </strong>
+                </p>
+                <p className="mt-3 text-base font-semibold text-brand-bone">
+                  Yaklaşık toplam (KDV hariç):{" "}
+                  <span className="text-brand-navy">{formatPrice(total)}</span>
+                </p>
+                <p className="mt-2 text-xs text-brand-mist">
+                  Detaylı malzeme listesi için WhatsApp ile teklif isteyin.
+                </p>
               </div>
             )}
 

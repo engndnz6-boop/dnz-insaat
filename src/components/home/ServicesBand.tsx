@@ -4,7 +4,7 @@ import { Calculator, Package, FileSpreadsheet } from "lucide-react";
 const items = [
   {
     title: "Analiz & maliyet hesaplama",
-    text: "m² girin; asma tavan, ışık bandı ve bölme duvar için yaklaşık malzeme metrajını görün.",
+    text: "Oda en × boy veya m² girin; yaklaşık maliyet için teklif alın.",
     href: "/hesaplama",
     icon: Calculator,
     cta: "Hesaplamaya git",
