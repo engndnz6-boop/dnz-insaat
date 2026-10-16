@@ -2,24 +2,50 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Calculator,
-  MessageCircle,
-  ShoppingBag,
-} from "lucide-react";
+import { FileText, MessageCircle, Printer } from "lucide-react";
 import { computeLines, sumLines, type MaterialLine } from "@/lib/calculators";
 import { useCalculators } from "@/lib/calculators-context";
+import { useSiteSettings } from "@/lib/site-settings-context";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
-import { brand } from "@/lib/brand";
+import { brand, checkoutConfig } from "@/lib/brand";
+import { LogoMark } from "@/components/brand/Logo";
+
+/** DNZ-YYAAGGSSDD — DnzHesap’taki teklif numarasıyla aynı düzen */
+function makeAnalysisNo(d = new Date()) {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `DNZ-${String(d.getFullYear()).slice(2)}${p(d.getMonth() + 1)}${p(
+    d.getDate()
+  )}${p(d.getHours())}${p(d.getMinutes())}`;
+}
+
+const num = (v: string) => Number(String(v).replace(",", ".")) || 0;
+
+const qtyFmt = (n: number) =>
+  new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(n);
+
+type Analysis = {
+  no: string;
+  date: Date;
+  systemTitle: string;
+  area: number;
+  en: number;
+  boy: number;
+  project: string;
+  lines: MaterialLine[];
+};
 
 export default function HesaplamaPage() {
   const { systems, ready } = useCalculators();
-  const [activeId, setActiveId] = useState<string>("");
-  const [enM, setEnM] = useState<string>("");
-  const [boyM, setBoyM] = useState<string>("");
-  const [m2, setM2] = useState<string>("50");
-  const [lines, setLines] = useState<MaterialLine[] | null>(null);
+  const { settings } = useSiteSettings();
+
+  const [activeId, setActiveId] = useState("");
+  const [enM, setEnM] = useState("");
+  const [boyM, setBoyM] = useState("");
+  const [m2, setM2] = useState("");
+  const [project, setProject] = useState("");
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [autoCalc, setAutoCalc] = useState(false);
 
   const resolvedId = activeId || systems[0]?.id || "";
   const active = useMemo(
@@ -27,279 +53,357 @@ export default function HesaplamaPage() {
     [systems, resolvedId]
   );
 
-  useEffect(() => {
-    setLines(null);
-  }, [active?.id]);
-
-  const areaFromRoom = useMemo(() => {
-    const e = Number(String(enM).replace(",", ".")) || 0;
-    const b = Number(String(boyM).replace(",", ".")) || 0;
-    if (e > 0 && b > 0) return Math.round(e * b * 100) / 100;
-    return 0;
+  const roomArea = useMemo(() => {
+    const e = num(enM);
+    const b = num(boyM);
+    return e > 0 && b > 0 ? Math.round(e * b * 100) / 100 : 0;
   }, [enM, boyM]);
 
-  useEffect(() => {
-    if (areaFromRoom > 0) setM2(String(areaFromRoom));
-  }, [areaFromRoom]);
+  const area = roomArea || num(m2);
 
-  // Ana sayfadaki hızlı metraj çubuğundan gelen ?sistem=…&m2=… parametreleri
-  const [autoCalc, setAutoCalc] = useState(false);
+  // Ana sayfadaki hızlı metraj çubuğundan gelen ?sistem=…&m2=…
   useEffect(() => {
     if (!ready) return;
     const params = new URLSearchParams(window.location.search);
     const sistem = params.get("sistem");
     const alan = params.get("m2");
     if (sistem && systems.some((s) => s.id === sistem)) setActiveId(sistem);
-    if (alan && Number(alan.replace(",", ".")) > 0) {
+    if (alan && num(alan) > 0) {
       setM2(alan);
       setAutoCalc(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
-  useEffect(() => {
-    if (!autoCalc || !active) return;
-    const a = Number(String(m2).replace(",", ".")) || 0;
-    if (a > 0) setLines(computeLines(active, a));
-    setAutoCalc(false);
-  }, [autoCalc, active, m2]);
-
-  const area = Number(String(m2).replace(",", ".")) || 0;
-  const total = lines ? sumLines(lines) : 0;
-
-  const onCalculate = () => {
-    if (!active || area <= 0) {
-      setLines(null);
-      return;
-    }
-    // Ebat / katlara tamamlama admin’deki malzeme ayarlarından uygulanır
-    setLines(computeLines(active, area));
+  const build = () => {
+    if (!active || area <= 0) return;
+    setAnalysis({
+      no: makeAnalysisNo(),
+      date: new Date(),
+      systemTitle: active.title,
+      area,
+      en: roomArea ? num(enM) : 0,
+      boy: roomArea ? num(boyM) : 0,
+      project: project.trim(),
+      lines: computeLines(active, area),
+    });
   };
 
-  const waMessage =
-    lines && active
-      ? `${active.title} için yaklaşık metraj talebi:\nAlan: ${area} m²` +
-        (enM && boyM ? ` (${enM}×${boyM} m)` : "") +
-        `\nTahmini malzeme tutarı: ${formatPrice(total)}\n\nDetaylı teklif istiyorum.`
-      : `${active?.title || "Sistem"} için teklif istiyorum.`;
+  // Girdi değişince eski analiz ekranda kalmasın
+  useEffect(() => {
+    setAnalysis(null);
+  }, [resolvedId]);
+
+  useEffect(() => {
+    if (!autoCalc || !active) return;
+    setAutoCalc(false);
+    build();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoCalc, active]);
 
   if (!ready) {
-    return (
-      <div className="container-page py-20 text-brand-mist">Yükleniyor…</div>
-    );
+    return <div className="container-page py-20 text-brand-mist">Yükleniyor…</div>;
   }
 
   if (!systems.length || !active) {
     return (
       <div className="container-page py-20">
-        <h1 className="section-title">Hesaplamalar</h1>
-        <p className="section-subtitle">
-          Henüz tanımlı sistem yok. Admin panelinden sistem ekleyin.
-        </p>
-        <Link href="/admin/hesaplamalar" className="btn-primary mt-6">
-          Admin — Hesaplamalar
-        </Link>
+        <h1 className="section-title">Malzeme analizi</h1>
+        <p className="section-subtitle">Henüz tanımlı sistem yok.</p>
       </div>
     );
   }
 
+  const subtotal = analysis ? sumLines(analysis.lines) : 0;
+  const vat = subtotal * checkoutConfig.vatRate;
+  const grand = subtotal + vat;
+
+  const waMessage = analysis
+    ? `Merhaba, ${analysis.no} numaralı malzeme analizi için teklif istiyorum.\n` +
+      `Sistem: ${analysis.systemTitle}\nAlan: ${qtyFmt(analysis.area)} m²` +
+      (analysis.en ? ` (${qtyFmt(analysis.en)} × ${qtyFmt(analysis.boy)} m)` : "") +
+      (analysis.project ? `\nProje: ${analysis.project}` : "") +
+      `\nTahmini tutar (KDV dahil): ${formatPrice(grand)}`
+    : "";
+
   return (
-    <div className="bg-brand-ink">
-      <div className="bg-brand-navy px-4 py-10 sm:px-6 lg:px-8">
-        <div className="container-page">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">
-            Analizler ve maliyet
-          </p>
-          <h1 className="mt-2 font-sans text-3xl font-bold text-white sm:text-4xl">
-            Hesaplamalar
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
-            Oda en × boy veya m² girin; malzeme metrajı ve maliyet özetini görün.
-          </p>
-        </div>
+    <div className="bg-brand-ink pb-8 print:bg-white print:pb-0">
+      {/* Giriş */}
+      <div className="container-page max-w-5xl pt-10 sm:pt-14 print:hidden">
+        <h1 className="type-wide text-3xl font-bold text-brand-bone sm:text-4xl">
+          Malzeme analizi
+        </h1>
+        <p className="mt-2 max-w-xl text-brand-mist">
+          Sistemi seçin, ölçüyü girin. Malzeme listesi, birim fiyatlar ve
+          tahmini tutar bir analiz belgesi olarak hazırlansın.
+        </p>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            build();
+          }}
+          className="mt-8 border border-black/10 bg-white p-5 sm:p-7"
+        >
+          <fieldset>
+            <legend className="text-sm font-semibold text-brand-bone">Sistem</legend>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {systems.map((s) => {
+                const on = s.id === resolvedId;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setActiveId(s.id)}
+                    aria-pressed={on}
+                    className={`border px-4 py-2.5 text-sm font-medium transition ${
+                      on
+                        ? "border-brand-navy bg-brand-navy text-white"
+                        : "border-black/15 bg-white text-brand-bone hover:border-brand-navy/50"
+                    }`}
+                  >
+                    {s.title}
+                  </button>
+                );
+              })}
+            </div>
+            {active.description ? (
+              <p className="mt-3 text-sm text-brand-mist">{active.description}</p>
+            ) : null}
+          </fieldset>
+
+          <div className="mt-7 grid gap-4 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-end">
+            <label className="block">
+              <span className="text-sm font-semibold text-brand-bone">En (m)</span>
+              <input
+                inputMode="decimal"
+                className="input-field mt-2"
+                placeholder="Örn. 4"
+                value={enM}
+                onChange={(e) => {
+                  setEnM(e.target.value);
+                  setM2("");
+                }}
+              />
+            </label>
+            <span className="hidden pb-3 text-brand-mist sm:block">×</span>
+            <label className="block">
+              <span className="text-sm font-semibold text-brand-bone">Boy (m)</span>
+              <input
+                inputMode="decimal"
+                className="input-field mt-2"
+                placeholder="Örn. 5"
+                value={boyM}
+                onChange={(e) => {
+                  setBoyM(e.target.value);
+                  setM2("");
+                }}
+              />
+            </label>
+            <span className="hidden pb-3 text-sm text-brand-mist sm:block">ya da</span>
+            <label className="block">
+              <span className="text-sm font-semibold text-brand-bone">Alan (m²)</span>
+              <input
+                inputMode="decimal"
+                className="input-field mt-2"
+                placeholder={roomArea ? String(roomArea) : "Örn. 45"}
+                value={roomArea ? "" : m2}
+                onChange={(e) => {
+                  setM2(e.target.value);
+                  setEnM("");
+                  setBoyM("");
+                }}
+              />
+            </label>
+          </div>
+
+          <label className="mt-5 block">
+            <span className="text-sm font-semibold text-brand-bone">
+              Proje / müşteri adı{" "}
+              <span className="font-normal text-brand-mist">(isteğe bağlı)</span>
+            </span>
+            <input
+              className="input-field mt-2"
+              placeholder="Örn. Gölbaşı ofis tadilatı"
+              value={project}
+              onChange={(e) => setProject(e.target.value)}
+            />
+          </label>
+
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <button type="submit" className="btn-primary" disabled={area <= 0}>
+              <FileText className="h-4 w-4" />
+              Analizi oluştur
+            </button>
+            {area > 0 ? (
+              <span className="text-sm text-brand-mist">
+                Toplam alan: <strong className="text-brand-bone">{qtyFmt(area)} m²</strong>
+              </span>
+            ) : null}
+          </div>
+        </form>
       </div>
 
-      <div className="container-page py-10 sm:py-12">
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <aside className="h-fit bg-brand-navy p-2">
-            <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
-              Malzeme maliyetleri
-            </p>
-            <nav className="flex flex-col gap-1">
-              {systems.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveId(c.id);
-                    setLines(null);
-                  }}
-                  className={`px-3 py-3 text-left text-sm font-medium transition ${
-                    resolvedId === c.id
-                      ? "bg-brand-gold text-white"
-                      : "bg-white/5 text-white/85 hover:bg-white/10"
-                  }`}
-                >
-                  {c.title}
-                </button>
-              ))}
-            </nav>
-            <Link
-              href="/katalog"
-              className="mt-3 flex items-center gap-2 bg-white/10 px-3 py-3 text-sm font-semibold text-white hover:bg-white/15"
+      {/* Analiz belgesi */}
+      {analysis ? (
+        <div className="container-page mt-8 max-w-5xl print:mt-0 print:max-w-none print:px-0">
+          <div className="mb-4 flex flex-wrap gap-3 print:hidden">
+            <button type="button" onClick={() => window.print()} className="btn-secondary">
+              <Printer className="h-4 w-4" />
+              Yazdır / PDF kaydet
+            </button>
+            <a
+              href={buildWhatsAppUrl(waMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1ebe57]"
             >
-              <ShoppingBag className="h-4 w-4" />
-              Malzeme satışına git
-            </Link>
-          </aside>
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp’tan teklif iste
+            </a>
+          </div>
 
-          <section className="border border-black/10 bg-white p-6 sm:p-8">
-            <div className="flex items-start gap-3">
-              <div className="bg-brand-navy/10 p-2 text-brand-navy">
-                <Calculator className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="font-sans text-2xl font-bold text-brand-bone">
-                  {active.title}
-                </h2>
-                <p className="mt-1 text-sm text-brand-mist">
-                  {active.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 space-y-5">
-              <div>
-                <p className="label-field">Oda ebatı (metre) veya alan</p>
-                <div className="mt-2 flex flex-wrap items-end gap-3">
-                  <label className="block">
-                    <span className="text-xs text-brand-mist">En (m)</span>
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      className="input-field w-32"
-                      placeholder="ör. 4"
-                      value={enM}
-                      onChange={(e) => setEnM(e.target.value)}
-                    />
-                  </label>
-                  <span className="pb-3 text-brand-mist">×</span>
-                  <label className="block">
-                    <span className="text-xs text-brand-mist">Boy (m)</span>
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      className="input-field w-32"
-                      placeholder="ör. 5"
-                      value={boyM}
-                      onChange={(e) => setBoyM(e.target.value)}
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="text-xs text-brand-mist">veya Alan (m²)</span>
-                    <input
-                      type="number"
-                      min={1}
-                      step={0.1}
-                      className="input-field w-32"
-                      value={m2}
-                      onChange={(e) => {
-                        setM2(e.target.value);
-                        setEnM("");
-                        setBoyM("");
-                      }}
-                    />
-                  </label>
-                </div>
-                {areaFromRoom > 0 && (
-                  <p className="mt-2 text-xs text-brand-navy">
-                    Hesaplanan alan: <strong>{areaFromRoom} m²</strong>
+          <article className="border border-black/10 bg-white px-6 py-8 text-brand-bone sm:px-10 sm:py-10 print:border-0 print:p-0">
+            {/* Başlık */}
+            <header className="flex flex-col gap-6 border-b-2 border-brand-navy pb-6 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 flex-col items-start gap-3 sm:flex-row sm:gap-4 print:flex-row">
+                <LogoMark className="h-12" plain />
+                <div className="min-w-0 break-words text-sm leading-relaxed">
+                  <p className="font-bold">{settings.companyName}</p>
+                  <p className="text-brand-mist">{brand.address}</p>
+                  <p className="text-brand-mist">
+                    {brand.phone}, {brand.email}
                   </p>
-                )}
+                </div>
               </div>
-
-              <button type="button" onClick={onCalculate} className="btn-primary">
-                Hesapla
-              </button>
-            </div>
-
-            {lines && (
-              <div className="mt-8 overflow-x-auto border border-black/10">
-                <p className="border-b border-black/5 bg-brand-ink/50 px-4 py-2 text-sm text-brand-mist">
-                  Alan:{" "}
-                  <strong className="text-brand-bone">
-                    {area} m²
-                    {enM && boyM ? ` (${enM}×${boyM} m)` : ""}
-                  </strong>
+              <div className="shrink-0 whitespace-nowrap sm:text-right">
+                <p className="type-wide text-xl font-bold text-brand-navy">
+                  Malzeme analizi
                 </p>
-                <table className="w-full min-w-[520px] text-left text-sm">
-                  <thead className="bg-brand-navy text-xs uppercase tracking-wider text-white/80">
-                    <tr>
-                      <th className="px-4 py-3 font-medium">Malzeme</th>
-                      <th className="px-4 py-3 font-medium">Miktar</th>
-                      <th className="px-4 py-3 font-medium">Birim</th>
-                      <th className="px-4 py-3 font-medium">Birim fiyat</th>
-                      <th className="px-4 py-3 font-medium">Tutar</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lines.map((line) => (
-                      <tr key={line.name} className="border-t border-black/5">
-                        <td className="px-4 py-3 text-brand-bone">
-                          {line.name}
-                        </td>
-                        <td className="px-4 py-3 text-brand-mist">{line.qty}</td>
-                        <td className="px-4 py-3 text-brand-mist">
-                          {line.unit}
-                        </td>
-                        <td className="px-4 py-3 text-brand-mist">
-                          {formatPrice(line.unitPrice)}
-                        </td>
-                        <td className="px-4 py-3 font-medium text-brand-navy">
-                          {formatPrice(line.qty * line.unitPrice)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-brand-navy/20 bg-brand-ink">
-                      <td
-                        colSpan={4}
-                        className="px-4 py-3 text-sm font-semibold text-brand-bone"
-                      >
-                        Yaklaşık toplam (KDV hariç)
-                      </td>
-                      <td className="px-4 py-3 text-base font-bold text-brand-navy">
-                        {formatPrice(total)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
+                <dl className="mt-2 grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5 text-sm sm:justify-end">
+                  <dt className="text-brand-mist">Analiz no</dt>
+                  <dd className="font-semibold tabular-nums">{analysis.no}</dd>
+                  <dt className="text-brand-mist">Tarih</dt>
+                  <dd className="tabular-nums">
+                    {analysis.date.toLocaleDateString("tr-TR")}
+                  </dd>
+                </dl>
               </div>
-            )}
+            </header>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={buildWhatsAppUrl(waMessage)}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 bg-[#25D366] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1ebe57]"
-              >
-                <MessageCircle className="h-4 w-4" />
-                WhatsApp ile teklif iste
-              </a>
-              <Link href="/katalog" className="btn-secondary">
-                Malzeme satışı / katalog
-              </Link>
-              <Link href="/iletisim" className="btn-ghost">
-                {brand.phone}
-              </Link>
+            {/* Proje bilgisi */}
+            <dl className="grid gap-4 border-b border-black/10 py-5 text-sm sm:grid-cols-3">
+              <div>
+                <dt className="text-brand-mist">Sistem</dt>
+                <dd className="mt-0.5 font-semibold">{analysis.systemTitle}</dd>
+              </div>
+              <div>
+                <dt className="text-brand-mist">Alan</dt>
+                <dd className="mt-0.5 font-semibold tabular-nums">
+                  {qtyFmt(analysis.area)} m²
+                  {analysis.en ? (
+                    <span className="font-normal text-brand-mist">
+                      {" "}
+                      ({qtyFmt(analysis.en)} × {qtyFmt(analysis.boy)} m)
+                    </span>
+                  ) : null}
+                </dd>
+              </div>
+              {analysis.project ? (
+                <div>
+                  <dt className="text-brand-mist">Proje</dt>
+                  <dd className="mt-0.5 font-semibold">{analysis.project}</dd>
+                </div>
+              ) : null}
+            </dl>
+
+            {/* Malzeme listesi — telefon */}
+            <ol className="mt-2 divide-y divide-black/5 sm:hidden print:hidden">
+              {analysis.lines.map((line, i) => (
+                <li key={`${line.name}-${i}`} className="flex items-start justify-between gap-4 py-3 text-sm">
+                  <div className="min-w-0">
+                    <p>{line.name}</p>
+                    <p className="mt-0.5 tabular-nums text-brand-mist">
+                      {qtyFmt(line.qty)} {line.unit} × {formatPrice(line.unitPrice)}
+                    </p>
+                  </div>
+                  <p className="shrink-0 font-semibold tabular-nums">
+                    {formatPrice(line.qty * line.unitPrice)}
+                  </p>
+                </li>
+              ))}
+            </ol>
+
+            {/* Malzeme tablosu — tablet, bilgisayar ve çıktı */}
+            <div className="hidden overflow-x-auto sm:block print:block">
+              <table className="mt-2 w-full text-sm">
+                <thead>
+                  <tr className="border-b border-black/15 text-left text-brand-mist">
+                    <th className="w-10 py-3 pr-2 font-medium">#</th>
+                    <th className="py-3 pr-4 font-medium">Malzeme</th>
+                    <th className="py-3 pr-4 text-right font-medium">Miktar</th>
+                    <th className="py-3 pr-4 font-medium">Birim</th>
+                    <th className="py-3 pr-4 text-right font-medium">Birim fiyat</th>
+                    <th className="py-3 text-right font-medium">Tutar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analysis.lines.map((line, i) => (
+                    <tr key={`${line.name}-${i}`} className="border-b border-black/5">
+                      <td className="py-3 pr-2 tabular-nums text-brand-mist">{i + 1}</td>
+                      <td className="py-3 pr-4">{line.name}</td>
+                      <td className="py-3 pr-4 text-right tabular-nums">{qtyFmt(line.qty)}</td>
+                      <td className="py-3 pr-4 text-brand-mist">{line.unit}</td>
+                      <td className="py-3 pr-4 text-right tabular-nums">
+                        {formatPrice(line.unitPrice)}
+                      </td>
+                      <td className="py-3 text-right font-semibold tabular-nums">
+                        {formatPrice(line.qty * line.unitPrice)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </section>
+
+            {/* Toplamlar */}
+            <div className="mt-6 flex justify-end">
+              <dl className="w-full max-w-xs text-sm">
+                <div className="flex justify-between py-1.5">
+                  <dt className="text-brand-mist">Ara toplam</dt>
+                  <dd className="tabular-nums">{formatPrice(subtotal)}</dd>
+                </div>
+                <div className="flex justify-between py-1.5">
+                  <dt className="text-brand-mist">
+                    KDV (%{Math.round(checkoutConfig.vatRate * 100)})
+                  </dt>
+                  <dd className="tabular-nums">{formatPrice(vat)}</dd>
+                </div>
+                <div className="mt-1 flex justify-between border-t-2 border-brand-navy pt-3">
+                  <dt className="font-bold">Genel toplam</dt>
+                  <dd className="type-wide text-lg font-bold tabular-nums text-brand-navy">
+                    {formatPrice(grand)}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <p className="mt-8 border-t border-black/10 pt-4 text-xs leading-relaxed text-brand-mist">
+              Bu analiz girilen ölçüye göre hazırlanmış tahmini bir malzeme
+              listesidir. İşçilik ve nakliye dahil değildir. Kesin fiyat için{" "}
+              {brand.phone} numarasından ya da {brand.domainDisplay} üzerinden
+              teklif isteyin.
+            </p>
+          </article>
+
+          <p className="mt-4 text-sm text-brand-mist print:hidden">
+            Uygulama da yaptırmak ister misiniz?{" "}
+            <Link href="/iletisim" className="font-semibold text-brand-navy hover:text-brand-gold">
+              Teklif formunu doldurun
+            </Link>
+          </p>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

@@ -24,7 +24,7 @@ export function Navbar() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-50 bg-brand-navy shadow-md">
+    <header className="sticky top-0 z-50 bg-brand-navy shadow-md print:hidden">
       <div className="container-page flex h-16 items-center justify-between sm:h-[72px]">
         <Link href="/" className="group transition hover:opacity-90">
           <Logo />

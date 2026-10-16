@@ -123,3 +123,17 @@ body {
     opacity: 1;
   }
 }
+
+/* Yazdır / PDF: sadece analiz belgesi */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  body {
+    background: #fff !important;
+  }
+  main {
+    min-height: 0 !important;
+  }
+}
