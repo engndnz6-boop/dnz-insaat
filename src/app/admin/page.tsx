@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Package, ShoppingBag, Plus, Calculator } from "lucide-react";
 import { useProducts } from "@/lib/products-context";
-import { useCalculators } from "@/lib/calculators-context";
+import { useImalat } from "@/lib/imalat/context";
 import type { StoredOrder } from "@/lib/checkout";
 import { formatPrice } from "@/lib/utils";
 
 export default function AdminHomePage() {
   const { products } = useProducts();
-  const { systems } = useCalculators();
+  const { systems } = useImalat();
   const [orders, setOrders] = useState<StoredOrder[]>([]);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function AdminHomePage() {
     <div>
       <h1 className="font-display text-3xl text-brand-bone">Özet</h1>
       <p className="mt-2 text-sm text-brand-mist">
-        Ürün kataloğu, hesaplama sistemleri ve sipariş yönetimi.
+        Ürün kataloğu, imalat sistemleri ve sipariş yönetimi.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -41,7 +41,7 @@ export default function AdminHomePage() {
           href="/admin/urunler"
         />
         <Stat
-          label="Hesaplama sistemi"
+          label="İmalat sistemi"
           value={String(systems.length)}
           icon={Calculator}
           href="/admin/hesaplamalar"
@@ -67,7 +67,7 @@ export default function AdminHomePage() {
         </Link>
         <Link href="/admin/hesaplamalar" className="btn-secondary">
           <Calculator className="h-4 w-4" />
-          Hesaplamaları Düzenle
+          İmalat Sistemlerini Düzenle
         </Link>
         <Link href="/admin/urunler" className="btn-ghost">
           Ürünleri Yönet

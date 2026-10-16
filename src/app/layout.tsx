@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CartProvider } from "@/lib/cart-context";
 import { ProductsProvider } from "@/lib/products-context";
 import { CatalogProvider } from "@/lib/catalog-context";
-import { CalculatorsProvider } from "@/lib/calculators-context";
+import { ImalatProvider } from "@/lib/imalat/context";
 import { SiteSettingsProvider } from "@/lib/site-settings-context";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -78,14 +78,14 @@ export default function RootLayout({
         <SiteSettingsProvider>
           <ProductsProvider>
             <CatalogProvider>
-              <CalculatorsProvider>
+              <ImalatProvider>
                 <CartProvider>
                   <Navbar />
                   <main className="min-h-[70vh]">{children}</main>
                   <Footer />
                   <WhatsAppFloat />
                 </CartProvider>
-              </CalculatorsProvider>
+              </ImalatProvider>
             </CatalogProvider>
           </ProductsProvider>
         </SiteSettingsProvider>

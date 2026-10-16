@@ -10,9 +10,9 @@ const steps = [
   },
   {
     title: "Metrajı hesaplayın",
-    text: "Oda ölçüsünü ya da m²’yi girin; plaka, profil ve aksesuar listesi tahmini tutarıyla çıksın.",
-    href: "/hesaplama",
-    cta: "Hesaplamaya git",
+    text: "İmalat sistemini seçip ölçüyü girin; profil, askı, plaka ve vida listesi tahmini tutarıyla çıksın.",
+    href: "/imalat-sistemleri",
+    cta: "İmalat sistemlerine git",
   },
   {
     title: "Teklifinizi alın",

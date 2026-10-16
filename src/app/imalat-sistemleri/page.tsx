@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { FileText, MessageCircle, Printer } from "lucide-react";
-import { computeLines, sumLines, type MaterialLine } from "@/lib/calculators";
-import { useCalculators } from "@/lib/calculators-context";
+import { computeImalat, sumImalat, type ImalatLine } from "@/lib/imalat/engine";
+import { useImalat } from "@/lib/imalat/context";
+import { dimLabels } from "@/lib/imalat/systems";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { brand, checkoutConfig } from "@/lib/brand";
@@ -16,15 +17,18 @@ const qtyFmt = (n: number) =>
 
 type Analysis = {
   systemTitle: string;
-  area: number;
+  measure: number;
+  measureUnit: string;
   en: number;
   boy: number;
+  isWall: boolean;
   project: string;
-  lines: MaterialLine[];
+  note?: string;
+  lines: ImalatLine[];
 };
 
 export default function HesaplamaPage() {
-  const { systems, ready } = useCalculators();
+  const { systems, ready } = useImalat();
 
   const [activeId, setActiveId] = useState("");
   const [enM, setEnM] = useState("");
@@ -32,6 +36,7 @@ export default function HesaplamaPage() {
   const [m2, setM2] = useState("");
   const [project, setProject] = useState("");
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [error, setError] = useState("");
   const [autoCalc, setAutoCalc] = useState(false);
 
   const resolvedId = activeId || systems[0]?.id || "";
@@ -62,21 +67,40 @@ export default function HesaplamaPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
+  const isWall = active?.kind === "wall";
+  const dl = dimLabels(active?.kind || "alcipan");
+
   const build = () => {
     if (!active || area <= 0) return;
+    if (isWall && !roomArea) {
+      setError("Bölme duvar için duvar uzunluğunu ve yüksekliğini girin.");
+      setAnalysis(null);
+      return;
+    }
+    const r = computeImalat(active, roomArea ? { L: num(enM), K: num(boyM) } : { area });
+    if ("err" in r) {
+      setError(r.err);
+      setAnalysis(null);
+      return;
+    }
+    setError("");
     setAnalysis({
       systemTitle: active.title,
-      area,
+      measure: r.measure,
+      measureUnit: r.measureUnit,
       en: roomArea ? num(enM) : 0,
       boy: roomArea ? num(boyM) : 0,
+      isWall: !!isWall,
       project: project.trim(),
-      lines: computeLines(active, area),
+      note: r.note,
+      lines: r.lines,
     });
   };
 
   // Girdi değişince eski analiz ekranda kalmasın
   useEffect(() => {
     setAnalysis(null);
+    setError("");
   }, [resolvedId]);
 
   useEffect(() => {
@@ -93,19 +117,19 @@ export default function HesaplamaPage() {
   if (!systems.length || !active) {
     return (
       <div className="container-page py-20">
-        <h1 className="section-title">Malzeme analizi</h1>
+        <h1 className="section-title">İmalat sistemleri</h1>
         <p className="section-subtitle">Henüz tanımlı sistem yok.</p>
       </div>
     );
   }
 
-  const subtotal = analysis ? sumLines(analysis.lines) : 0;
+  const subtotal = analysis ? sumImalat(analysis.lines) : 0;
   const vat = subtotal * checkoutConfig.vatRate;
   const grand = subtotal + vat;
 
   const waMessage = analysis
     ? `Merhaba, malzeme analizi için teklif istiyorum.\n` +
-      `Sistem: ${analysis.systemTitle}\nAlan: ${qtyFmt(analysis.area)} m²` +
+      `Sistem: ${analysis.systemTitle}\nÖlçü: ${qtyFmt(analysis.measure)} ${analysis.measureUnit}` +
       (analysis.en ? ` (${qtyFmt(analysis.en)} × ${qtyFmt(analysis.boy)} m)` : "") +
       (analysis.project ? `\nProje: ${analysis.project}` : "") +
       `\nTahmini tutar (KDV dahil): ${formatPrice(grand)}`
@@ -116,11 +140,11 @@ export default function HesaplamaPage() {
       {/* Giriş */}
       <div className="container-page max-w-5xl pt-10 sm:pt-14 print:hidden">
         <h1 className="type-wide text-3xl font-bold text-brand-bone sm:text-4xl">
-          Malzeme analizi
+          İmalat sistemleri
         </h1>
         <p className="mt-2 max-w-xl text-brand-mist">
-          Sistemi seçin, ölçüyü girin. Malzeme listesi, birim fiyatlar ve
-          tahmini tutar bir analiz belgesi olarak hazırlansın.
+          Sistemi seçin, ölçüyü girin. Profil, askı, plaka ve vida miktarları
+          hat hat hesaplanıp malzeme analizi olarak hazırlansın.
         </p>
 
         <form
@@ -159,11 +183,11 @@ export default function HesaplamaPage() {
 
           <div className="mt-7 grid gap-4 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-end">
             <label className="block">
-              <span className="text-sm font-semibold text-brand-bone">En (m)</span>
+              <span className="text-sm font-semibold text-brand-bone">{dl.a}</span>
               <input
                 inputMode="decimal"
                 className="input-field mt-2"
-                placeholder="Örn. 4"
+                placeholder={isWall ? "Örn. 5,4" : "Örn. 4"}
                 value={enM}
                 onChange={(e) => {
                   setEnM(e.target.value);
@@ -173,11 +197,11 @@ export default function HesaplamaPage() {
             </label>
             <span className="hidden pb-3 text-brand-mist sm:block">×</span>
             <label className="block">
-              <span className="text-sm font-semibold text-brand-bone">Boy (m)</span>
+              <span className="text-sm font-semibold text-brand-bone">{dl.b}</span>
               <input
                 inputMode="decimal"
                 className="input-field mt-2"
-                placeholder="Örn. 5"
+                placeholder={isWall ? "Örn. 2,8" : "Örn. 5"}
                 value={boyM}
                 onChange={(e) => {
                   setBoyM(e.target.value);
@@ -187,7 +211,7 @@ export default function HesaplamaPage() {
             </label>
             <span className="hidden pb-3 text-sm text-brand-mist sm:block">ya da</span>
             <label className="block">
-              <span className="text-sm font-semibold text-brand-bone">Alan (m²)</span>
+              <span className="text-sm font-semibold text-brand-bone">{dl.area}</span>
               <input
                 inputMode="decimal"
                 className="input-field mt-2"
@@ -226,6 +250,7 @@ export default function HesaplamaPage() {
               </span>
             ) : null}
           </div>
+          {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
         </form>
       </div>
 
@@ -260,9 +285,11 @@ export default function HesaplamaPage() {
                 <dd className="mt-0.5 font-semibold">{analysis.systemTitle}</dd>
               </div>
               <div>
-                <dt className="text-brand-mist">Alan</dt>
+                <dt className="text-brand-mist">
+                  {analysis.measureUnit === "mt" ? "Bant uzunluğu" : analysis.isWall ? "Duvar alanı" : "Alan"}
+                </dt>
                 <dd className="mt-0.5 font-semibold tabular-nums">
-                  {qtyFmt(analysis.area)} m²
+                  {qtyFmt(analysis.measure)} {analysis.measureUnit}
                   {analysis.en ? (
                     <span className="font-normal text-brand-mist">
                       {" "}
@@ -285,6 +312,7 @@ export default function HesaplamaPage() {
                 <li key={`${line.name}-${i}`} className="flex items-start justify-between gap-4 py-3 text-sm">
                   <div className="min-w-0">
                     <p>{line.name}</p>
+                    <p className="text-xs text-brand-mist">{line.why}</p>
                     <p className="mt-0.5 tabular-nums text-brand-mist">
                       {qtyFmt(line.qty)} {line.unit} × {formatPrice(line.unitPrice)}
                     </p>
@@ -311,9 +339,12 @@ export default function HesaplamaPage() {
                 </thead>
                 <tbody>
                   {analysis.lines.map((line, i) => (
-                    <tr key={`${line.name}-${i}`} className="border-b border-black/5">
+                    <tr key={`${line.name}-${i}`} className="border-b border-black/5 align-top">
                       <td className="py-3 pr-2 tabular-nums text-brand-mist">{i + 1}</td>
-                      <td className="py-3 pr-4">{line.name}</td>
+                      <td className="py-3 pr-4">
+                        {line.name}
+                        <span className="mt-0.5 block text-xs text-brand-mist">{line.why}</span>
+                      </td>
                       <td className="py-3 pr-4 text-right tabular-nums">{qtyFmt(line.qty)}</td>
                       <td className="py-3 pr-4 text-brand-mist">{line.unit}</td>
                       <td className="py-3 pr-4 text-right tabular-nums">
@@ -350,6 +381,9 @@ export default function HesaplamaPage() {
               </dl>
             </div>
 
+            {analysis.note ? (
+              <p className="mt-6 text-xs text-brand-mist">{analysis.note}</p>
+            ) : null}
             <p className="mt-8 border-t border-black/10 pt-4 text-xs leading-relaxed text-brand-mist">
               Bu analiz girilen ölçüye göre hazırlanmış tahmini bir malzeme
               listesidir. İşçilik ve nakliye dahil değildir. Kesin fiyat için{" "}

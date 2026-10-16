@@ -9,8 +9,8 @@ import { Logo } from "@/components/brand/Logo";
 
 const links = [
   { href: "/", label: "Ana Sayfa" },
-  { href: "/hesaplama", label: "Hesaplamalar" },
   { href: "/katalog", label: "Ürünler" },
+  { href: "/imalat-sistemleri", label: "İmalat Sistemleri" },
   { href: "/kataloglar", label: "Dokümanlar" },
   { href: "/#projeler", label: "Projeler" },
   { href: "/iletisim", label: "İletişim" },

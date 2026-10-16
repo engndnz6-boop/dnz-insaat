@@ -159,7 +159,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     { href: "/admin/site", label: "Site", icon: Settings },
     { href: "/admin/urunler", label: "Ürünler", icon: Package },
     { href: "/admin/kategoriler", label: "Kategoriler", icon: Tags },
-    { href: "/admin/hesaplamalar", label: "Hesaplamalar", icon: Calculator },
+    { href: "/admin/hesaplamalar", label: "İmalat Sistemleri", icon: Calculator },
     { href: "/admin/kataloglar", label: "PDF Katalog", icon: FileText },
     { href: "/admin/siparisler", label: "Siparişler", icon: ShoppingBag },
   ];

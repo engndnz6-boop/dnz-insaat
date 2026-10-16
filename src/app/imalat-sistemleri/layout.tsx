@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Asma Tavan & Bölme Duvar Maliyet Hesaplama",
+  title: "İmalat Sistemleri: Asma Tavan ve Bölme Duvar Malzeme Analizi",
   description:
     "Alçıpan asma tavan, clip-in, taşyünü, karolam ve bölme duvar için m² bazlı malzeme metrajı ve maliyet hesaplama. DNZ İnşaat.",
   keywords: [
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "bölme duvar hesaplama",
     "clipin metraj",
   ],
-  alternates: { canonical: "/hesaplama" },
+  alternates: { canonical: "/imalat-sistemleri" },
 };
 
 export default function HesaplamaLayout({

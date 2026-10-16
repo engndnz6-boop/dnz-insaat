@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowRight, Phone } from "lucide-react";
 import { useSiteSettings } from "@/lib/site-settings-context";
-import { useCalculators } from "@/lib/calculators-context";
+import { useImalat } from "@/lib/imalat/context";
 import { brand } from "@/lib/brand";
 import { CeilingDrawing } from "./CeilingDrawing";
 
 function QuickEstimate() {
-  const { systems } = useCalculators();
+  const { systems } = useImalat();
   const [systemId, setSystemId] = useState("");
   const [m2, setM2] = useState("");
 
@@ -20,7 +20,7 @@ function QuickEstimate() {
     const area = Number(m2.replace(",", "."));
     if (area > 0) params.set("m2", String(area));
     const q = params.toString();
-    return q ? `/hesaplama?${q}` : "/hesaplama";
+    return q ? `/imalat-sistemleri?${q}` : "/imalat-sistemleri";
   }, [selected, m2]);
 
   return (

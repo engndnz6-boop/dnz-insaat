@@ -1,308 +1,234 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Plus, RotateCcw, Trash2 } from "lucide-react";
-import { useCalculators } from "@/lib/calculators-context";
-import type { CalculatorSystem } from "@/lib/calculators";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, RotateCcw, Save, Trash2 } from "lucide-react";
+import { useImalat } from "@/lib/imalat/context";
+import {
+  computeImalat,
+  fmtQ,
+  sumImalat,
+  type ImalatKind,
+  type ImalatSystem,
+} from "@/lib/imalat/engine";
+import {
+  KIND_LABEL,
+  MATERIAL_KEYS,
+  PARAMS,
+  dimLabels,
+  seedImalat,
+} from "@/lib/imalat/systems";
+import { formatPrice } from "@/lib/utils";
 
-export default function AdminHesaplamalarPage() {
-  const {
-    systems,
-    ready,
-    addSystem,
-    updateSystem,
-    deleteSystem,
-    addMaterial,
-    updateMaterial,
-    deleteMaterial,
-    resetToSeed,
-  } = useCalculators();
-  const [activeId, setActiveId] = useState<string>("");
-  const [newTitle, setNewTitle] = useState("");
+const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
+const toNum = (v: string) => Number(String(v).replace(",", ".")) || 0;
 
-  const active =
-    systems.find((s) => s.id === (activeId || systems[0]?.id)) || null;
+export default function AdminImalatPage() {
+  const { systems, ready, source, save } = useImalat();
+  const [draft, setDraft] = useState<ImalatSystem[]>([]);
+  const [activeId, setActiveId] = useState("");
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [testA, setTestA] = useState("6");
+  const [testB, setTestB] = useState("4.5");
+  /** Sayı kutuları yazılırken virgül kaybolmasın diye kontrolsüz; sıfırlamada yeniden çizilir */
+  const [rev, setRev] = useState(0);
 
-  if (!ready) {
-    return <p className="text-brand-mist">Yükleniyor…</p>;
-  }
+  useEffect(() => {
+    if (ready) setDraft(clone(systems));
+  }, [ready, systems]);
 
-  const saveActive = (next: CalculatorSystem) => {
-    updateSystem(next);
+  const active = draft.find((s) => s.id === activeId) || draft[0];
+
+  const patch = (fn: (s: ImalatSystem) => void) => {
+    if (!active) return;
+    setDraft((prev) =>
+      prev.map((s) => {
+        if (s.id !== active.id) return s;
+        const n = clone(s);
+        fn(n);
+        return n;
+      })
+    );
+    setDirty(true);
+    setMsg(null);
   };
+
+  const preview = useMemo(() => {
+    if (!active) return null;
+    return computeImalat(active, { L: toNum(testA), K: toNum(testB) });
+  }, [active, testA, testB]);
+
+  const onSave = async () => {
+    setSaving(true);
+    const r = await save(draft);
+    setSaving(false);
+    if (r.ok) setDirty(false);
+    setMsg(r.ok ? { ok: true, text: "Kaydedildi. Sitede hemen geçerli." } : { ok: false, text: r.error || "Kaydedilemedi." });
+  };
+
+  const addSystem = (kind: ImalatKind) => {
+    const tpl = seedImalat.find((s) => s.kind === kind)!;
+    const sys: ImalatSystem = { ...clone(tpl), id: `sys-${Date.now().toString(36)}`, title: `Yeni ${KIND_LABEL[kind].toLocaleLowerCase("tr")}` };
+    setDraft((p) => [...p, sys]);
+    setActiveId(sys.id);
+    setDirty(true);
+  };
+
+  if (!ready || !active) return <p className="text-brand-mist">Yükleniyor…</p>;
+
+  const seed = seedImalat.find((s) => s.id === active.id);
+  const missingKeys = MATERIAL_KEYS[active.kind].filter(
+    (k) => !active.materials.some((m) => m.key === k.key)
+  );
+  const dl = dimLabels(active.kind);
 
   return (
     <div>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl text-brand-bone">
-            Hesaplama Sistemleri
-          </h1>
-          <p className="mt-2 text-sm text-brand-mist">
-            Sarfiyat katsayıları (m² başına), plaka ebatı ve birim fiyatları
-            buradan düzenlenir. Ebat girince miktar ebatın katlarına (adet)
-            tamamlanır.
+          <h1 className="font-display text-3xl text-brand-bone">İmalat sistemleri</h1>
+          <p className="mt-2 max-w-2xl text-sm text-brand-mist">
+            Malzeme miktarları DnzHesap’taki gibi hat, profil boyu, ek yeri, askı
+            noktası ve vida hattı sayılarak hesaplanır. Burada aralıkları, ebatları,
+            malzeme adlarını ve fiyatları düzenleyin.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="btn-ghost text-xs"
-            onClick={() => {
-              if (confirm("Tüm hesaplamalar varsayılana sıfırlansın mı?")) {
-                resetToSeed();
-                setActiveId("");
-              }
-            }}
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Sıfırla
-          </button>
-          <Link href="/hesaplama" className="btn-secondary text-xs" target="_blank">
-            Site hesaplamayı aç
-          </Link>
-        </div>
+        <button type="button" onClick={onSave} disabled={saving || (!dirty && source === "onedrive")} className="btn-primary">
+          <Save className="h-4 w-4" />
+          {saving ? "Kaydediliyor…" : "Kaydet"}
+        </button>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-3">
-          <div className="border border-black/10 bg-brand-anthracite/40 p-3">
-            <p className="label-field">Sistemler</p>
-            <nav className="mt-2 flex flex-col gap-1">
-              {systems.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setActiveId(s.id)}
-                  className={`px-3 py-2 text-left text-sm ${
-                    active?.id === s.id
-                      ? "bg-brand-navy text-white"
-                      : "border border-black/10 text-brand-bone hover:border-brand-navy/30"
-                  }`}
-                >
-                  {s.title}
-                </button>
-              ))}
-            </nav>
-          </div>
+      {msg ? (
+        <p className={`mt-4 border px-4 py-3 text-sm ${msg.ok ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-red-800"}`}>
+          {msg.text}
+        </p>
+      ) : source !== "onedrive" ? (
+        <p className="mt-4 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Sitede şu an varsayılan sistemler görünüyor. Fiyatları kontrol edip
+          <strong> Kaydet</strong>’e basın; kayıt OneDrive’a gider ve ziyaretçiler de görür.
+        </p>
+      ) : dirty ? (
+        <p className="mt-4 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Kaydedilmemiş değişiklik var.
+        </p>
+      ) : null}
 
-          <div className="border border-black/10 bg-brand-anthracite/40 p-3">
-            <p className="label-field">Yeni sistem ekle</p>
-            <input
-              className="input-field mt-1"
-              placeholder="Örn. 60x60 Taşyünü"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-            />
-            <button
-              type="button"
-              className="btn-primary mt-2 w-full text-xs"
-              onClick={() => {
-                if (!newTitle.trim()) return;
-                const created = addSystem(newTitle.trim());
-                setNewTitle("");
-                setActiveId(created.id);
-              }}
+      <div className="mt-6 grid gap-6 lg:grid-cols-[240px_1fr]">
+        <aside>
+          <nav className="flex flex-col border border-black/10 bg-white">
+            {draft.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setActiveId(s.id)}
+                className={`border-b border-black/5 px-4 py-3 text-left text-sm last:border-b-0 ${
+                  s.id === active.id ? "bg-brand-navy font-semibold text-white" : "text-brand-bone hover:bg-brand-ink"
+                }`}
+              >
+                {s.title}
+              </button>
+            ))}
+          </nav>
+          <label className="mt-4 block">
+            <span className="label-field">Yeni sistem ekle</span>
+            <select
+              className="input-field"
+              value=""
+              onChange={(e) => e.target.value && addSystem(e.target.value as ImalatKind)}
             >
-              <Plus className="h-3.5 w-3.5" />
-              Sistem Ekle
-            </button>
-          </div>
+              <option value="">Türünü seçin…</option>
+              {(Object.keys(KIND_LABEL) as ImalatKind[]).map((k) => (
+                <option key={k} value={k}>
+                  {KIND_LABEL[k]}
+                </option>
+              ))}
+            </select>
+          </label>
         </aside>
 
-        {active ? (
-          <section className="space-y-5 border border-black/10 bg-brand-anthracite/40 p-5">
+        <div className="min-w-0 space-y-6">
+          <section className="border border-black/10 bg-white p-5">
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block sm:col-span-2">
+              <label className="block">
                 <span className="label-field">Sistem adı</span>
-                <input
-                  className="input-field"
-                  value={active.title}
-                  onChange={(e) =>
-                    saveActive({ ...active, title: e.target.value })
-                  }
-                />
+                <input className="input-field" value={active.title} onChange={(e) => patch((s) => (s.title = e.target.value))} />
+              </label>
+              <label className="block">
+                <span className="label-field">Hesap türü</span>
+                <input className="input-field bg-brand-ink" value={KIND_LABEL[active.kind]} readOnly />
               </label>
               <label className="block sm:col-span-2">
                 <span className="label-field">Açıklama</span>
-                <textarea
-                  className="input-field min-h-[72px]"
-                  value={active.description}
-                  onChange={(e) =>
-                    saveActive({ ...active, description: e.target.value })
-                  }
-                />
+                <input className="input-field" value={active.description} onChange={(e) => patch((s) => (s.description = e.target.value))} />
               </label>
             </div>
+          </section>
 
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="font-sans text-lg font-bold text-brand-bone">
-                Malzemeler & sarfiyat
-              </h2>
-              <button
-                type="button"
-                className="btn-secondary text-xs"
-                onClick={() => addMaterial(active.id)}
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Malzeme ekle
-              </button>
+          <section className="border border-black/10 bg-white p-5">
+            <h2 className="font-semibold text-brand-bone">Ölçüler ve aralıklar</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {PARAMS[active.kind].map((p) => (
+                <label key={p.key} className="block">
+                  <span className="text-xs text-brand-mist">
+                    {p.label} ({p.unit})
+                  </span>
+                  <input
+                    inputMode="decimal"
+                    className="input-field mt-1"
+                    key={`${active.id}-${p.key}-${rev}`}
+                    defaultValue={String(active.params[p.key] ?? "").replace(".", ",")}
+                    onChange={(e) => patch((s) => (s.params[p.key] = toNum(e.target.value)))}
+                  />
+                </label>
+              ))}
             </div>
+          </section>
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1100px] text-left text-sm">
-                <thead className="bg-brand-navy text-xs uppercase tracking-wider text-white/80">
-                  <tr>
-                    <th className="px-3 py-2 font-medium">Malzeme</th>
-                    <th className="px-3 py-2 font-medium">Birim</th>
-                    <th className="px-3 py-2 font-medium">Sarfiyat / m²</th>
-                    <th className="px-3 py-2 font-medium">Plaka en cm</th>
-                    <th className="px-3 py-2 font-medium">Plaka boy cm</th>
-                    <th className="px-3 py-2 font-medium">Profil boy m</th>
-                    <th className="px-3 py-2 font-medium">Birim fiyat ₺</th>
-                    <th className="px-3 py-2 font-medium">Yuvarlama</th>
-                    <th className="px-3 py-2 font-medium" />
+          <section className="border border-black/10 bg-white p-5">
+            <h2 className="font-semibold text-brand-bone">Malzemeler</h2>
+            <p className="mt-1 text-xs text-brand-mist">
+              Adı ve fiyatı değiştirebilirsiniz. Listeden çıkardığınız kalem analize girmez.
+            </p>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[620px] text-sm">
+                <thead>
+                  <tr className="border-b border-black/10 text-left text-xs text-brand-mist">
+                    <th className="py-2 pr-3 font-medium">Kalem</th>
+                    <th className="py-2 pr-3 font-medium">Malzeme adı</th>
+                    <th className="w-24 py-2 pr-3 font-medium">Birim</th>
+                    <th className="w-32 py-2 pr-3 font-medium">Birim fiyat (₺)</th>
+                    <th className="w-10" />
                   </tr>
                 </thead>
                 <tbody>
-                  {active.materials.map((m) => (
-                    <tr key={m.id} className="border-t border-black/5">
-                      <td className="px-2 py-2">
+                  {active.materials.map((m, i) => (
+                    <tr key={m.key} className="border-b border-black/5">
+                      <td className="py-2 pr-3 text-xs text-brand-mist">
+                        {MATERIAL_KEYS[active.kind].find((k) => k.key === m.key)?.label || m.key}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <input className="input-field py-2" value={m.name} onChange={(e) => patch((s) => (s.materials[i].name = e.target.value))} />
+                      </td>
+                      <td className="py-2 pr-3">
+                        <input className="input-field py-2" value={m.unit} onChange={(e) => patch((s) => (s.materials[i].unit = e.target.value))} />
+                      </td>
+                      <td className="py-2 pr-3">
                         <input
+                          inputMode="decimal"
                           className="input-field py-2"
-                          value={m.name}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              name: e.target.value,
-                            })
-                          }
+                          key={`${active.id}-${m.key}-${rev}`}
+                          defaultValue={String(m.unitPrice).replace(".", ",")}
+                          onChange={(e) => patch((s) => (s.materials[i].unitPrice = toNum(e.target.value)))}
                         />
                       </td>
-                      <td className="px-2 py-2">
-                        <input
-                          className="input-field py-2"
-                          value={m.unit}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              unit: e.target.value,
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          className="input-field py-2"
-                          value={m.ratePerM2}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              ratePerM2: Number(e.target.value) || 0,
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          step="1"
-                          min="0"
-                          className="input-field py-2"
-                          placeholder="120"
-                          value={m.pieceWidthCm ?? ""}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              pieceWidthCm: e.target.value
-                                ? Number(e.target.value)
-                                : undefined,
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          step="1"
-                          min="0"
-                          className="input-field py-2"
-                          placeholder="250"
-                          value={m.pieceHeightCm ?? ""}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              pieceHeightCm: e.target.value
-                                ? Number(e.target.value)
-                                : undefined,
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          className="input-field py-2"
-                          placeholder="3"
-                          title="Profil için 3 metre"
-                          value={m.pieceLengthM ?? ""}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              pieceLengthM: e.target.value
-                                ? Number(e.target.value)
-                                : undefined,
-                              ...(e.target.value
-                                ? {
-                                    pieceWidthCm: undefined,
-                                    pieceHeightCm: undefined,
-                                  }
-                                : {}),
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          className="input-field py-2"
-                          value={m.unitPrice}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              unitPrice: Number(e.target.value) || 0,
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <select
-                          className="input-field py-2"
-                          value={m.roundMode}
-                          onChange={(e) =>
-                            updateMaterial(active.id, m.id, {
-                              roundMode: e.target.value as
-                                | "round"
-                                | "ceil"
-                                | "piece",
-                            })
-                          }
-                        >
-                          <option value="round">Ondalık</option>
-                          <option value="ceil">Yukarı tam</option>
-                          <option value="piece">Ebat katı</option>
-                        </select>
-                      </td>
-                      <td className="px-2 py-2">
+                      <td className="py-2">
                         <button
                           type="button"
-                          className="btn-ghost text-xs text-red-600"
-                          onClick={() => {
-                            if (confirm("Bu malzeme silinsin mi?")) {
-                              deleteMaterial(active.id, m.id);
-                            }
-                          }}
+                          aria-label="Kalemi çıkar"
+                          onClick={() => patch((s) => s.materials.splice(i, 1))}
+                          className="p-2 text-brand-mist hover:text-red-600"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -312,30 +238,105 @@ export default function AdminHesaplamalarPage() {
                 </tbody>
               </table>
             </div>
+            {missingKeys.length ? (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="text-xs text-brand-mist">Kalem ekle:</span>
+                {missingKeys.map((k) => (
+                  <button
+                    key={k.key}
+                    type="button"
+                    onClick={() => patch((s) => s.materials.push({ key: k.key, name: k.label, unit: "adet", unitPrice: 0 }))}
+                    className="inline-flex items-center gap-1 border border-black/10 px-2.5 py-1 text-xs hover:border-brand-navy"
+                  >
+                    <Plus className="h-3 w-3" />
+                    {k.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </section>
 
-            <p className="text-xs text-brand-mist">
-              <strong>Plaka:</strong> en×boy cm → adet.{" "}
-              <strong>Profil:</strong> profil boy m = 3 → metre 3&apos;ün katına
-              tamamlanır (55×0,85=46,75 → 48 mt).
-            </p>
+          <section className="border border-black/10 bg-white p-5">
+            <h2 className="font-semibold text-brand-bone">Deneme hesabı</h2>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <label className="block">
+                <span className="text-xs text-brand-mist">{dl.a}</span>
+                <input className="input-field mt-1 w-28" value={testA} onChange={(e) => setTestA(e.target.value)} />
+              </label>
+              <label className="block">
+                <span className="text-xs text-brand-mist">{dl.b}</span>
+                <input className="input-field mt-1 w-28" value={testB} onChange={(e) => setTestB(e.target.value)} />
+              </label>
+            </div>
+            {preview && "err" in preview ? (
+              <p className="mt-3 text-sm text-red-700">{preview.err}</p>
+            ) : preview ? (
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[560px] text-sm">
+                  <tbody>
+                    {preview.lines.map((l) => (
+                      <tr key={l.key} className="border-b border-black/5 align-top">
+                        <td className="py-2 pr-3">
+                          {l.name}
+                          <span className="block text-xs text-brand-mist">{l.why}</span>
+                        </td>
+                        <td className="whitespace-nowrap py-2 pr-3 text-right tabular-nums">
+                          {fmtQ(l.qty)} {l.unit}
+                        </td>
+                        <td className="whitespace-nowrap py-2 text-right tabular-nums">{formatPrice(l.qty * l.unitPrice)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td className="pt-3 font-semibold">
+                        Toplam ({fmtQ(preview.measure)} {preview.measureUnit}, KDV hariç)
+                      </td>
+                      <td />
+                      <td className="pt-3 text-right font-bold tabular-nums">{formatPrice(sumImalat(preview.lines))}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            ) : null}
+          </section>
 
+          <div className="flex flex-wrap gap-3">
+            {seed ? (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  patch((s) => {
+                    s.params = clone(seed.params);
+                    s.materials = clone(seed.materials);
+                    s.title = seed.title;
+                    s.description = seed.description;
+                  });
+                  setRev((r) => r + 1);
+                }}
+              >
+                <RotateCcw className="h-4 w-4" />
+                Varsayılana döndür
+              </button>
+            ) : null}
             <button
               type="button"
-              className="btn-ghost text-xs text-red-600"
+              className="inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-50"
               onClick={() => {
-                if (confirm(`"${active.title}" silinsin mi?`)) {
-                  deleteSystem(active.id);
-                  setActiveId("");
-                }
+                if (draft.length <= 1) return;
+                if (!window.confirm(`“${active.title}” silinsin mi?`)) return;
+                setDraft((p) => p.filter((s) => s.id !== active.id));
+                setActiveId("");
+                setDirty(true);
+                setRev((r) => r + 1);
               }}
             >
-              <Trash2 className="h-3.5 w-3.5" />
-              Bu sistemi sil
+              <Trash2 className="h-4 w-4" />
+              Sistemi sil
             </button>
-          </section>
-        ) : (
-          <p className="text-sm text-brand-mist">Sistem seçin veya yeni ekleyin.</p>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );

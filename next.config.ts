@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Eski hesaplama adresi yeni İmalat Sistemleri sayfasına yönlenir (Google ve eski bağlantılar için)
+  async redirects() {
+    return [
+      { source: "/hesaplama", destination: "/imalat-sistemleri", permanent: true },
+    ];
+  },
   images: {
     remotePatterns: [
       {
