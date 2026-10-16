@@ -5,19 +5,9 @@ import Link from "next/link";
 import { FileText, MessageCircle, Printer } from "lucide-react";
 import { computeLines, sumLines, type MaterialLine } from "@/lib/calculators";
 import { useCalculators } from "@/lib/calculators-context";
-import { useSiteSettings } from "@/lib/site-settings-context";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { brand, checkoutConfig } from "@/lib/brand";
-import { LogoMark } from "@/components/brand/Logo";
-
-/** DNZ-YYAAGGSSDD — DnzHesap’taki teklif numarasıyla aynı düzen */
-function makeAnalysisNo(d = new Date()) {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `DNZ-${String(d.getFullYear()).slice(2)}${p(d.getMonth() + 1)}${p(
-    d.getDate()
-  )}${p(d.getHours())}${p(d.getMinutes())}`;
-}
 
 const num = (v: string) => Number(String(v).replace(",", ".")) || 0;
 
@@ -25,8 +15,6 @@ const qtyFmt = (n: number) =>
   new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(n);
 
 type Analysis = {
-  no: string;
-  date: Date;
   systemTitle: string;
   area: number;
   en: number;
@@ -37,7 +25,6 @@ type Analysis = {
 
 export default function HesaplamaPage() {
   const { systems, ready } = useCalculators();
-  const { settings } = useSiteSettings();
 
   const [activeId, setActiveId] = useState("");
   const [enM, setEnM] = useState("");
@@ -78,8 +65,6 @@ export default function HesaplamaPage() {
   const build = () => {
     if (!active || area <= 0) return;
     setAnalysis({
-      no: makeAnalysisNo(),
-      date: new Date(),
       systemTitle: active.title,
       area,
       en: roomArea ? num(enM) : 0,
@@ -119,7 +104,7 @@ export default function HesaplamaPage() {
   const grand = subtotal + vat;
 
   const waMessage = analysis
-    ? `Merhaba, ${analysis.no} numaralı malzeme analizi için teklif istiyorum.\n` +
+    ? `Merhaba, malzeme analizi için teklif istiyorum.\n` +
       `Sistem: ${analysis.systemTitle}\nAlan: ${qtyFmt(analysis.area)} m²` +
       (analysis.en ? ` (${qtyFmt(analysis.en)} × ${qtyFmt(analysis.boy)} m)` : "") +
       (analysis.project ? `\nProje: ${analysis.project}` : "") +
@@ -264,32 +249,9 @@ export default function HesaplamaPage() {
           </div>
 
           <article className="border border-black/10 bg-white px-6 py-8 text-brand-bone sm:px-10 sm:py-10 print:border-0 print:p-0">
-            {/* Başlık */}
-            <header className="flex flex-col gap-6 border-b-2 border-brand-navy pb-6 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex min-w-0 flex-col items-start gap-3 sm:flex-row sm:gap-4 print:flex-row">
-                <LogoMark className="h-12" plain />
-                <div className="min-w-0 break-words text-sm leading-relaxed">
-                  <p className="font-bold">{settings.companyName}</p>
-                  <p className="text-brand-mist">{brand.address}</p>
-                  <p className="text-brand-mist">
-                    {brand.phone}, {brand.email}
-                  </p>
-                </div>
-              </div>
-              <div className="shrink-0 whitespace-nowrap sm:text-right">
-                <p className="type-wide text-xl font-bold text-brand-navy">
-                  Malzeme analizi
-                </p>
-                <dl className="mt-2 grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5 text-sm sm:justify-end">
-                  <dt className="text-brand-mist">Analiz no</dt>
-                  <dd className="font-semibold tabular-nums">{analysis.no}</dd>
-                  <dt className="text-brand-mist">Tarih</dt>
-                  <dd className="tabular-nums">
-                    {analysis.date.toLocaleDateString("tr-TR")}
-                  </dd>
-                </dl>
-              </div>
-            </header>
+            <h2 className="type-wide border-b-2 border-brand-navy pb-4 text-xl font-bold text-brand-navy">
+              Malzeme analizi
+            </h2>
 
             {/* Proje bilgisi */}
             <dl className="grid gap-4 border-b border-black/10 py-5 text-sm sm:grid-cols-3">
