@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FileDown, Plus, Trash2 } from "lucide-react";
 import { useCatalog } from "@/lib/catalog-context";
+import { CatalogSyncStatus } from "@/components/admin/CatalogSyncStatus";
 import { openPdf } from "@/lib/pdf-storage";
 
 export default function AdminPdfCatalogsPage() {
@@ -47,6 +48,7 @@ export default function AdminPdfCatalogsPage() {
         Müşterilerin indirebileceği PDF katalogları yükleyin (max 4 MB) veya
         link ekleyin.
       </p>
+      <CatalogSyncStatus />
 
       <form
         onSubmit={onSubmit}

@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const categories = getRootCategories().map((c) => ({
+  const categories = (await getRootCategories()).map((c) => ({
     url: `${base}/kategori/${c.slug}`,
     lastModified: now,
     changeFrequency: "weekly" as const,

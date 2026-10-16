@@ -9,22 +9,25 @@ import { buildCategoryMetadata } from "@/lib/seo";
 import { CategoryJsonLd } from "@/components/seo/CategoryJsonLd";
 import { CategoryPageClient } from "./CategoryPageClient";
 
+// Admin’de kategori adı/açıklaması değişince sayfa en geç 5 dk içinde yenilenir
+export const revalidate = 300;
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  return getRootCategories().map((c) => ({ slug: c.slug }));
+  return (await getRootCategories()).map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) return { title: "Kategori bulunamadı" };
   return buildCategoryMetadata(category);
 }
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
   const products = await getProducts();

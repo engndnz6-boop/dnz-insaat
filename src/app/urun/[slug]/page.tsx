@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Ürün bulunamadı" };
 
-  const category = getCategoryById(product.categoryId);
+  const category = await getCategoryById(product.categoryId);
   return buildProductMetadata(product, category?.name);
 }
 
@@ -27,7 +27,7 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const category = getCategoryById(product.categoryId);
+  const category = await getCategoryById(product.categoryId);
 
   return (
     <>

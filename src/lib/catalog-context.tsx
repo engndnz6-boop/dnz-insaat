@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -16,7 +17,7 @@ import {
   seedCategories,
   seedPdfCatalogs,
 } from "@/lib/data/categories";
-import { deletePdfBlob, savePdfBlob } from "@/lib/pdf-storage";
+import { deletePdfBlob } from "@/lib/pdf-storage";
 import { slugify } from "@/lib/utils";
 
 const CAT_KEY = "dnz-insaat-categories-v2";
@@ -45,6 +46,13 @@ interface CatalogContextValue {
   }) => Promise<PdfCatalog>;
   deletePdfCatalog: (id: string) => Promise<void>;
   updatePdfCatalog: (catalog: PdfCatalog) => void;
+  /** onedrive: herkes aynı listeyi görür; local/seed: henüz OneDrive’a kaydedilmedi */
+  source: "onedrive" | "local" | "seed";
+  /** Son OneDrive kaydı hata verdiyse mesajı */
+  syncError: string;
+  syncing: boolean;
+  /** Mevcut listeyi OneDrive’a elle kaydet */
+  syncNow: () => Promise<boolean>;
 }
 
 const CatalogContext = createContext<CatalogContextValue | null>(null);
@@ -59,46 +67,140 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   );
   const [pdfCatalogs, setPdfCatalogs] = useState<PdfCatalog[]>(seedPdfCatalogs);
   const [ready, setReady] = useState(false);
+  const [source, setSource] = useState<"onedrive" | "local" | "seed">("seed");
+  const [syncError, setSyncError] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  /** Admin bir değişiklik yaptıysa true — sadece o zaman OneDrive’a yazılır */
+  const dirty = useRef(false);
 
   useEffect(() => {
-    try {
-      const c =
-        localStorage.getItem(CAT_KEY) ||
-        localStorage.getItem("dnz-insaat-categories");
-      if (c) {
-        const parsed = JSON.parse(c) as Category[];
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const normalized = parsed.map(normalizeCategory);
-          // Seed'de olup yerel kayıtta olmayan kategorileri ekle
-          const ids = new Set(normalized.map((x) => x.id));
-          const missing = seedCategories.filter((s) => !ids.has(s.id));
-          setCategories([...normalized, ...missing.map(normalizeCategory)]);
+    let cancelled = false;
+
+    const readLocalPdfs = (): PdfCatalog[] => {
+      try {
+        const p = localStorage.getItem(PDF_KEY);
+        const parsed = p ? (JSON.parse(p) as PdfCatalog[]) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    };
+
+    (async () => {
+      // 1) OneDrive — tüm ziyaretçiler için ortak liste
+      try {
+        const res = await fetch("/api/catalog", { cache: "no-store" });
+        const data = (await res.json()) as {
+          source?: string;
+          categories?: Category[];
+          pdfCatalogs?: PdfCatalog[];
+        };
+        if (
+          !cancelled &&
+          data.source === "onedrive" &&
+          Array.isArray(data.categories) &&
+          data.categories.length
+        ) {
+          setCategories(data.categories.map(normalizeCategory));
+          const remote = Array.isArray(data.pdfCatalogs) ? data.pdfCatalogs : [];
+          // Bu tarayıcıda kalmış eski (yalnız yerel) PDF’ler admin’e görünmeye devam etsin
+          const ids = new Set(remote.map((x) => x.id));
+          const localOnly = readLocalPdfs().filter(
+            (x) => x.storageKey && !x.url && !ids.has(x.id)
+          );
+          setPdfCatalogs([...remote, ...localOnly]);
+          setSource("onedrive");
+          setReady(true);
+          return;
         }
+      } catch {
+        /* yerel kayda düş */
       }
-      const p = localStorage.getItem(PDF_KEY);
-      if (p) {
-        const parsed = JSON.parse(p) as PdfCatalog[];
-        if (Array.isArray(parsed)) setPdfCatalogs(parsed);
+      if (cancelled) return;
+
+      // 2) Bu tarayıcıdaki eski kayıt
+      let src: "local" | "seed" = "seed";
+      try {
+        const c =
+          localStorage.getItem(CAT_KEY) ||
+          localStorage.getItem("dnz-insaat-categories");
+        if (c) {
+          const parsed = JSON.parse(c) as Category[];
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const normalized = parsed.map(normalizeCategory);
+            // Seed'de olup yerel kayıtta olmayan kategorileri ekle
+            const ids = new Set(normalized.map((x) => x.id));
+            const missing = seedCategories.filter((s) => !ids.has(s.id));
+            setCategories([...normalized, ...missing.map(normalizeCategory)]);
+            src = "local";
+          }
+        }
+        const localPdfs = readLocalPdfs();
+        if (localPdfs.length) setPdfCatalogs(localPdfs);
+      } catch {
+        /* ignore */
       }
+      if (!cancelled) {
+        setSource(src);
+        setReady(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const pushToOneDrive = useCallback(
+    async (cats: Category[], pdfs: PdfCatalog[]) => {
+      setSyncing(true);
+      try {
+        const res = await fetch("/api/catalog", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ categories: cats, pdfCatalogs: pdfs }),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          setSyncError(data.error || "OneDrive’a kaydedilemedi.");
+          return false;
+        }
+        setSyncError("");
+        setSource("onedrive");
+        return true;
+      } catch {
+        setSyncError("OneDrive’a bağlanılamadı.");
+        return false;
+      } finally {
+        setSyncing(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!ready) return;
+    try {
+      localStorage.setItem(CAT_KEY, JSON.stringify(categories));
+      localStorage.setItem(PDF_KEY, JSON.stringify(pdfCatalogs));
     } catch {
       /* ignore */
     }
-    setReady(true);
-  }, []);
+    if (dirty.current) {
+      dirty.current = false;
+      void pushToOneDrive(categories, pdfCatalogs);
+    }
+  }, [categories, pdfCatalogs, ready, pushToOneDrive]);
 
-  useEffect(() => {
-    if (!ready) return;
-    localStorage.setItem(CAT_KEY, JSON.stringify(categories));
-  }, [categories, ready]);
-
-  useEffect(() => {
-    if (!ready) return;
-    localStorage.setItem(PDF_KEY, JSON.stringify(pdfCatalogs));
-  }, [pdfCatalogs, ready]);
+  const syncNow = useCallback(
+    () => pushToOneDrive(categories, pdfCatalogs),
+    [pushToOneDrive, categories, pdfCatalogs]
+  );
 
   const addCategory = useCallback(
     (name: string, description?: string, parentId: string | null = null) => {
       const cat = createCategory(name, description, parentId);
+      dirty.current = true;
       setCategories((prev) => [...prev, cat]);
       return cat;
     },
@@ -106,6 +208,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   );
 
   const updateCategory = useCallback((category: Category) => {
+    dirty.current = true;
     setCategories((prev) =>
       prev.map((c) =>
         c.id === category.id ? normalizeCategory(category) : c
@@ -114,6 +217,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const deleteCategory = useCallback((id: string) => {
+    dirty.current = true;
     setCategories((prev) =>
       prev.filter((c) => c.id !== id && c.parentId !== id)
     );
@@ -141,7 +245,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       url?: string;
     }) => {
       const id = `pdf-${Date.now()}`;
-      let storageKey: string | undefined;
+      const storageKey: string | undefined = undefined;
       let fileName = "katalog.pdf";
       let url = input.url?.trim() || undefined;
 
@@ -149,10 +253,23 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
         if (input.file.size > 4 * 1024 * 1024) {
           throw new Error("PDF en fazla 4 MB olabilir.");
         }
-        storageKey = id;
         fileName = input.file.name;
-        await savePdfBlob(storageKey, input.file);
-        url = undefined;
+        // PDF OneDrive’a yüklenir ki tüm ziyaretçiler indirebilsin
+        const form = new FormData();
+        form.append("file", input.file);
+        form.append("kind", "pdf");
+        const res = await fetch("/api/admin/upload", {
+          method: "POST",
+          body: form,
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          url?: string;
+          error?: string;
+        };
+        if (!res.ok || !data.url) {
+          throw new Error(data.error || "PDF OneDrive’a yüklenemedi.");
+        }
+        url = data.url;
       }
 
       if (!storageKey && !url) {
@@ -169,6 +286,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
         url,
         createdAt: new Date().toISOString(),
       };
+      dirty.current = true;
       setPdfCatalogs((prev) => [catalog, ...prev]);
       return catalog;
     },
@@ -176,6 +294,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   );
 
   const deletePdfCatalog = useCallback(async (id: string) => {
+    dirty.current = true;
     setPdfCatalogs((prev) => {
       const item = prev.find((p) => p.id === id);
       if (item?.storageKey) {
@@ -186,6 +305,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updatePdfCatalog = useCallback((catalog: PdfCatalog) => {
+    dirty.current = true;
     setPdfCatalogs((prev) =>
       prev.map((p) => (p.id === catalog.id ? catalog : p))
     );
@@ -213,6 +333,10 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       addPdfCatalog,
       deletePdfCatalog,
       updatePdfCatalog,
+      source,
+      syncError,
+      syncing,
+      syncNow,
     }),
     [
       categories,
@@ -227,6 +351,10 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       addPdfCatalog,
       deletePdfCatalog,
       updatePdfCatalog,
+      source,
+      syncError,
+      syncing,
+      syncNow,
     ]
   );
 

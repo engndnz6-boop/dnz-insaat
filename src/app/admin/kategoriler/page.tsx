@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pencil, Plus, Trash2, CornerDownRight } from "lucide-react";
 import { useCatalog } from "@/lib/catalog-context";
+import { CatalogSyncStatus } from "@/components/admin/CatalogSyncStatus";
 import { slugify } from "@/lib/utils";
 import { useProducts } from "@/lib/products-context";
 import type { Category } from "@/lib/types";
@@ -62,6 +63,7 @@ export default function AdminCategoriesPage() {
         Ana kategori ve alt kategori ekleyin. Örnek: Elektrik Malzemeleri →
         Anahtar Prizler. Ürünlerde ayrıca marka (Viko) ve model girilir.
       </p>
+      <CatalogSyncStatus />
 
       <form
         onSubmit={onAdd}
