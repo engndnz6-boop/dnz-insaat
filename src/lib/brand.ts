@@ -11,7 +11,14 @@ export const brand = {
   email: "dnzyapimalzemeleri@gmail.com",
   phone: "0533 611 06 15",
   phoneTel: "+905336110615",
-  address: "Karşıyaka Mah. Şehit Ali Gaffar Okkan Cad. No: 42/A, Gölbaşı / Ankara",
+  address: "Karşıyaka Mah. Şehit Ali Gaffar Okkan Cad. No: 42/A, 06830 Gölbaşı / Ankara",
+  postalCode: "06830",
+  /** Google İşletme Profili (Haritalar) */
+  mapsUrl: "https://maps.app.goo.gl/5aHGjFU2mzyPy3W89",
+  googleProfileName: "DNZ YAPI MALZEMELERİ DEKORASYON VE HIRDAVAT",
+  /** Harita gömme: işletme adı + adres araması (API anahtarı gerekmez) */
+  mapsEmbedUrl:
+    "https://www.google.com/maps?q=DNZ+YAPI+MALZEMELER%C4%B0+DEKORASYON+VE+HIRDAVAT,+Kar%C5%9F%C4%B1yaka,+42-A,+06830+G%C3%B6lba%C5%9F%C4%B1%2FAnkara&output=embed",
   hours: "Pazartesi – Cumartesi · 09:00 – 18:00",
   keywords: [
     "DNZ İnşaat",

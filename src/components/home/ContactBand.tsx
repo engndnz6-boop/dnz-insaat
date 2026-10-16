@@ -55,6 +55,15 @@ export function ContactBand() {
                 <span className="mt-1 block text-sm text-brand-mist">
                   {brand.hours.replace(" · ", ", ")}
                 </span>
+                <a
+                  href={brand.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-light mt-4 px-4 py-2 text-xs"
+                >
+                  <MapPin className="h-4 w-4" />
+                  Yol tarifi al
+                </a>
               </span>
             </div>
           </div>

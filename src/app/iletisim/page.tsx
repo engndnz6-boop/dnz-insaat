@@ -49,6 +49,30 @@ export default function IletisimPage() {
             </a>
           </div>
 
+          <div className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-red">
+            <iframe
+              title="DNZ İnşaat Malzemeleri konumu"
+              src={brand.mapsEmbedUrl}
+              className="block h-64 w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            <div className="p-4">
+              <a href={brand.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn-gold w-full text-xs">
+                <MapPin className="h-4 w-4" />
+                Yol tarifi al
+              </a>
+              <a
+                href={brand.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 block text-center text-xs font-semibold text-brand-navy hover:text-brand-gold"
+              >
+                Google’da yorum yazın
+              </a>
+            </div>
+          </div>
+
           <div className="border border-black/5 p-6 text-sm leading-relaxed text-brand-mist">
             <p className="font-medium text-brand-bone">Uygulama alanlarımız</p>
             <p className="mt-2">
