@@ -9,6 +9,7 @@ import { Logo } from "@/components/brand/Logo";
 
 const links = [
   { href: "/", label: "Ana Sayfa" },
+  { href: "/hakkimizda", label: "Kurumsal" },
   { href: "/katalog", label: "Ürünler" },
   { href: "/imalat-sistemleri", label: "İmalat Sistemleri" },
   { href: "/kataloglar", label: "Dokümanlar" },
@@ -30,7 +31,7 @@ export function Navbar() {
           <Logo tone="dark" />
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-6 xl:flex">
           {links.map((link) => {
             const active =
               link.href === "/"
@@ -40,7 +41,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-[13px] font-medium tracking-wide transition ${
+                className={`whitespace-nowrap text-[13px] font-medium tracking-wide transition ${
                   active
                     ? "text-brand-navy font-semibold"
                     : "text-brand-bone/70 hover:text-brand-navy"
@@ -50,7 +51,7 @@ export function Navbar() {
               </Link>
             );
           })}
-          <Link href="/iletisim" className="btn-gold px-4 py-2 text-[13px]">
+          <Link href="/iletisim" className="btn-gold whitespace-nowrap px-4 py-2 text-[13px]">
             Teklif Al
           </Link>
         </nav>
@@ -71,7 +72,7 @@ export function Navbar() {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center text-brand-navy md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center text-brand-navy xl:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Menüyü kapat" : "Menüyü aç"}
           >
@@ -81,7 +82,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-black/10 bg-brand-soft md:hidden">
+        <div className="border-t border-black/10 bg-brand-soft xl:hidden">
           <nav className="container-page flex flex-col gap-1 py-4">
             {links.map((link) => (
               <Link

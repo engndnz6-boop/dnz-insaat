@@ -3,6 +3,7 @@ export const brand = {
   name: "DNZ İnşaat Malzemeleri",
   shortName: "DNZ",
   tagline: "İnşaat Malzemeleri & Asma Tavan",
+  slogan: "Malzemeden uygulamaya, hayalden gerçeğe… DNZ İnşaat.",
   description:
     "DNZ İnşaat Malzemeleri Ankara Gölbaşı: alçıpan, alçı, boya, galvaniz profil, kutu profil, ABS, UMS, clip-in / petek / karolam / taşyünü / vinil asma tavan, plastik lambiri, bölme duvar, giydirme duvar, seramik, parke, malzeme, yedek parça, kombi parçası, elektrik ve su tamiratı, ev-okul-ofis tadilatı, anahtar teslim.",
   /** Vercel/DNS: dnzinşaat.com.tr punycode */

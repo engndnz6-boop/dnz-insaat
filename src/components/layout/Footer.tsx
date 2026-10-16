@@ -15,9 +15,15 @@ export function Footer() {
       <div className="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <Logo />
-          <p className="mt-4 text-sm leading-relaxed text-white/70">
+          <p className="mt-4 text-base font-semibold leading-snug text-white">
+            {brand.slogan}
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-white/60">
             {brand.description}
           </p>
+          <Link href="/hakkimizda" className="mt-3 inline-block text-sm font-semibold text-brand-gold-light hover:text-white">
+            Misyonumuz ve vizyonumuz
+          </Link>
         </div>
 
         <div>

@@ -7,6 +7,7 @@ import { FeaturedProjects } from "@/components/home/FeaturedProjects";
 import { Testimonials } from "@/components/home/Testimonials";
 import { SeoTopics } from "@/components/home/SeoTopics";
 import { ContactBand } from "@/components/home/ContactBand";
+import { MissionBand } from "@/components/home/MissionBand";
 import { projects } from "@/lib/data/projects";
 import { testimonials } from "@/lib/data/testimonials";
 
@@ -22,6 +23,7 @@ export default function HomePage() {
       <ProcessSteps />
       <FeaturedProducts />
       <FeaturedProjects projects={projects} />
+      <MissionBand />
       <Testimonials items={testimonials} />
       <SeoTopics />
       <ContactBand />

@@ -28,6 +28,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${base}/hakkimizda`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.7,
+    },
+    {
       url: `${base}/iletisim`,
       lastModified: now,
       changeFrequency: "monthly",
