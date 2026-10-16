@@ -104,7 +104,7 @@ export function Footer() {
           <p className="mt-4 text-sm text-white/75">{brand.hours}</p>
           <Link
             href="/iletisim"
-            className="mt-6 inline-flex bg-brand-gold px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-gold-light"
+            className="btn-gold mt-6 px-4 py-2 text-xs transition hover:bg-brand-gold-light"
           >
             Proje Teklifi İste
           </Link>

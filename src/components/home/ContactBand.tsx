@@ -7,7 +7,7 @@ export function ContactBand() {
   return (
     <section className="bg-brand-ink pb-4 pt-20 sm:pt-24">
       <div className="container-page">
-        <div className="grid gap-px bg-black/10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="grid gap-px overflow-hidden rounded-xl bg-black/10 shadow-red lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
           <div className="bg-brand-navy px-6 py-12 text-white sm:px-12 sm:py-14">
             <h2 className="type-wide max-w-lg text-3xl font-bold leading-tight sm:text-[2.6rem]">
               Projenizi anlatın, metrajı ve fiyatı birlikte çıkaralım.
@@ -19,7 +19,7 @@ export function ContactBand() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/iletisim"
-                className="inline-flex items-center bg-brand-gold px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-gold-light"
+                className="btn-gold px-6 py-3.5"
               >
                 Teklif formunu doldur
               </Link>
@@ -27,7 +27,7 @@ export function ContactBand() {
                 href={buildWhatsAppUrl(quoteInquiryMessage())}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border border-white/30 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                className="btn-light px-6 py-3.5"
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp’tan yaz

@@ -60,7 +60,7 @@ export function ProcessSteps() {
 
             <Link
               href="/kataloglar"
-              className="mt-10 flex items-center gap-4 border border-black/10 p-4 transition hover:border-brand-navy/40"
+              className="mt-10 flex items-center gap-4 rounded-lg border border-black/10 bg-white p-4 shadow-red transition hover:border-brand-navy/40"
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-brand-paper text-brand-navy">
                 <FileText className="h-5 w-5" />
@@ -76,7 +76,7 @@ export function ProcessSteps() {
             </Link>
           </div>
 
-          <ol className="relative grid gap-px bg-black/10 sm:grid-cols-2">
+          <ol className="relative grid gap-px overflow-hidden rounded-lg bg-black/10 shadow-red sm:grid-cols-2">
             {steps.map((step, i) => (
               <li key={step.title} className="bg-white">
                 <Link

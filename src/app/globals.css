@@ -4,7 +4,7 @@
 
 :root {
   --font-sans: "Archivo Variable";
-  --brand-ink: #e8ecf1;
+  --brand-ink: #ddeded;
   --brand-anthracite: #ffffff;
   --brand-gold: #d97706;
   --brand-bone: #0f172a;
@@ -25,12 +25,77 @@ body {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
+  /* Gerçekçi (3B) butonlar: üstten ışık alan degrade, iç parlama, koyu alt kenar,
+     kırmızı gölge; üzerine gelince hafif kalkar, basınca içe gömülür */
+  .btn-3d {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3 text-sm font-semibold tracking-wide transition duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    border-width: 1px;
+    border-bottom-width: 3px;
+  }
+  .btn-3d:hover {
+    transform: translateY(-1px);
+  }
+  .btn-3d:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+    margin-bottom: 2px;
+  }
+
+  .btn-gold {
+    @apply btn-3d text-white focus-visible:outline-brand-gold;
+    background: linear-gradient(180deg, #f6a33a 0%, #e0820b 55%, #c96f04 100%);
+    border-color: #b86503;
+    border-bottom-color: #8f4e02;
+    text-shadow: 0 1px 0 rgba(120, 50, 0, 0.45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 10px 20px -10px rgba(185, 28, 28, 0.6);
+  }
+  .btn-gold:hover {
+    background: linear-gradient(180deg, #f8b052 0%, #e98d14 55%, #d27706 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 14px 24px -10px rgba(185, 28, 28, 0.65);
+  }
+  .btn-gold:active {
+    box-shadow: inset 0 2px 4px rgba(120, 50, 0, 0.35), 0 4px 8px -6px rgba(185, 28, 28, 0.5);
+  }
+
+  .btn-navy {
+    @apply btn-3d text-white focus-visible:outline-brand-navy;
+    background: linear-gradient(180deg, #2a5596 0%, #154181 55%, #0b2c5e 100%);
+    border-color: #0b2c5e;
+    border-bottom-color: #061a3a;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 10px 20px -10px rgba(185, 28, 28, 0.55);
+  }
+  .btn-navy:hover {
+    background: linear-gradient(180deg, #3463a8 0%, #1b4b92 55%, #0f3470 100%);
+  }
+  .btn-navy:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 4px 8px -6px rgba(185, 28, 28, 0.5);
+  }
+
+  .btn-light {
+    @apply btn-3d text-brand-navy focus-visible:outline-brand-navy;
+    background: linear-gradient(180deg, #ffffff 0%, #f2f6f7 60%, #e3eaec 100%);
+    border-color: #c3ced6;
+    border-bottom-color: #9fb0bd;
+    box-shadow: inset 0 1px 0 #ffffff, 0 10px 20px -12px rgba(185, 28, 28, 0.45);
+  }
+  .btn-light:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #f7fafb 60%, #eaf0f2 100%);
+  }
+  .btn-light:active {
+    box-shadow: inset 0 2px 4px rgba(11, 44, 94, 0.15), 0 4px 8px -6px rgba(185, 28, 28, 0.4);
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-brand-navy px-6 py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-[#0a2550] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy disabled:opacity-50;
+    @apply btn-navy;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 border border-brand-navy/30 bg-white px-6 py-3 text-sm font-semibold tracking-wide text-brand-navy transition hover:border-brand-navy hover:bg-brand-navy/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-navy;
+    @apply btn-light;
+  }
+
+  .card-red {
+    @apply shadow-red;
   }
 
   .btn-ghost {

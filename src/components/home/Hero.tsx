@@ -26,10 +26,10 @@ function QuickEstimate() {
   return (
     <form
       onSubmit={(e) => e.preventDefault()}
-      className="grid gap-px border border-black/10 bg-black/10 shadow-[0_24px_50px_-28px_rgba(7,29,63,0.35)] sm:grid-cols-[1.3fr_0.7fr_auto]"
+      className="grid gap-px overflow-hidden rounded-lg border border-black/10 bg-white shadow-red sm:grid-cols-[1.3fr_0.7fr_auto] sm:items-center"
       aria-label="Hızlı metraj hesabı"
     >
-      <label className="flex flex-col bg-white px-5 py-3.5">
+      <label className="flex flex-col border-b border-black/10 bg-white px-5 py-3.5 sm:border-b-0 sm:border-r">
         <span className="text-xs font-medium text-brand-mist">Sistem</span>
         <select
           value={selected}
@@ -43,7 +43,7 @@ function QuickEstimate() {
           ))}
         </select>
       </label>
-      <label className="flex flex-col bg-white px-5 py-3.5">
+      <label className="flex flex-col border-b border-black/10 bg-white px-5 py-3.5 sm:border-b-0 sm:border-r">
         <span className="text-xs font-medium text-brand-mist">Alan (m²)</span>
         <input
           inputMode="decimal"
@@ -55,7 +55,7 @@ function QuickEstimate() {
       </label>
       <Link
         href={href}
-        className="flex items-center justify-center gap-2 bg-brand-gold px-7 py-4 text-sm font-semibold text-white transition hover:bg-brand-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-gold"
+        className="btn-gold m-1.5 px-7 py-3.5"
       >
         Metrajı hesapla
         <ArrowRight className="h-4 w-4" />
@@ -68,7 +68,7 @@ export function Hero() {
   const { settings } = useSiteSettings();
 
   return (
-    <section className="relative bg-gradient-to-b from-[#E9EEF4] to-[#D6DFEA]">
+    <section className="relative bg-gradient-to-b from-[#E8F4F3] via-[#DCEEEE] to-[#C8E2E5]">
       {/* İnce modül çizgileri: 60 cm karo ritmi */}
       <div
         aria-hidden
@@ -104,14 +104,14 @@ export function Hero() {
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
               href="/#hizmetler"
-              className="inline-flex items-center gap-2 bg-brand-gold px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-gold-light"
+              className="btn-gold px-6 py-3.5"
             >
               Hizmetlerimizi keşfedin
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/iletisim"
-              className="inline-flex items-center gap-2 border border-brand-navy/30 bg-white px-6 py-3.5 text-sm font-semibold text-brand-navy transition hover:border-brand-navy"
+              className="btn-light px-6 py-3.5"
             >
               Teklif alın
             </Link>

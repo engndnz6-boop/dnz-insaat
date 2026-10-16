@@ -24,7 +24,7 @@ export function Navbar() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-black/10 bg-brand-soft/95 backdrop-blur print:hidden">
+    <header className="sticky top-0 z-50 border-b border-black/10 bg-brand-soft/95 shadow-[0_6px_16px_-12px_rgba(185,28,28,0.45)] backdrop-blur print:hidden">
       <div className="container-page flex h-16 items-center justify-between sm:h-[72px]">
         <Link href="/" className="group transition hover:opacity-90">
           <Logo tone="dark" />
@@ -50,7 +50,7 @@ export function Navbar() {
               </Link>
             );
           })}
-          <Link href="/iletisim" className="bg-brand-gold px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-brand-gold-light">
+          <Link href="/iletisim" className="btn-gold px-4 py-2 text-[13px]">
             Teklif Al
           </Link>
         </nav>
@@ -96,7 +96,7 @@ export function Navbar() {
             <Link
               href="/iletisim"
               onClick={() => setOpen(false)}
-              className="mt-2 bg-brand-gold px-3 py-3 text-center text-sm font-semibold text-white"
+              className="btn-gold mt-2 w-full py-3"
             >
               Teklif Al
             </Link>

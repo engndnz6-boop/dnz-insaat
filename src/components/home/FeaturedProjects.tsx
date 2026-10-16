@@ -38,7 +38,7 @@ function BeforeAfterCard({
   const hasVideo = Boolean(project.videoUrl);
 
   return (
-    <article className="group overflow-hidden border border-black/10 bg-white">
+    <article className="group overflow-hidden rounded-lg border border-black/10 bg-white shadow-red">
       <div className="relative aspect-[4/3] select-none overflow-hidden bg-brand-steel/40">
         {showVideo && hasVideo ? (
           <ProductVideo

@@ -91,7 +91,7 @@ export function CategoryShowcase() {
             <Link
               key={cat.href}
               href={cat.href}
-              className={`group relative flex overflow-hidden bg-brand-navy ${spans[i]}`}
+              className={`group relative flex overflow-hidden rounded-lg bg-brand-navy shadow-red ${spans[i]}`}
             >
               <ProductImage
                 src={images[i]}

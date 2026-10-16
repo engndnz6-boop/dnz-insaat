@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          ink: "#E8ECF1",
+          ink: "#DDEDED",
           anthracite: "#FFFFFF",
           slate: "#E2E8F0",
           mist: "#64748B",
@@ -20,8 +20,8 @@ const config: Config = {
           navy: "#0B2C5E",
           night: "#071D3F",
           steel: "#C9D1DC",
-          paper: "#DFE5EC",
-          soft: "#EEF1F5",
+          paper: "#CFE5E6",
+          soft: "#E6F3F2",
         },
       },
       fontFamily: {
@@ -29,7 +29,9 @@ const config: Config = {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        soft: "0 18px 40px -18px rgba(21, 25, 32, 0.18)",
+        soft: "0 14px 30px -16px rgba(185, 28, 28, 0.38)",
+        /* Kırmızı gölge: kartlar ve paneller */
+        red: "0 16px 32px -18px rgba(185, 28, 28, 0.5), 0 4px 10px -6px rgba(185, 28, 28, 0.25)",
       },
       animation: {
         "fade-up": "fadeUp 0.7s ease-out forwards",

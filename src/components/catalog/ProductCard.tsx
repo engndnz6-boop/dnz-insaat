@@ -17,7 +17,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/urun/${product.slug}`}
-      className="group flex flex-col overflow-hidden border border-black/5 bg-brand-anthracite shadow-soft transition hover:border-brand-gold/30"
+      className="group flex flex-col overflow-hidden rounded-lg border border-black/5 bg-white shadow-red transition hover:-translate-y-0.5 hover:border-brand-gold/40"
     >
       <div className="relative aspect-[4/5] overflow-hidden">
         <ProductImage
