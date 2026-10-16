@@ -9,11 +9,11 @@ import { Logo } from "@/components/brand/Logo";
 
 const links = [
   { href: "/", label: "Ana Sayfa" },
-  { href: "/hakkimizda", label: "Kurumsal" },
   { href: "/katalog", label: "Ürünler" },
   { href: "/imalat-sistemleri", label: "İmalat Sistemleri" },
-  { href: "/kataloglar", label: "Dokümanlar" },
-  { href: "/#projeler", label: "Projeler" },
+  { href: "/hizmetlerimiz", label: "Hizmetlerimiz" },
+  { href: "/projelerimiz", label: "Projelerimiz" },
+  { href: "/hakkimizda", label: "Hakkımızda" },
   { href: "/iletisim", label: "İletişim" },
 ];
 
@@ -31,7 +31,7 @@ export function Navbar() {
           <Logo tone="dark" />
         </Link>
 
-        <nav className="hidden items-center gap-6 xl:flex">
+        <nav className="hidden items-center gap-5 xl:flex">
           {links.map((link) => {
             const active =
               link.href === "/"

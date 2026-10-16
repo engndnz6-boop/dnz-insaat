@@ -38,7 +38,7 @@ export function ProductJsonLd({
             name: product.brand || brand.name,
           },
           category: categoryName,
-          offers: {
+          offers: product.quoteOnly ? undefined : {
             "@type": "Offer",
             url,
             priceCurrency: product.currency,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
+  Inbox,
   LayoutDashboard,
   LogOut,
   Package,
@@ -161,6 +162,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     { href: "/admin/kategoriler", label: "Kategoriler", icon: Tags },
     { href: "/admin/hesaplamalar", label: "İmalat Sistemleri", icon: Calculator },
     { href: "/admin/kataloglar", label: "PDF Katalog", icon: FileText },
+    { href: "/admin/teklifler", label: "Teklif Talepleri", icon: Inbox },
     { href: "/admin/siparisler", label: "Siparişler", icon: ShoppingBag },
   ];
 

@@ -1,80 +1,72 @@
 import { NextResponse } from "next/server";
+import { isOneDriveConfigured, readJsonFromOneDrive, writeJsonToOneDrive } from "@/lib/onedrive";
+import { QUOTES_FILE, type QuoteRequest, type QuotesFile } from "@/lib/quotes";
 
 export const runtime = "nodejs";
 
-const QUOTE_EMAIL =
-  process.env.QUOTE_EMAIL?.trim() || "dnzyapimalzemeleri@gmail.com";
+const QUOTE_EMAIL = process.env.QUOTE_EMAIL?.trim() || "dnzyapimalzemeleri@gmail.com";
 
-type QuoteBody = {
-  name?: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  projectType?: string;
-  message?: string;
-};
+const clean = (v: unknown, max = 2000) => String(v ?? "").trim().slice(0, max);
 
 export async function POST(request: Request) {
-  let body: QuoteBody;
+  let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Geçersiz istek." }, { status: 400 });
   }
 
-  const name = String(body.name || "").trim();
-  const email = String(body.email || "").trim();
-  const phone = String(body.phone || "").trim();
-  const company = String(body.company || "").trim();
-  const projectType = String(body.projectType || "").trim();
-  const message = String(body.message || "").trim();
+  const q: QuoteRequest = {
+    id: `q-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    name: clean(body.name, 120),
+    phone: clean(body.phone, 40),
+    email: clean(body.email, 160),
+    topic: clean(body.topic || body.projectType, 160),
+    location: clean(body.location, 160),
+    message: clean(body.message),
+    status: "yeni",
+  };
 
-  if (!name || !email || !phone || !projectType || !message) {
-    return NextResponse.json(
-      { error: "Zorunlu alanlar eksik." },
-      { status: 400 }
-    );
+  if (!q.name || !q.phone || !q.topic || !q.message) {
+    return NextResponse.json({ error: "Zorunlu alanlar eksik." }, { status: 400 });
   }
 
-  try {
-    const res = await fetch(
-      `https://formsubmit.co/ajax/${encodeURIComponent(QUOTE_EMAIL)}`,
-      {
+  const results = await Promise.allSettled([
+    // 1) Talep kaydı (admin > Teklif talepleri)
+    (async () => {
+      if (!isOneDriveConfigured()) return;
+      const data = (await readJsonFromOneDrive<QuotesFile>(QUOTES_FILE)) || { quotes: [] };
+      const quotes = Array.isArray(data.quotes) ? data.quotes : [];
+      quotes.unshift(q);
+      await writeJsonToOneDrive(QUOTES_FILE, { quotes: quotes.slice(0, 1000) } satisfies QuotesFile);
+    })(),
+    // 2) E-posta bildirimi
+    (async () => {
+      const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(QUOTE_EMAIL)}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          name,
-          email,
-          phone,
-          company: company || "-",
-          projectType,
-          message,
-          _subject: `DNZ Teklif Talebi — ${projectType}`,
+          "Ad soyad": q.name,
+          Telefon: q.phone,
+          "E-posta": q.email || "-",
+          "Ürün / hizmet": q.topic,
+          "Proje konumu": q.location || "-",
+          Açıklama: q.message,
+          _subject: `DNZ Teklif Talebi — ${q.topic}`,
           _template: "table",
-          _replyto: email,
+          ...(q.email ? { _replyto: q.email } : {}),
         }),
         cache: "no-store",
-      }
-    );
+      });
+      if (!res.ok) throw new Error("E-posta gönderilemedi.");
+    })(),
+  ]);
 
-    if (!res.ok) {
-      const text = await res.text();
-      return NextResponse.json(
-        { error: "E-posta gönderilemedi.", detail: text.slice(0, 200) },
-        { status: 502 }
-      );
-    }
-
-    return NextResponse.json({ ok: true, email: QUOTE_EMAIL });
-  } catch (err) {
-    return NextResponse.json(
-      {
-        error: err instanceof Error ? err.message : "E-posta hatası",
-      },
-      { status: 500 }
-    );
+  const saved = results[0].status === "fulfilled";
+  const mailed = results[1].status === "fulfilled";
+  if (!saved && !mailed) {
+    return NextResponse.json({ error: "Talep iletilemedi." }, { status: 502 });
   }
+  return NextResponse.json({ ok: true, saved, mailed });
 }

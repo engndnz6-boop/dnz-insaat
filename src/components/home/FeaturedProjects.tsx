@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import type { Product, Project } from "@/lib/types";
 import { useProducts } from "@/lib/products-context";
 import { ProductImage } from "@/components/product/ProductImage";
@@ -19,6 +20,9 @@ function productToProject(p: Product): Project {
     afterImage: after,
     description: p.shortDescription || p.description,
     videoUrl: p.videoUrl || "",
+    works: p.projectWorks || "",
+    materials: p.projectMaterials || "",
+    status: p.projectStatus || "",
   };
 }
 
@@ -120,6 +124,28 @@ function BeforeAfterCard({
         <p className="mt-2 text-sm leading-relaxed text-brand-mist">
           {project.description}
         </p>
+        {project.works || project.materials || project.status ? (
+          <dl className="mt-3 space-y-1 text-xs">
+            {project.works ? (
+              <div className="flex gap-2">
+                <dt className="shrink-0 text-brand-mist">Uygulanan işler:</dt>
+                <dd className="text-brand-bone">{project.works}</dd>
+              </div>
+            ) : null}
+            {project.materials ? (
+              <div className="flex gap-2">
+                <dt className="shrink-0 text-brand-mist">Malzemeler:</dt>
+                <dd className="text-brand-bone">{project.materials}</dd>
+              </div>
+            ) : null}
+            {project.status ? (
+              <div className="flex gap-2">
+                <dt className="shrink-0 text-brand-mist">Durum:</dt>
+                <dd className="font-semibold text-emerald-700">{project.status}</dd>
+              </div>
+            ) : null}
+          </dl>
+        ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
           {hasVideo ? (
             <button
@@ -146,8 +172,14 @@ function BeforeAfterCard({
 
 export function FeaturedProjects({
   projects: seedProjects = [],
+  limit,
+  asPage = false,
 }: {
   projects?: Project[];
+  /** Ana sayfada gösterilecek en fazla proje */
+  limit?: number;
+  /** Projelerimiz sayfası: başlık h1, buton yok */
+  asPage?: boolean;
 }) {
   const { getProjects, ready } = useProducts();
   const items = useMemo(() => {
@@ -158,21 +190,34 @@ export function FeaturedProjects({
     }));
     // Admin’de en az bir proje varsa yalnızca gerçek projeler gösterilir;
     // örnek (seed) projeler sadece hiç proje yokken yer tutucu olarak çıkar.
-    if (mapped.length > 0) return mapped;
-    return seedProjects.map((p) => ({
-      project: p,
-      slug: undefined as string | undefined,
-    }));
-  }, [getProjects, seedProjects]);
+    const all =
+      mapped.length > 0
+        ? mapped
+        : seedProjects.map((p) => ({ project: p, slug: undefined as string | undefined }));
+    return limit ? all.slice(0, limit) : all;
+  }, [getProjects, seedProjects, limit]);
 
   return (
     <section id="projeler" className="container-page scroll-mt-24 py-20 sm:py-24">
-      <div className="max-w-2xl">
-        <h2 className="home-heading">Yaptığımız işler</h2>
-        <p className="mt-3 text-base leading-relaxed text-brand-mist sm:text-lg">
-          Asma tavan, bölme duvar ve tadilat işlerimizden örnekler. Önce ve
-          sonrayı görmek için çizgiyi kaydırın.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl">
+          {asPage ? (
+            <h1 className="home-heading">Projelerimiz</h1>
+          ) : (
+            <h2 className="home-heading">Kalitemiz, ortaya çıkardığımız işlerde.</h2>
+          )}
+          <p className="mt-3 text-base leading-relaxed text-brand-mist sm:text-lg">
+            {asPage
+              ? "Kalitemiz, ortaya çıkardığımız işlerde. Tamamlanan projelerden gerçek fotoğraflar ve uygulama detayları."
+              : "Tamamlanan projelerden gerçek fotoğraflar ve uygulama detayları. Önce ve sonrayı görmek için çizgiyi kaydırın."}
+          </p>
+        </div>
+        {!asPage ? (
+          <Link href="/projelerimiz" className="btn-light shrink-0 px-5 py-3">
+            Projelerimizi keşfet
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        ) : null}
       </div>
 
       <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">

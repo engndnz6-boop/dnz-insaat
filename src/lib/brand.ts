@@ -99,9 +99,9 @@ export const brand = {
     slate: "#E2E8F0",
     mist: "#64748B",
     bone: "#0F172A",
-    gold: "#D97706",
+    gold: "#E78312",
     goldLight: "#F59E0B",
-    navy: "#0B2C5E",
+    navy: "#102B55",
   },
 } as const;
 

@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { MapPin, MessageCircle, Phone } from "lucide-react";
+import { Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import { brand } from "@/lib/brand";
 import { buildWhatsAppUrl, quoteInquiryMessage } from "@/lib/whatsapp";
 
@@ -10,19 +9,17 @@ export function ContactBand() {
         <div className="grid gap-px overflow-hidden rounded-xl bg-black/10 shadow-red lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
           <div className="bg-brand-navy px-6 py-12 text-white sm:px-12 sm:py-14">
             <h2 className="type-wide max-w-lg text-3xl font-bold leading-tight sm:text-[2.6rem]">
-              Projenizi anlatın, metrajı ve fiyatı birlikte çıkaralım.
+              Projenize bugün başlayın.
             </h2>
             <p className="mt-4 max-w-md text-white/75">
-              Alçıpan, profil, asma tavan, bölme duvar, seramik, parke ya da
-              anahtar teslim tadilat için teklif isteyin.
+              Malzeme, uygulama, tadilat ya da dekorasyon; ihtiyacınızı anlatın,
+              size özel teklif hazırlayalım.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/iletisim"
-                className="btn-gold px-6 py-3.5"
-              >
-                Teklif formunu doldur
-              </Link>
+              <a href={`tel:${brand.phoneTel}`} className="btn-gold px-6 py-3.5">
+                <Phone className="h-4 w-4" />
+                Hemen ara
+              </a>
               <a
                 href={buildWhatsAppUrl(quoteInquiryMessage())}
                 target="_blank"
@@ -31,6 +28,10 @@ export function ContactBand() {
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp’tan yaz
+              </a>
+              <a href={brand.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn-light px-6 py-3.5">
+                <MapPin className="h-4 w-4" />
+                Yol tarifi al
               </a>
             </div>
           </div>
@@ -48,22 +49,15 @@ export function ContactBand() {
             <div className="flex items-start gap-4">
               <MapPin className="mt-1 h-5 w-5 shrink-0 text-brand-navy" />
               <span>
-                <span className="block text-sm text-brand-mist">Mağaza</span>
-                <span className="block leading-relaxed text-brand-bone">
-                  {brand.address}
-                </span>
-                <span className="mt-1 block text-sm text-brand-mist">
-                  {brand.hours.replace(" · ", ", ")}
-                </span>
-                <a
-                  href={brand.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-light mt-4 px-4 py-2 text-xs"
-                >
-                  <MapPin className="h-4 w-4" />
-                  Yol tarifi al
-                </a>
+                <span className="block text-sm text-brand-mist">Konum: Gölbaşı / Ankara</span>
+                <span className="block leading-relaxed text-brand-bone">{brand.address}</span>
+              </span>
+            </div>
+            <div className="flex items-start gap-4">
+              <Clock className="mt-1 h-5 w-5 shrink-0 text-brand-navy" />
+              <span>
+                <span className="block text-sm text-brand-mist">Çalışma saatleri</span>
+                <span className="block text-brand-bone">{brand.hours.replace(" · ", ", ")}</span>
               </span>
             </div>
           </div>

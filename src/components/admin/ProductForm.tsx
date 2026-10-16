@@ -476,6 +476,33 @@ export function ProductForm({
                 onChange={(e) => set("projectCategory", e.target.value)}
               />
             </Field>
+            <Field label="Uygulanan işler">
+              <input
+                className="input-field"
+                placeholder="Asma tavan, ışık bandı, boya"
+                value={form.projectWorks || ""}
+                onChange={(e) => set("projectWorks", e.target.value)}
+              />
+            </Field>
+            <Field label="Kullanılan malzemeler">
+              <input
+                className="input-field"
+                placeholder="Alçıpan 12,5 mm, C 60/27 profil"
+                value={form.projectMaterials || ""}
+                onChange={(e) => set("projectMaterials", e.target.value)}
+              />
+            </Field>
+            <Field label="Tamamlanma durumu">
+              <select
+                className="input-field"
+                value={form.projectStatus || ""}
+                onChange={(e) => set("projectStatus", e.target.value)}
+              >
+                <option value="">Belirtme</option>
+                <option value="Tamamlandı">Tamamlandı</option>
+                <option value="Devam ediyor">Devam ediyor</option>
+              </select>
+            </Field>
           </>
         ) : null}
         <Field label="Ana kategori *">
@@ -527,16 +554,31 @@ export function ProductForm({
             onChange={(e) => set("shortDescription", e.target.value)}
           />
         </Field>
-        <Field label={form.kind === "project" ? "Referans tutar (opsiyonel)" : "Fiyat (TRY) *"}>
+        <Field label={form.kind === "project" ? "Referans tutar (opsiyonel)" : form.quoteOnly ? "Fiyat (sitede gösterilmez)" : "Fiyat (TRY) *"}>
           <input
             type="number"
-            required={form.kind !== "project"}
+            required={form.kind !== "project" && !form.quoteOnly}
             min={0}
             className="input-field"
             value={form.price}
             onChange={(e) => set("price", Number(e.target.value))}
           />
         </Field>
+        {form.kind !== "project" ? (
+          <div className="sm:col-span-2 grid gap-4 border border-black/10 bg-white p-4 sm:grid-cols-3">
+            <Field label="Satış birimi">
+              <input className="input-field" placeholder="adet, m², paket, boy" value={form.unit || ""} onChange={(e) => set("unit", e.target.value)} />
+            </Field>
+            <label className="flex items-center gap-2 self-end pb-3 text-sm text-brand-bone">
+              <input type="checkbox" checked={!!form.vatIncluded} onChange={(e) => set("vatIncluded", e.target.checked)} className="h-4 w-4 accent-[#E78312]" />
+              Fiyata KDV dahil
+            </label>
+            <label className="flex items-center gap-2 self-end pb-3 text-sm text-brand-bone">
+              <input type="checkbox" checked={!!form.quoteOnly} onChange={(e) => set("quoteOnly", e.target.checked)} className="h-4 w-4 accent-[#E78312]" />
+              Fiyat gösterme, teklif iste
+            </label>
+          </div>
+        ) : null}
         {form.kind !== "project" ? (
           <div className="sm:col-span-2 border border-black/10 bg-white p-4">
             <h3 className="text-sm font-semibold text-brand-bone">Ürün özellikleri</h3>

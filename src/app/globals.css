@@ -6,9 +6,9 @@
   --font-sans: "Archivo Variable";
   --brand-ink: #ddeded;
   --brand-anthracite: #ffffff;
-  --brand-gold: #d97706;
+  --brand-gold: #e78312;
   --brand-bone: #0f172a;
-  --brand-navy: #0b2c5e;
+  --brand-navy: #102b55;
 }
 
 html {
@@ -43,14 +43,14 @@ body {
 
   .btn-gold {
     @apply btn-3d text-white focus-visible:outline-brand-gold;
-    background: linear-gradient(180deg, #f6a33a 0%, #e0820b 55%, #c96f04 100%);
-    border-color: #b86503;
-    border-bottom-color: #8f4e02;
+    background: linear-gradient(180deg, #f5a54c 0%, #e78312 55%, #cf6f08 100%);
+    border-color: #b9620a;
+    border-bottom-color: #8e4a06;
     text-shadow: 0 1px 0 rgba(120, 50, 0, 0.45);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 10px 20px -10px rgba(185, 28, 28, 0.6);
   }
   .btn-gold:hover {
-    background: linear-gradient(180deg, #f8b052 0%, #e98d14 55%, #d27706 100%);
+    background: linear-gradient(180deg, #f7b162 0%, #ec8f22 55%, #d6770c 100%);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 14px 24px -10px rgba(185, 28, 28, 0.65);
   }
   .btn-gold:active {
@@ -59,14 +59,14 @@ body {
 
   .btn-navy {
     @apply btn-3d text-white focus-visible:outline-brand-navy;
-    background: linear-gradient(180deg, #2a5596 0%, #154181 55%, #0b2c5e 100%);
-    border-color: #0b2c5e;
-    border-bottom-color: #061a3a;
+    background: linear-gradient(180deg, #2c4c80 0%, #183a6e 55%, #102b55 100%);
+    border-color: #102b55;
+    border-bottom-color: #081a36;
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 10px 20px -10px rgba(185, 28, 28, 0.55);
   }
   .btn-navy:hover {
-    background: linear-gradient(180deg, #3463a8 0%, #1b4b92 55%, #0f3470 100%);
+    background: linear-gradient(180deg, #355891 0%, #1e447c 55%, #143263 100%);
   }
   .btn-navy:active {
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 4px 8px -6px rgba(185, 28, 28, 0.5);

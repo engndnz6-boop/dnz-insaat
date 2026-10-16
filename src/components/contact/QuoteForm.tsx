@@ -1,61 +1,69 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Send } from "lucide-react";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
+import { services } from "@/lib/services";
 
-const PROJECT_TYPES = [
-  "Alçıpan asma tavan",
-  "Alçıpan ışık bandı",
-  "Taşyünü asma tavan",
-  "Karolam asma tavan",
-  "Clip-in asma tavan",
-  "Bölme duvar",
-  "Toplu malzeme alımı",
-  "Diğer",
+/** Ürün ya da hizmet seçimi: ürün grupları + uygulama hizmetleri */
+export const QUOTE_TOPICS: { group: string; options: string[] }[] = [
+  {
+    group: "Ürün / malzeme",
+    options: [
+      "Alçıpan ve profil sistemleri",
+      "Asma tavan malzemeleri",
+      "Seramik ve fayans",
+      "Boya ve alçı ürünleri",
+      "Parke ve kapılar",
+      "Elektrik ve su tesisatı ürünleri",
+      "Toplu malzeme alımı",
+    ],
+  },
+  { group: "Uygulama hizmeti", options: services.map((s) => s.title) },
+  { group: "Diğer", options: ["Diğer"] },
 ];
 
-function buildQuoteWhatsAppText(form: {
+type FormState = {
   name: string;
-  email: string;
   phone: string;
-  company: string;
-  projectType: string;
+  topic: string;
+  location: string;
   message: string;
-}) {
+  email: string;
+};
+
+function whatsappText(f: FormState) {
   return [
     "Merhaba, siteden teklif talebi:",
-    `Ad: ${form.name}`,
-    `Telefon: ${form.phone}`,
-    `E-posta: ${form.email}`,
-    form.company ? `Firma: ${form.company}` : null,
-    `Proje: ${form.projectType}`,
+    `Ad soyad: ${f.name}`,
+    `Telefon: ${f.phone}`,
+    f.email ? `E-posta: ${f.email}` : null,
+    `Konu: ${f.topic}`,
+    f.location ? `Proje konumu: ${f.location}` : null,
     "",
-    form.message,
+    f.message,
   ]
-    .filter(Boolean)
+    .filter((x) => x !== null)
     .join("\n");
 }
 
-export function QuoteForm() {
+export function QuoteForm({ compact = false }: { compact?: boolean }) {
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     name: "",
-    email: "",
     phone: "",
-    company: "",
-    projectType: PROJECT_TYPES[0],
+    topic: QUOTE_TOPICS[0].options[0],
+    location: "",
     message: "",
+    email: "",
   });
+  const set = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
     setSending(true);
-
-    const waUrl = buildWhatsAppUrl(buildQuoteWhatsAppText(form));
-
+    const waUrl = buildWhatsAppUrl(whatsappText(form));
     try {
       await fetch("/api/quote", {
         method: "POST",
@@ -65,117 +73,71 @@ export function QuoteForm() {
     } catch {
       /* WhatsApp yine açılsın */
     }
-
-    // Otomatik WhatsApp yönlendirme
     window.location.href = waUrl;
   };
 
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-5 border border-black/5 bg-brand-anthracite/40 p-6 sm:p-8"
+      className="space-y-5 rounded-lg border border-black/5 bg-white p-6 shadow-red sm:p-8"
     >
-      <p className="text-xs text-brand-mist">
-        Gönderince talep{" "}
-        <strong className="text-brand-bone">dnzyapimalzemeleri@gmail.com</strong>{" "}
-        adresine iletilir ve WhatsApp’a yönlendirilirsiniz.
-      </p>
-
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className="label-field">
-            Ad Soyad *
-          </label>
-          <input
-            id="name"
-            required
-            className="input-field"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
+          <label htmlFor="q-name" className="label-field">Ad soyad *</label>
+          <input id="q-name" required autoComplete="name" className="input-field" value={form.name} onChange={(e) => set("name", e.target.value)} />
         </div>
         <div>
-          <label htmlFor="phone" className="label-field">
-            Telefon *
-          </label>
-          <input
-            id="phone"
-            type="tel"
-            required
-            className="input-field"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
+          <label htmlFor="q-phone" className="label-field">Telefon numarası *</label>
+          <input id="q-phone" type="tel" required autoComplete="tel" inputMode="tel" placeholder="05xx xxx xx xx" className="input-field" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
         </div>
         <div>
-          <label htmlFor="email" className="label-field">
-            E-posta *
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            className="input-field"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
+          <label htmlFor="q-topic" className="label-field">Ürün veya hizmet *</label>
+          <select id="q-topic" required className="input-field" value={form.topic} onChange={(e) => set("topic", e.target.value)}>
+            {QUOTE_TOPICS.map((g) => (
+              <optgroup key={g.group} label={g.group}>
+                {g.options.map((o) => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </div>
         <div>
-          <label htmlFor="company" className="label-field">
-            Firma / Ofis
-          </label>
-          <input
-            id="company"
-            className="input-field"
-            value={form.company}
-            onChange={(e) => setForm({ ...form, company: e.target.value })}
-          />
+          <label htmlFor="q-loc" className="label-field">Proje konumu</label>
+          <input id="q-loc" placeholder="Örn. Gölbaşı, İncek, Çankaya" className="input-field" value={form.location} onChange={(e) => set("location", e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label htmlFor="projectType" className="label-field">
-          Proje Türü *
-        </label>
-        <select
-          id="projectType"
-          required
-          className="input-field"
-          value={form.projectType}
-          onChange={(e) => setForm({ ...form, projectType: e.target.value })}
-        >
-          {PROJECT_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="message" className="label-field">
-          Proje Detayı *
-        </label>
+        <label htmlFor="q-msg" className="label-field">Açıklama *</label>
         <textarea
-          id="message"
+          id="q-msg"
           required
-          rows={5}
+          rows={compact ? 3 : 5}
+          placeholder="Metrekare, malzeme ihtiyacı, yapılacak iş, istenen tarih…"
           className="input-field resize-y"
-          placeholder="Metrekare, malzeme ihtiyacı, teslim tarihi vb."
           value={form.message}
-          onChange={(e) => setForm({ ...form, message: e.target.value })}
+          onChange={(e) => set("message", e.target.value)}
         />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {!compact ? (
+        <div>
+          <label htmlFor="q-mail" className="label-field">E-posta (isteğe bağlı)</label>
+          <input id="q-mail" type="email" autoComplete="email" className="input-field" value={form.email} onChange={(e) => set("email", e.target.value)} />
+        </div>
+      ) : null}
 
-      <button
-        type="submit"
-        disabled={sending}
-        className="btn-primary w-full sm:w-auto"
-      >
+      <p className="text-xs leading-relaxed text-brand-mist">
+        Gönderince talebiniz bize iletilir ve WhatsApp açılır. Fotoğraf eklemek
+        isterseniz WhatsApp’ta mesajınıza ekleyebilirsiniz. Bilgileriniz yalnızca
+        teklif hazırlamak için kullanılır,{" "}
+        <Link href="/gizlilik" className="underline hover:text-brand-navy">gizlilik ve KVKK</Link>.
+      </p>
+
+      <button type="submit" disabled={sending} className="btn-gold w-full px-6 py-3.5 sm:w-auto">
         <Send className="h-4 w-4" />
-        {sending ? "Yönlendiriliyor…" : "Teklif Talebi Gönder"}
+        {sending ? "Gönderiliyor…" : "Teklif talebimi gönder"}
       </button>
     </form>
   );

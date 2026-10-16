@@ -10,7 +10,7 @@ import { WhatsAppInquiryButton } from "@/components/product/WhatsAppInquiryButto
 import { useProducts } from "@/lib/products-context";
 import { useCatalog } from "@/lib/catalog-context";
 import { openPdf } from "@/lib/pdf-storage";
-import { MATERIAL_LABELS, formatPrice, productSpecRows } from "@/lib/utils";
+import { MATERIAL_LABELS, formatPrice, priceSuffix, productSpecRows } from "@/lib/utils";
 
 export function ProductPageClient() {
   const params = useParams<{ slug: string }>();
@@ -103,12 +103,18 @@ export function ProductPageClient() {
               İmalat / proje örneği
             </p>
           ) : (
-            <p className="mt-6 font-display text-3xl text-brand-gold">
-              {formatPrice(product.price)}
-              <span className="ml-2 font-sans text-sm font-normal text-brand-mist">
-                / birim · KDV hariç
-              </span>
-            </p>
+            product.quoteOnly ? (
+              <p className="mt-6 text-base text-brand-bone/80">
+                Projenizin miktarına ve ihtiyaçlarına göre fiyatlandırma.
+              </p>
+            ) : (
+              <p className="mt-6 font-display text-3xl text-brand-gold">
+                {formatPrice(product.price)}
+                <span className="ml-2 font-sans text-sm font-normal text-brand-mist">
+                  {priceSuffix(product)}
+                </span>
+              </p>
+            )
           )}
 
           {product.kind !== "project" && specRows.length > 0 ? (
@@ -129,10 +135,10 @@ export function ProductPageClient() {
           )}
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            {product.kind !== "project" && (
+            {product.kind !== "project" && !product.quoteOnly && (
               <AddToCartButton product={product} />
             )}
-            <WhatsAppInquiryButton productName={product.name} />
+            <WhatsAppInquiryButton productName={product.name} quote={!!product.quoteOnly} />
           </div>
 
           {(product.pdfStorageKey || product.pdfUrl) && (

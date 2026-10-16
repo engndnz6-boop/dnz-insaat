@@ -80,12 +80,24 @@ export interface Product {
   projectLocation?: string;
   /** İmalat kayıtları için iş türü etiketi */
   projectCategory?: string;
+  /** Proje: uygulanan işler */
+  projectWorks?: string;
+  /** Proje: kullanılan malzemeler */
+  projectMaterials?: string;
+  /** Proje: tamamlanma durumu (örn. Tamamlandı, Devam ediyor) */
+  projectStatus?: string;
   /** Ana kategori */
   categoryId: string;
   /** Alt kategori (opsiyonel) */
   subcategoryId?: string;
   /** Ürün kodu */
   code?: string;
+  /** Fiyat gösterilmez, “Fiyat teklifi al” çıkar (miktara göre fiyatlanan ürünler) */
+  quoteOnly?: boolean;
+  /** Satış birimi: adet, m², paket, boy… */
+  unit?: string;
+  /** Fiyata KDV dahil mi (varsayılan: hariç) */
+  vatIncluded?: boolean;
   /** Ebat: en, boy, kalınlık (birimiyle serbest yazı, örn. "120 cm", "12,5 mm") */
   en?: string;
   boy?: string;
@@ -120,6 +132,9 @@ export interface Project {
   description: string;
   /** YouTube / Vimeo / MP4 */
   videoUrl?: string;
+  works?: string;
+  materials?: string;
+  status?: string;
 }
 
 export interface Testimonial {

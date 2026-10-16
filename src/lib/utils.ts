@@ -79,3 +79,8 @@ export function productSpecRows(p: Product): { label: string; value: string }[] 
     { label: "Renk / desen", value: productPattern(p) },
   ].filter((r) => r.value);
 }
+
+/** "/ adet · KDV hariç" */
+export function priceSuffix(p: Product): string {
+  return `/ ${(p.unit || "birim").trim()} · KDV ${p.vatIncluded ? "dahil" : "hariç"}`;
+}

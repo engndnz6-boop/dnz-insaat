@@ -7,6 +7,7 @@ import { SiteSettingsProvider } from "@/lib/site-settings-context";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
+import { MobileContactBar } from "@/components/layout/MobileContactBar";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { brand } from "@/lib/brand";
 // Tek aile: Archivo (wdth ekseni başlıklarda geniş kesim için) — kendi sunucumuzdan
@@ -84,6 +85,7 @@ export default function RootLayout({
                   <main className="min-h-[70vh]">{children}</main>
                   <Footer />
                   <WhatsAppFloat />
+                  <MobileContactBar />
                 </CartProvider>
               </ImalatProvider>
             </CatalogProvider>

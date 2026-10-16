@@ -11,7 +11,7 @@ export function Footer() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <footer className="mt-16 bg-brand-navy text-white print:hidden">
+    <footer className="mt-16 bg-brand-navy pb-16 text-white md:pb-0 print:hidden">
       <div className="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <Logo />
@@ -42,27 +42,18 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link
-                href="/kategori/alcipan-asma-tavan-malzemeleri"
-                className="hover:text-white"
-              >
-                Alçıpan Asma Tavan
+              <Link href="/hizmetlerimiz" className="hover:text-white">
+                Hizmetlerimiz
               </Link>
             </li>
             <li>
-              <Link
-                href="/kategori/bolme-duvar-malzemeleri"
-                className="hover:text-white"
-              >
-                Bölme Duvar Malzemeleri
+              <Link href="/projelerimiz" className="hover:text-white">
+                Projelerimiz
               </Link>
             </li>
             <li>
-              <Link
-                href="/kategori/clipin-petek-asma-tavan"
-                className="hover:text-white"
-              >
-                Clip-in Asma Tavan
+              <Link href="/hakkimizda" className="hover:text-white">
+                Hakkımızda
               </Link>
             </li>
             <li>
@@ -71,13 +62,13 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/#projeler" className="hover:text-white">
-                Tamamlanan Projeler
+              <Link href="/iletisim" className="hover:text-white">
+                İletişim
               </Link>
             </li>
             <li>
-              <Link href="/iletisim" className="hover:text-white">
-                İletişim
+              <Link href="/gizlilik" className="hover:text-white">
+                Gizlilik ve KVKK
               </Link>
             </li>
           </ul>

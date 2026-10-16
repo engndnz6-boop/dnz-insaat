@@ -2,121 +2,140 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import {
+  ArrowRight,
+  Grid3x3,
+  Layers,
+  LayoutGrid,
+  PaintRoller,
+  Plug,
+  DoorOpen,
+  type LucideIcon,
+} from "lucide-react";
 import { useProducts } from "@/lib/products-context";
 import { ProductImage } from "@/components/product/ProductImage";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
 
-const categories = [
+type Group = {
+  title: string;
+  text: string;
+  href: string;
+  categoryIds: string[];
+  icon: LucideIcon;
+  /** Admin’de fotoğraf yoksa kullanılan görsel (yoksa simgeli kutu) */
+  fallback?: string;
+};
+
+const groups: Group[] = [
   {
-    title: "Alçıpan ve galvaniz profil",
-    text: "Plaka, C ve U profil, kutu profil, ABS / UMS profil, askı ve aksesuar.",
+    title: "Alçıpan ve profil sistemleri",
+    text: "Alçıpan plaka, galvaniz, kutu, ABS ve UMS profil, bölme duvar.",
     href: "/kategori/alcipan-asma-tavan-malzemeleri",
-    categoryIds: ["cat-alcipan-tavan", "cat-isik-bandi"],
-    image:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1400&q=80",
+    categoryIds: ["cat-alcipan-tavan", "cat-bolme"],
+    icon: Layers,
+    fallback: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1000&q=80",
   },
   {
-    title: "Clip-in ve petek asma tavan",
-    text: "Metal panel ve taşıyıcı sistemler.",
+    title: "Asma tavan malzemeleri",
+    text: "Clip-in, karolam, taşyünü, vinil tavan, lambiri ve ışık bandı.",
     href: "/kategori/clipin-petek-asma-tavan",
-    categoryIds: ["cat-clipin"],
-    image:
-      "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=900&q=80",
+    categoryIds: ["cat-clipin", "cat-karolam", "cat-tasyunu", "cat-vinil-lambiri", "cat-isik-bandi"],
+    icon: LayoutGrid,
+    fallback: "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=1000&q=80",
   },
   {
-    title: "Taşyünü, karolam ve vinil",
-    text: "Akustik ve yangına dayanıklı tavan panelleri.",
-    href: "/kategori/tasyunu-asma-tavan-malzemeleri",
-    categoryIds: ["cat-tasyunu", "cat-karolam"],
-    image:
-      "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=900&q=80",
+    title: "Seramik ve fayans",
+    text: "Banyo, mutfak ve zemin için seramik ve fayans.",
+    href: "/kategori/seramik-parke",
+    categoryIds: ["cat-seramik-parke"],
+    icon: Grid3x3,
   },
   {
-    title: "Bölme ve giydirme duvar",
-    text: "Ofis, okul ve konut için alçıpan duvar sistemleri.",
-    href: "/kategori/bolme-duvar-malzemeleri",
-    categoryIds: ["cat-bolme"],
-    image:
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=80",
+    title: "Boya ve alçı ürünleri",
+    text: "İç ve dış cephe boyası, saten ve kara alçı, astar.",
+    href: "/kategori/alci-boya-malzeme",
+    categoryIds: ["cat-boya-alci"],
+    icon: PaintRoller,
   },
-];
-
-const spans = [
-  "sm:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[320px] lg:min-h-0",
-  "min-h-[240px]",
-  "min-h-[240px]",
-  "sm:col-span-2 lg:col-span-2 min-h-[240px]",
+  {
+    title: "Parke ve kapılar",
+    text: "Laminat parke, süpürgelik, iç kapı ve aksesuar.",
+    href: "/kategori/seramik-parke",
+    categoryIds: ["cat-seramik-parke"],
+    icon: DoorOpen,
+  },
+  {
+    title: "Elektrik ve su tesisatı ürünleri",
+    text: "Anahtar, priz, kablo, aydınlatma, boru, fittings ve kombi parçası.",
+    href: "/kategori/elektrik-malzemeleri-tamirat",
+    categoryIds: ["cat-elektrik", "cat-su"],
+    icon: Plug,
+  },
 ];
 
 export function CategoryShowcase() {
   const { products } = useProducts();
 
-  // Admin’de o kategoriye yüklenen ilk fotoğraf (önce projeler, sonra ürünler);
-  // hiç yoksa varsayılan görsel kullanılır.
-  const images = useMemo(
-    () =>
-      categories.map((cat) => {
-        const inCat = products.filter(
-          (p) => cat.categoryIds.includes(p.categoryId) && p.images?.[0]
-        );
-        const pick =
-          inCat.find((p) => p.kind === "project") || inCat[0] || null;
-        return pick ? pick.images[0] : cat.image;
-      }),
-    [products]
-  );
+  // Admin’de o gruba yüklenen ilk ürün fotoğrafı; aynı fotoğraf iki kutuda tekrar etmesin
+  const images = useMemo(() => {
+    const used = new Set<string>();
+    return groups.map((g) => {
+      const pick = products.find(
+        (p) =>
+          p.kind !== "project" &&
+          g.categoryIds.includes(p.categoryId) &&
+          p.images?.[0] &&
+          !used.has(p.images[0])
+      );
+      const src = pick?.images[0] || g.fallback || "";
+      if (src) used.add(src);
+      return src;
+    });
+  }, [products]);
 
   return (
     <section className="bg-brand-paper pb-20 pt-28 sm:pb-24 sm:pt-32">
       <div className="container-page">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
-            <h2 className="home-heading">Ürün grupları</h2>
+            <h2 className="home-heading">Yapınız için doğru malzeme, doğru adres.</h2>
             <p className="mt-3 text-base leading-relaxed text-brand-mist sm:text-lg">
-              Tavandan duvara, bir şantiyenin ihtiyaç duyduğu malzemenin çoğu
-              Gölbaşı&apos;ndaki mağazamızda hazır.
+              Kaliteli ürünleri inceleyin, ihtiyacınıza uygun seçenekleri bulun.
             </p>
           </div>
-          <Link
-            href="/katalog"
-            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand-navy transition hover:text-brand-gold"
-          >
-            Tüm ürünler
+          <Link href="/katalog" className="btn-light shrink-0 px-5 py-3">
+            Tüm ürünleri gör
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-3 lg:auto-rows-[250px] sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((cat, i) => (
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {groups.map((g, i) => (
             <Link
-              key={cat.href}
-              href={cat.href}
-              className={`group relative flex overflow-hidden rounded-lg bg-brand-navy shadow-red ${spans[i]}`}
+              key={g.title}
+              href={g.href}
+              className="group flex flex-col overflow-hidden rounded-lg border border-black/5 bg-white shadow-red transition hover:-translate-y-0.5"
             >
-              <ProductImage
-                src={images[i]}
-                alt={`${cat.title}, Ankara Gölbaşı`}
-                fill
-                sizes={i === 0 ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 1024px) 100vw, 25vw"}
-                className="object-cover transition duration-700 group-hover:scale-[1.03]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-night via-brand-night/55 to-brand-night/5" />
-              <div className="relative mt-auto flex w-full items-end justify-between gap-4 p-5 sm:p-6">
+              <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-brand-navy to-[#1d4a7c]">
+                {images[i] ? (
+                  <ProductImage
+                    src={images[i]}
+                    alt={`${g.title}, DNZ İnşaat Malzemeleri Gölbaşı`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <g.icon className="h-16 w-16 text-white/80" strokeWidth={1.25} aria-hidden />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-1 items-start justify-between gap-4 p-5">
                 <div>
-                  <h3
-                    className={`type-wide font-bold leading-tight text-white ${
-                      i === 0 ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl"
-                    }`}
-                  >
-                    {cat.title}
-                  </h3>
-                  <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-white/75">
-                    {cat.text}
-                  </p>
+                  <h3 className="text-lg font-bold text-brand-navy">{g.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-brand-mist">{g.text}</p>
                 </div>
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-white/10 text-white transition group-hover:bg-brand-gold">
-                  <ArrowUpRight className="h-5 w-5" />
-                </span>
+                <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-brand-gold transition group-hover:translate-x-0.5" />
               </div>
             </Link>
           ))}

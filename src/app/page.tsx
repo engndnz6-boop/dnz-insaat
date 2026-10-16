@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/Hero";
 import { CategoryShowcase } from "@/components/home/CategoryShowcase";
-import { ProcessSteps } from "@/components/home/ProcessSteps";
+import { ServicesSection } from "@/components/home/ServicesSection";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { FeaturedProjects } from "@/components/home/FeaturedProjects";
-import { Testimonials } from "@/components/home/Testimonials";
-import { SeoTopics } from "@/components/home/SeoTopics";
-import { ContactBand } from "@/components/home/ContactBand";
+import { WhyDnz } from "@/components/home/WhyDnz";
 import { MissionBand } from "@/components/home/MissionBand";
+import { QuoteSection } from "@/components/home/QuoteSection";
+import { ContactBand } from "@/components/home/ContactBand";
 import { projects } from "@/lib/data/projects";
-import { testimonials } from "@/lib/data/testimonials";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -20,12 +19,12 @@ export default function HomePage() {
     <>
       <Hero />
       <CategoryShowcase />
-      <ProcessSteps />
+      <ServicesSection />
       <FeaturedProducts />
-      <FeaturedProjects projects={projects} />
+      <FeaturedProjects projects={projects} limit={3} />
+      <WhyDnz />
       <MissionBand />
-      <Testimonials items={testimonials} />
-      <SeoTopics />
+      <QuoteSection />
       <ContactBand />
     </>
   );

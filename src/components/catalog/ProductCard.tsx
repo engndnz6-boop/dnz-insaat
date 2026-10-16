@@ -3,7 +3,7 @@
 import { ProductImage } from "@/components/product/ProductImage";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import { formatPrice, productDimensions } from "@/lib/utils";
+import { formatPrice, priceSuffix, productDimensions } from "@/lib/utils";
 import { useCatalog } from "@/lib/catalog-context";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -54,12 +54,16 @@ export function ProductCard({ product }: { product: Product }) {
               İmalat / proje
             </span>
           ) : (
-            <>
-              {formatPrice(product.price)}
-              <span className="ml-1 text-xs font-normal text-brand-mist">
-                / birim
-              </span>
-            </>
+            product.quoteOnly ? (
+              <span className="text-sm font-semibold text-brand-gold">Fiyat teklifi al</span>
+            ) : (
+              <>
+                {formatPrice(product.price)}
+                <span className="ml-1 text-xs font-normal text-brand-mist">
+                  {priceSuffix(product)}
+                </span>
+              </>
+            )
           )}
         </p>
       </div>
