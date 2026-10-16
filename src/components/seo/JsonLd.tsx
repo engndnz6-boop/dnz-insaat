@@ -19,7 +19,6 @@ export function JsonLd() {
         "@type": "LocalBusiness",
         "@id": `${brand.url}/#localbusiness`,
         name: brand.name,
-        alternateName: brand.googleProfileName,
         hasMap: brand.mapsUrl,
         sameAs: [brand.mapsUrl],
         image: `${brand.url}/logo-dnz.png`,

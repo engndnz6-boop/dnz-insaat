@@ -15,10 +15,9 @@ export const brand = {
   postalCode: "06830",
   /** Google İşletme Profili (Haritalar) */
   mapsUrl: "https://maps.app.goo.gl/5aHGjFU2mzyPy3W89",
-  googleProfileName: "DNZ YAPI MALZEMELERİ DEKORASYON VE HIRDAVAT",
   /** Harita gömme: işletme adı + adres araması (API anahtarı gerekmez) */
   mapsEmbedUrl:
-    "https://www.google.com/maps?q=DNZ+YAPI+MALZEMELER%C4%B0+DEKORASYON+VE+HIRDAVAT,+Kar%C5%9F%C4%B1yaka,+42-A,+06830+G%C3%B6lba%C5%9F%C4%B1%2FAnkara&output=embed",
+    "https://www.google.com/maps?q=DNZ+%C4%B0n%C5%9Faat+Malzemeleri,+Kar%C5%9F%C4%B1yaka,+%C5%9Eehit+Ali+Gaffar+Okkan+Cd.+42-A,+06830+G%C3%B6lba%C5%9F%C4%B1%2FAnkara&output=embed",
   hours: "Pazartesi – Cumartesi · 09:00 – 18:00",
   keywords: [
     "DNZ İnşaat",
