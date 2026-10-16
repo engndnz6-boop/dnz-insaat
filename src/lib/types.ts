@@ -84,6 +84,16 @@ export interface Product {
   categoryId: string;
   /** Alt kategori (opsiyonel) */
   subcategoryId?: string;
+  /** Ürün kodu */
+  code?: string;
+  /** Ebat: en, boy, kalınlık (birimiyle serbest yazı, örn. "120 cm", "12,5 mm") */
+  en?: string;
+  boy?: string;
+  kalinlik?: string;
+  /** Kullanım alanı (serbest yazı, örn. "Tavan, kuru hacim") */
+  usage?: string;
+  /** Renk / desen (serbest yazı, örn. "Beyaz", "Meşe desen") */
+  pattern?: string;
   /** Marka — örn. Viko */
   brand?: string;
   /** Model — örn. Novella */

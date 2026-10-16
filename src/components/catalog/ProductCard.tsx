@@ -3,7 +3,7 @@
 import { ProductImage } from "@/components/product/ProductImage";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, productDimensions } from "@/lib/utils";
 import { useCatalog } from "@/lib/catalog-context";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -12,8 +12,7 @@ export function ProductCard({ product }: { product: Product }) {
   const sub = product.subcategoryId
     ? getCategory(product.subcategoryId)
     : undefined;
-  const badge =
-    product.brand || sub?.name || cat?.name || "Ürün";
+  const badge = sub?.name || cat?.name || "Ürün";
 
   return (
     <Link
@@ -41,11 +40,11 @@ export function ProductCard({ product }: { product: Product }) {
         <h3 className="font-display text-lg text-brand-bone transition group-hover:text-brand-gold">
           {product.name}
         </h3>
-        {(product.brand || product.model) && (
-          <p className="mt-1 text-xs text-brand-gold/90">
-            {[product.brand, product.model].filter(Boolean).join(" · ")}
+        {product.kind !== "project" && (product.code || productDimensions(product)) ? (
+          <p className="mt-1 text-xs text-brand-mist">
+            {[product.code, productDimensions(product)].filter(Boolean).join(", ")}
           </p>
-        )}
+        ) : null}
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-mist">
           {product.shortDescription}
         </p>

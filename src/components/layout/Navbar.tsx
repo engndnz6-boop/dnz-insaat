@@ -24,10 +24,10 @@ export function Navbar() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-50 bg-brand-navy shadow-md print:hidden">
+    <header className="sticky top-0 z-50 border-b border-black/10 bg-white/95 backdrop-blur print:hidden">
       <div className="container-page flex h-16 items-center justify-between sm:h-[72px]">
         <Link href="/" className="group transition hover:opacity-90">
-          <Logo />
+          <Logo tone="dark" />
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">
@@ -35,16 +35,15 @@ export function Navbar() {
             const active =
               link.href === "/"
                 ? pathname === "/"
-                : pathname.startsWith(link.href.split("#")[0]) &&
-                  link.href !== "/";
+                : !link.href.includes("#") && pathname.startsWith(link.href);
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`text-[13px] font-medium tracking-wide transition ${
                   active
-                    ? "text-white"
-                    : "text-white/75 hover:text-white"
+                    ? "text-brand-navy font-semibold"
+                    : "text-brand-bone/70 hover:text-brand-navy"
                 }`}
               >
                 {link.label}
@@ -59,7 +58,7 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           <Link
             href="/sepet"
-            className="relative inline-flex h-10 w-10 items-center justify-center text-white transition hover:text-brand-gold-light"
+            className="relative inline-flex h-10 w-10 items-center justify-center text-brand-navy transition hover:text-brand-gold"
             aria-label="Sepet"
           >
             <ShoppingBag className="h-5 w-5" />
@@ -72,7 +71,7 @@ export function Navbar() {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center text-white md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center text-brand-navy md:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Menüyü kapat" : "Menüyü aç"}
           >
@@ -82,14 +81,14 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-white/10 bg-brand-navy md:hidden">
+        <div className="border-t border-black/10 bg-white md:hidden">
           <nav className="container-page flex flex-col gap-1 py-4">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="px-2 py-3 text-sm font-medium text-white/90 hover:text-white"
+                className="px-2 py-3 text-sm font-medium text-brand-bone hover:text-brand-navy"
               >
                 {link.label}
               </Link>

@@ -9,6 +9,8 @@ type LogoProps = {
   variant?: "mark" | "markCompact" | "icon";
   /** Hero gibi koyu zeminde beyaz kutu kullanma */
   plain?: boolean;
+  /** Şirket adı rengi: light = koyu zeminde beyaz, dark = açık zeminde lacivert */
+  tone?: "light" | "dark";
 };
 
 function isRemoteLogo(src: string): boolean {
@@ -66,6 +68,7 @@ export function Logo({
   className = "",
   variant = "mark",
   plain = false,
+  tone = "light",
 }: LogoProps) {
   const { settings } = useSiteSettings();
 
@@ -81,9 +84,9 @@ export function Logo({
 
   return (
     <span className={`inline-flex min-w-0 items-center gap-3 ${className}`}>
-      <LogoMark className="h-9 sm:h-10" plain={plain} priority />
+      <LogoMark className="h-9 sm:h-10" plain={plain || tone === "dark"} priority />
       <span className="hidden min-w-0 md:block">
-        <span className="block truncate text-sm font-semibold tracking-wide text-white">
+        <span className={`block truncate text-sm font-semibold tracking-wide ${tone === "dark" ? "text-brand-navy" : "text-white"}`}>
           {settings.companyName}
         </span>
       </span>

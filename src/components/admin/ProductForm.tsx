@@ -2,18 +2,8 @@
 
 import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
-import type {
-  ColorOption,
-  MaterialType,
-  Product,
-  UsageArea,
-} from "@/lib/types";
+import type { Product } from "@/lib/types";
 import { slugify } from "@/lib/utils";
-import {
-  COLOR_LABELS,
-  MATERIAL_LABELS,
-  USAGE_LABELS,
-} from "@/lib/utils";
 import { useCatalog } from "@/lib/catalog-context";
 import {
   compressImageFile,
@@ -270,15 +260,6 @@ export function ProductForm({
     }
   };
 
-  const toggleUsage = (area: UsageArea) => {
-    set(
-      "usageAreas",
-      form.usageAreas.includes(area)
-        ? form.usageAreas.filter((a) => a !== area)
-        : [...form.usageAreas, area]
-    );
-  };
-
   return (
     <form onSubmit={onSubmit} className="space-y-6 border border-black/5 bg-brand-anthracite/40 p-6">
       <fieldset className="border border-black/10 p-4">
@@ -532,22 +513,6 @@ export function ProductForm({
             ))}
           </select>
         </Field>
-        <Field label="Marka (ör. Viko)">
-          <input
-            className="input-field"
-            placeholder="Viko, Schneider, Legrand..."
-            value={form.brand || ""}
-            onChange={(e) => set("brand", e.target.value)}
-          />
-        </Field>
-        <Field label="Model">
-          <input
-            className="input-field"
-            placeholder="Örn. Novella, Karre..."
-            value={form.model || ""}
-            onChange={(e) => set("model", e.target.value)}
-          />
-        </Field>
         <Field label="Slug (URL)">
           <input
             className="input-field"
@@ -572,6 +537,34 @@ export function ProductForm({
             onChange={(e) => set("price", Number(e.target.value))}
           />
         </Field>
+        {form.kind !== "project" ? (
+          <div className="sm:col-span-2 border border-black/10 bg-white p-4">
+            <h3 className="text-sm font-semibold text-brand-bone">Ürün özellikleri</h3>
+            <p className="mt-1 text-xs text-brand-mist">
+              Birimiyle yazın (örn. 120 cm, 12,5 mm). Boş bıraktığınız özellik sitede görünmez.
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <Field label="Ürün kodu">
+                <input className="input-field" placeholder="Örn. DNZ-ALC-125" value={form.code || ""} onChange={(e) => set("code", e.target.value)} />
+              </Field>
+              <Field label="En">
+                <input className="input-field" placeholder="Örn. 120 cm" value={form.en || ""} onChange={(e) => set("en", e.target.value)} />
+              </Field>
+              <Field label="Boy">
+                <input className="input-field" placeholder="Örn. 250 cm" value={form.boy || ""} onChange={(e) => set("boy", e.target.value)} />
+              </Field>
+              <Field label="Kalınlık">
+                <input className="input-field" placeholder="Örn. 12,5 mm" value={form.kalinlik || ""} onChange={(e) => set("kalinlik", e.target.value)} />
+              </Field>
+              <Field label="Kullanım alanı">
+                <input className="input-field" placeholder="Örn. Tavan ve duvar, kuru hacim" value={form.usage || ""} onChange={(e) => set("usage", e.target.value)} />
+              </Field>
+              <Field label="Renk / desen">
+                <input className="input-field" placeholder="Örn. Beyaz, meşe desen" value={form.pattern || ""} onChange={(e) => set("pattern", e.target.value)} />
+              </Field>
+            </div>
+          </div>
+        ) : null}
         <div className="sm:col-span-2">
           <Field label="Açıklama">
             <textarea
@@ -582,39 +575,6 @@ export function ProductForm({
             />
           </Field>
         </div>
-        <Field label="Malzeme tipi">
-          <select
-            className="input-field"
-            value={form.material}
-            onChange={(e) => set("material", e.target.value as MaterialType)}
-          >
-            {Object.entries(MATERIAL_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Renk">
-          <select
-            className="input-field"
-            value={form.color}
-            onChange={(e) => set("color", e.target.value as ColorOption)}
-          >
-            {Object.entries(COLOR_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Boyut">
-          <input
-            className="input-field"
-            value={form.size}
-            onChange={(e) => set("size", e.target.value)}
-          />
-        </Field>
         <div className="sm:col-span-2 space-y-3">
           <Field label="Video dosyası yükle (telefon / bilgisayar)">
             <input
@@ -684,65 +644,6 @@ export function ProductForm({
             placeholder="/docs/... veya https://..."
             value={form.pdfUrl}
             onChange={(e) => set("pdfUrl", e.target.value)}
-          />
-        </Field>
-      </div>
-
-      <fieldset>
-        <legend className="label-field">Kullanım alanları</legend>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {(Object.keys(USAGE_LABELS) as UsageArea[]).map((area) => (
-            <button
-              key={area}
-              type="button"
-              onClick={() => toggleUsage(area)}
-              className={`px-3 py-1.5 text-xs ${
-                form.usageAreas.includes(area)
-                  ? "bg-brand-gold text-brand-ink"
-                  : "border border-black/10 text-brand-mist"
-              }`}
-            >
-              {USAGE_LABELS[area]}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Teknik: Boyut">
-          <input
-            className="input-field"
-            value={form.specs.dimensions}
-            onChange={(e) =>
-              set("specs", { ...form.specs, dimensions: e.target.value })
-            }
-          />
-        </Field>
-        <Field label="Teknik: Malzeme">
-          <input
-            className="input-field"
-            value={form.specs.material}
-            onChange={(e) =>
-              set("specs", { ...form.specs, material: e.target.value })
-            }
-          />
-        </Field>
-        <Field label="Teknik: Ağırlık">
-          <input
-            className="input-field"
-            value={form.specs.weight}
-            onChange={(e) =>
-              set("specs", { ...form.specs, weight: e.target.value })
-            }
-          />
-        </Field>
-        <Field label="Teknik: Garanti">
-          <input
-            className="input-field"
-            value={form.specs.warranty}
-            onChange={(e) =>
-              set("specs", { ...form.specs, warranty: e.target.value })
-            }
           />
         </Field>
       </div>

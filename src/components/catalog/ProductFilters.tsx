@@ -2,11 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Product } from "@/lib/types";
-import {
-  COLOR_LABELS,
-  MATERIAL_LABELS,
-  USAGE_LABELS,
-} from "@/lib/utils";
+import { productDimensions, productPattern, productUsage } from "@/lib/utils";
 import { ProductCard } from "./ProductCard";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useCatalog } from "@/lib/catalog-context";
@@ -14,20 +10,16 @@ import { useCatalog } from "@/lib/catalog-context";
 type Filters = {
   category: string;
   subcategory: string;
-  brand: string;
-  material: string;
-  color: string;
   size: string;
+  pattern: string;
   usage: string;
 };
 
 const empty: Filters = {
   category: "",
   subcategory: "",
-  brand: "",
-  material: "",
-  color: "",
   size: "",
+  pattern: "",
   usage: "",
 };
 
@@ -47,7 +39,7 @@ export function ProductCatalog({
   hideCategoryPicker = false,
   hideHeader = false,
   title = "Sistem & Malzeme Kataloğu",
-  subtitle = "Ana kategori, alt kategori ve markaya göre filtreleyin (ör. Elektrik → Anahtar Prizler → Viko).",
+  subtitle = "Kategori, ebat, renk / desen ve kullanım alanına göre filtreleyin.",
 }: ProductCatalogProps) {
   const { rootCategories, getSubcategories, getCategory } = useCatalog();
   const [filters, setFilters] = useState<Filters>({
@@ -56,18 +48,14 @@ export function ProductCatalog({
   });
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const sizes = useMemo(
-    () => Array.from(new Set(products.map((p) => p.size))).sort(),
-    [products]
-  );
-
-  const brands = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          products.map((p) => p.brand?.trim()).filter(Boolean) as string[]
-        )
-      ).sort((a, b) => a.localeCompare(b, "tr")),
+  const uniq = (vals: string[]) =>
+    Array.from(new Set(vals.map((v) => v.trim()).filter(Boolean))).sort((a, b) =>
+      a.localeCompare(b, "tr")
+    );
+  const sizes = useMemo(() => uniq(products.map(productDimensions)), [products]);
+  const patterns = useMemo(() => uniq(products.map(productPattern)), [products]);
+  const usages = useMemo(
+    () => uniq(products.flatMap((p) => productUsage(p).split(","))),
     [products]
   );
 
@@ -80,17 +68,14 @@ export function ProductCatalog({
       if (filters.category && p.categoryId !== filters.category) return false;
       if (filters.subcategory && p.subcategoryId !== filters.subcategory)
         return false;
-      if (
-        filters.brand &&
-        (p.brand || "").toLowerCase() !== filters.brand.toLowerCase()
-      )
-        return false;
-      if (filters.material && p.material !== filters.material) return false;
-      if (filters.color && p.color !== filters.color) return false;
-      if (filters.size && p.size !== filters.size) return false;
+      if (filters.size && productDimensions(p).trim() !== filters.size) return false;
+      if (filters.pattern && productPattern(p).trim() !== filters.pattern) return false;
       if (
         filters.usage &&
-        !p.usageAreas.includes(filters.usage as Product["usageAreas"][number])
+        !productUsage(p)
+          .split(",")
+          .map((x) => x.trim())
+          .includes(filters.usage)
       )
         return false;
       return true;
@@ -118,38 +103,30 @@ export function ProductCatalog({
           onChange={(v) => setFilters((f) => ({ ...f, subcategory: v }))}
         />
       )}
-      {brands.length > 0 && (
+      {sizes.length > 1 && (
         <FilterGroup
-          label="Marka"
-          value={filters.brand}
-          options={brands.map((b) => [b, b])}
-          onChange={(v) => setFilters((f) => ({ ...f, brand: v }))}
+          label="Ebat"
+          value={filters.size}
+          options={sizes.map((x) => [x, x])}
+          onChange={(v) => setFilters((f) => ({ ...f, size: v }))}
         />
       )}
-      <FilterGroup
-        label="Malzeme tipi"
-        value={filters.material}
-        options={Object.entries(MATERIAL_LABELS)}
-        onChange={(v) => setFilters((f) => ({ ...f, material: v }))}
-      />
-      <FilterGroup
-        label="Renk"
-        value={filters.color}
-        options={Object.entries(COLOR_LABELS)}
-        onChange={(v) => setFilters((f) => ({ ...f, color: v }))}
-      />
-      <FilterGroup
-        label="Boyut"
-        value={filters.size}
-        options={sizes.map((s) => [s, s])}
-        onChange={(v) => setFilters((f) => ({ ...f, size: v }))}
-      />
-      <FilterGroup
-        label="Kullanım Alanı"
-        value={filters.usage}
-        options={Object.entries(USAGE_LABELS)}
-        onChange={(v) => setFilters((f) => ({ ...f, usage: v }))}
-      />
+      {patterns.length > 1 && (
+        <FilterGroup
+          label="Renk / desen"
+          value={filters.pattern}
+          options={patterns.map((x) => [x, x])}
+          onChange={(v) => setFilters((f) => ({ ...f, pattern: v }))}
+        />
+      )}
+      {usages.length > 1 && (
+        <FilterGroup
+          label="Kullanım alanı"
+          value={filters.usage}
+          options={usages.map((x) => [x, x])}
+          onChange={(v) => setFilters((f) => ({ ...f, usage: v }))}
+        />
+      )}
       {activeCount > 0 && (
         <button
           type="button"

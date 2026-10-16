@@ -106,12 +106,12 @@ export function CeilingDrawing({ className = "" }: { className?: string }) {
           ]
             .map((p) => p.join(","))
             .join(" ")}
-          fill="#C9D1DC"
-          fillOpacity="0.09"
+          fill="#0B2C5E"
+          fillOpacity="0.05"
         />
 
         {/* Oda kenarları */}
-        <g stroke="#C9D1DC" strokeOpacity="0.55" strokeWidth="1.2" fill="none">
+        <g stroke="#0B2C5E" strokeOpacity="0.45" strokeWidth="1.2" fill="none">
           <line pathLength={1} x1={0} y1={r(VY - UP)} x2={back.x1} y2={back.y1} style={next()} />
           <line pathLength={1} x1={VW} y1={r(VY - UP)} x2={back.x2} y2={back.y1} style={next()} />
           <line pathLength={1} x1={0} y1={r(VY + DOWN)} x2={back.x1} y2={back.y2} style={next()} />
@@ -124,7 +124,7 @@ export function CeilingDrawing({ className = "" }: { className?: string }) {
         </g>
 
         {/* Asma tavan ızgarası (T profiller) */}
-        <g stroke="#C9D1DC" strokeOpacity="0.32" strokeWidth="1" fill="none">
+        <g stroke="#0B2C5E" strokeOpacity="0.22" strokeWidth="1" fill="none">
           {Array.from({ length: COLS + 1 }, (_, i) => {
             const [x1, y1] = ceil(xAt(i), Z_FRONT);
             const [x2, y2] = ceil(xAt(i), Z_BACK);
@@ -142,7 +142,7 @@ export function CeilingDrawing({ className = "" }: { className?: string }) {
         </g>
 
         {/* Bölme duvar karkası (C dikmeler) */}
-        <g stroke="#C9D1DC" strokeOpacity="0.5" strokeWidth="1.4" fill="none">
+        <g stroke="#0B2C5E" strokeOpacity="0.4" strokeWidth="1.4" fill="none">
           {studs.map((z, k) => {
             const [x, y1] = wallRight(z, 0);
             const [, y2] = wallRight(z, 1);
@@ -168,8 +168,8 @@ export function CeilingDrawing({ className = "" }: { className?: string }) {
             className="hero-panel"
             style={{ animationDelay: `${1.6 + k * 0.08}s` }}
             points={tile(i, j)}
-            fill="#FDE7C2"
-            fillOpacity="0.9"
+            fill="#FBBF24"
+            fillOpacity="0.55"
           />
         ))}
 
@@ -183,14 +183,14 @@ export function CeilingDrawing({ className = "" }: { className?: string }) {
             stroke="#F59E0B"
             strokeWidth="10"
             filter="url(#glow)"
-            opacity="0.9"
+            opacity="0.6"
           />
           <line
             x1={0}
             y1={r(VY - UP + 14)}
             x2={back.x1}
             y2={r(back.y1 + 14 / Z_BACK)}
-            stroke="#FCD34D"
+            stroke="#F59E0B"
             strokeWidth="1.6"
           />
         </g>

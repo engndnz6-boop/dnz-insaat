@@ -5,17 +5,12 @@ import { useParams } from "next/navigation";
 import { FileDown } from "lucide-react";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductVideo } from "@/components/product/ProductVideo";
-import { TechnicalSpecsTable } from "@/components/product/TechnicalSpecs";
 import { AddToCartButton } from "@/components/product/AddToCartButton";
 import { WhatsAppInquiryButton } from "@/components/product/WhatsAppInquiryButton";
 import { useProducts } from "@/lib/products-context";
 import { useCatalog } from "@/lib/catalog-context";
 import { openPdf } from "@/lib/pdf-storage";
-import {
-  MATERIAL_LABELS,
-  USAGE_LABELS,
-  formatPrice,
-} from "@/lib/utils";
+import { MATERIAL_LABELS, formatPrice, productSpecRows } from "@/lib/utils";
 
 export function ProductPageClient() {
   const params = useParams<{ slug: string }>();
@@ -49,6 +44,7 @@ export function ProductPageClient() {
     );
   }
 
+  const specRows = productSpecRows(product);
   const categoryHref = category?.slug
     ? `/kategori/${category.slug}`
     : "/katalog";
@@ -91,18 +87,10 @@ export function ProductPageClient() {
                   product.subcategoryId
                     ? getCategory(product.subcategoryId)?.name
                     : null,
-                  product.brand,
                 ]
                   .filter(Boolean)
                   .join(" · ") || MATERIAL_LABELS[product.material]}
           </p>
-          {(product.brand || product.model) && product.kind !== "project" && (
-            <p className="mt-2 text-sm text-brand-mist">
-              {product.brand}
-              {product.brand && product.model ? " / " : ""}
-              {product.model}
-            </p>
-          )}
           <h1 className="mt-3 font-display text-3xl text-brand-bone sm:text-4xl">
             {product.name}
           </h1>
@@ -123,32 +111,22 @@ export function ProductPageClient() {
             </p>
           )}
 
-          <ul className="mt-6 flex flex-wrap gap-2">
-            {product.kind !== "project" && (
-              <li className="border border-black/10 px-3 py-1 text-xs text-brand-mist">
-                Boyut: {product.size}
-              </li>
-            )}
-            {product.usageAreas.map((area) => (
-              <li
-                key={area}
-                className="border border-black/10 px-3 py-1 text-xs text-brand-mist"
-              >
-                {USAGE_LABELS[area]}
-              </li>
-            ))}
-            {product.kind !== "project" && (
-              <li
-                className={`px-3 py-1 text-xs ${
-                  product.inStock
-                    ? "bg-brand-gold/15 text-brand-gold"
-                    : "bg-red-500/15 text-red-300"
-                }`}
-              >
-                {product.inStock ? "Stokta" : "Tükendi"}
-              </li>
-            )}
-          </ul>
+          {product.kind !== "project" && specRows.length > 0 ? (
+            <dl className="mt-6 divide-y divide-black/5 border-y border-black/10 text-sm">
+              {specRows.map((r) => (
+                <div key={r.label} className="grid grid-cols-[9rem_1fr] gap-4 py-2.5">
+                  <dt className="text-brand-mist">{r.label}</dt>
+                  <dd className="font-medium text-brand-bone">{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+
+          {product.kind !== "project" && (
+            <p className={`mt-4 inline-block px-3 py-1 text-xs font-semibold ${product.inStock ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+              {product.inStock ? "Stokta" : "Tükendi"}
+            </p>
+          )}
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             {product.kind !== "project" && (
@@ -170,9 +148,6 @@ export function ProductPageClient() {
             </button>
           )}
 
-          <div className="mt-10">
-            <TechnicalSpecsTable specs={product.specs} />
-          </div>
         </div>
       </div>
     </div>

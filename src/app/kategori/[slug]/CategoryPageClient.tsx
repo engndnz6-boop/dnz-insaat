@@ -37,23 +37,23 @@ export function CategoryPageClient({
 
   return (
     <>
-      <div className="border-b border-black/5 bg-brand-navy px-4 py-8 sm:px-6 lg:px-8">
+      <div className="border-b border-black/5 bg-white px-4 py-8 sm:px-6 lg:px-8">
         <div className="container-page">
-          <nav className="text-xs text-white/60" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-white">
+          <nav className="text-xs text-brand-mist" aria-label="Breadcrumb">
+            <Link href="/" className="hover:text-brand-navy">
               Ana Sayfa
             </Link>
             <span className="mx-2">/</span>
-            <Link href="/katalog" className="hover:text-white">
+            <Link href="/katalog" className="hover:text-brand-navy">
               Katalog
             </Link>
             <span className="mx-2">/</span>
-            <span className="text-white/90">{categoryName}</span>
+            <span className="text-brand-bone">{categoryName}</span>
           </nav>
-          <h1 className="mt-4 font-sans text-3xl font-bold text-white sm:text-4xl">
+          <h1 className="type-wide mt-4 font-sans text-3xl font-bold text-brand-bone sm:text-4xl">
             {categoryName}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm text-white/75 sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm text-brand-mist sm:text-base">
             {categoryDescription ||
               `${categoryName} — Ankara Gölbaşı malzeme satışı ve uygulama.`}
           </p>

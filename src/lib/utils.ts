@@ -47,3 +47,35 @@ export const USAGE_LABELS: Record<string, string> = {
   hastane: "Hastane / Kurum",
   ticari: "Ticari",
 };
+
+/* ───── Ürün özellikleri: ad, fiyat, ebat (en × boy × kalınlık), kod, kullanım alanı, renk / desen ───── */
+import type { Product } from "@/lib/types";
+
+/** "120 cm × 250 cm × 12,5 mm"; yeni alanlar boşsa eski boyut bilgisine düşer */
+export function productDimensions(p: Product): string {
+  const parts = [p.en, p.boy, p.kalinlik].map((x) => (x || "").trim()).filter(Boolean);
+  if (parts.length) return parts.join(" × ");
+  return (p.specs?.dimensions || "").trim() || (p.size || "").trim();
+}
+
+export function productUsage(p: Product): string {
+  if (p.usage?.trim()) return p.usage.trim();
+  return (p.usageAreas || []).map((a) => USAGE_LABELS[a] || a).join(", ");
+}
+
+export function productPattern(p: Product): string {
+  if (p.pattern?.trim()) return p.pattern.trim();
+  return p.color ? COLOR_LABELS[p.color] || p.color : "";
+}
+
+export function productSpecRows(p: Product): { label: string; value: string }[] {
+  return [
+    { label: "Ürün kodu", value: (p.code || "").trim() },
+    { label: "En", value: (p.en || "").trim() },
+    { label: "Boy", value: (p.boy || "").trim() },
+    { label: "Kalınlık", value: (p.kalinlik || "").trim() },
+    ...(!p.en && !p.boy && !p.kalinlik ? [{ label: "Ebat", value: productDimensions(p) }] : []),
+    { label: "Kullanım alanı", value: productUsage(p) },
+    { label: "Renk / desen", value: productPattern(p) },
+  ].filter((r) => r.value);
+}
