@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --font-sans: "Archivo Variable";
   --brand-ink: #f4f6f9;
   --brand-anthracite: #ffffff;
   --brand-gold: #d97706;
@@ -42,6 +43,17 @@ body {
 
   .section-title {
     @apply font-sans text-3xl font-bold tracking-tight text-brand-bone sm:text-4xl;
+    font-stretch: 112%;
+  }
+
+  /* Geniş başlık kesimi (Archivo wdth ekseni) */
+  .type-wide {
+    font-stretch: 118%;
+  }
+
+  .home-heading {
+    @apply font-sans text-[1.9rem] font-bold leading-[1.1] tracking-[-0.01em] text-brand-bone sm:text-[2.6rem];
+    font-stretch: 116%;
   }
 
   .section-subtitle {
@@ -73,4 +85,41 @@ body {
   border: none;
   background: #0b2c5e;
   cursor: ew-resize;
+}
+
+/* Ana sayfa hero çizimi — tek seferlik çizim animasyonu */
+.hero-draw path,
+.hero-draw line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: heroDraw 1.6s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+.hero-draw .hero-panel {
+  opacity: 0;
+  animation: heroPanel 0.6s ease-out forwards;
+}
+.hero-draw .no-draw line {
+  stroke-dasharray: none;
+  animation: none;
+}
+@keyframes heroDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes heroPanel {
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-draw path,
+  .hero-draw line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .hero-draw .hero-panel {
+    animation: none;
+    opacity: 1;
+  }
 }

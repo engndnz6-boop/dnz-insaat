@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { CartProvider } from "@/lib/cart-context";
 import { ProductsProvider } from "@/lib/products-context";
 import { CatalogProvider } from "@/lib/catalog-context";
@@ -10,21 +9,9 @@ import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { brand } from "@/lib/brand";
+// Tek aile: Archivo (wdth ekseni başlıklarda geniş kesim için) — kendi sunucumuzdan
+import "@fontsource-variable/archivo/wdth.css";
 import "./globals.css";
-
-const display = Cormorant_Garamond({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const sans = Outfit({
-  subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-sans",
-  display: "swap",
-});
 
 const titleDefault =
   "DNZ İnşaat Malzemeleri | Alçıpan, Profil, Asma Tavan Ankara Gölbaşı";
@@ -85,7 +72,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className={`${display.variable} ${sans.variable}`}>
+    <html lang="tr">
       <body className="font-sans">
         <JsonLd />
         <SiteSettingsProvider>

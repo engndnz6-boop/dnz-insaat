@@ -38,8 +38,8 @@ function BeforeAfterCard({
   const hasVideo = Boolean(project.videoUrl);
 
   return (
-    <article className="group overflow-hidden border border-black/5 bg-brand-anthracite shadow-soft">
-      <div className="relative aspect-[4/3] select-none overflow-hidden">
+    <article className="group overflow-hidden border border-black/10 bg-white">
+      <div className="relative aspect-[4/3] select-none overflow-hidden bg-brand-steel/40">
         {showVideo && hasVideo ? (
           <ProductVideo
             url={project.videoUrl!}
@@ -111,10 +111,10 @@ function BeforeAfterCard({
       </div>
 
       <div className="p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-gold">
-          {project.category} · {project.location}
+        <p className="text-sm font-medium text-brand-gold">
+          {project.category}, {project.location}
         </p>
-        <h3 className="mt-2 font-display text-xl text-brand-bone">
+        <h3 className="mt-1.5 text-lg font-bold text-brand-bone">
           {project.title}
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-brand-mist">
@@ -164,17 +164,16 @@ export function FeaturedProjects({
   }, [getProjects, seedProjects]);
 
   return (
-    <section id="projeler" className="container-page scroll-mt-24 py-20 sm:py-28">
+    <section id="projeler" className="container-page scroll-mt-24 py-20 sm:py-24">
       <div className="max-w-2xl">
-        <p className="section-kicker">Projeler</p>
-        <h2 className="section-title mt-3">Yaptığımız işler</h2>
-        <p className="section-subtitle">
-          Alçıpan asma tavan, bölme duvar ve tadilat imalatlarından örnekler.
-          Admin’den “İmalat / proje” olarak eklenen kayıtlar burada listelenir.
+        <h2 className="home-heading">Yaptığımız işler</h2>
+        <p className="mt-3 text-base leading-relaxed text-brand-mist sm:text-lg">
+          Asma tavan, bölme duvar ve tadilat işlerimizden örnekler. Önce ve
+          sonrayı görmek için çizgiyi kaydırın.
         </p>
       </div>
 
-      <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {!ready
           ? Array.from({ length: 3 }).map((_, i) => (
               <div

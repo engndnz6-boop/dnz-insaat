@@ -42,6 +42,28 @@ export default function HesaplamaPage() {
     if (areaFromRoom > 0) setM2(String(areaFromRoom));
   }, [areaFromRoom]);
 
+  // Ana sayfadaki hızlı metraj çubuğundan gelen ?sistem=…&m2=… parametreleri
+  const [autoCalc, setAutoCalc] = useState(false);
+  useEffect(() => {
+    if (!ready) return;
+    const params = new URLSearchParams(window.location.search);
+    const sistem = params.get("sistem");
+    const alan = params.get("m2");
+    if (sistem && systems.some((s) => s.id === sistem)) setActiveId(sistem);
+    if (alan && Number(alan.replace(",", ".")) > 0) {
+      setM2(alan);
+      setAutoCalc(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
+
+  useEffect(() => {
+    if (!autoCalc || !active) return;
+    const a = Number(String(m2).replace(",", ".")) || 0;
+    if (a > 0) setLines(computeLines(active, a));
+    setAutoCalc(false);
+  }, [autoCalc, active, m2]);
+
   const area = Number(String(m2).replace(",", ".")) || 0;
   const total = lines ? sumLines(lines) : 0;
 

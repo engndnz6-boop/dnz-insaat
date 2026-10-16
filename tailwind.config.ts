@@ -18,10 +18,13 @@ const config: Config = {
           gold: "#D97706",
           "gold-light": "#F59E0B",
           navy: "#0B2C5E",
+          night: "#071D3F",
+          steel: "#C9D1DC",
+          paper: "#F5F6F8",
         },
       },
       fontFamily: {
-        display: ["var(--font-display)", "Georgia", "serif"],
+        display: ["var(--font-sans)", "system-ui", "sans-serif"],
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       boxShadow: {
