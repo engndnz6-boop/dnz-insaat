@@ -36,7 +36,7 @@ const stats = [
 
 export function ProcessSteps() {
   return (
-    <section className="bg-white py-20 sm:py-24">
+    <section className="bg-brand-soft py-20 sm:py-24">
       <div className="container-page">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-16">
           <div>

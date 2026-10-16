@@ -5,7 +5,7 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
   const [lead, ...rest] = items;
 
   return (
-    <section className="border-t border-black/5 bg-white py-20 text-brand-bone sm:py-28">
+    <section className="border-t border-black/5 bg-brand-soft py-20 text-brand-bone sm:py-28">
       <div className="container-page">
         <h2 className="home-heading">Birlikte çalıştıklarımız ne diyor</h2>
 

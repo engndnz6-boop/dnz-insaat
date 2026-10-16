@@ -24,7 +24,7 @@ export function Navbar() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-black/10 bg-white/95 backdrop-blur print:hidden">
+    <header className="sticky top-0 z-50 border-b border-black/10 bg-brand-soft/95 backdrop-blur print:hidden">
       <div className="container-page flex h-16 items-center justify-between sm:h-[72px]">
         <Link href="/" className="group transition hover:opacity-90">
           <Logo tone="dark" />
@@ -81,7 +81,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-black/10 bg-white md:hidden">
+        <div className="border-t border-black/10 bg-brand-soft md:hidden">
           <nav className="container-page flex flex-col gap-1 py-4">
             {links.map((link) => (
               <Link

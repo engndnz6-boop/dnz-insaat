@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          ink: "#F4F6F9",
+          ink: "#E8ECF1",
           anthracite: "#FFFFFF",
           slate: "#E2E8F0",
           mist: "#64748B",
@@ -20,7 +20,8 @@ const config: Config = {
           navy: "#0B2C5E",
           night: "#071D3F",
           steel: "#C9D1DC",
-          paper: "#F5F6F8",
+          paper: "#DFE5EC",
+          soft: "#EEF1F5",
         },
       },
       fontFamily: {

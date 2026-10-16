@@ -37,7 +37,7 @@ export function CategoryPageClient({
 
   return (
     <>
-      <div className="border-b border-black/5 bg-white px-4 py-8 sm:px-6 lg:px-8">
+      <div className="border-b border-black/5 bg-brand-soft px-4 py-8 sm:px-6 lg:px-8">
         <div className="container-page">
           <nav className="text-xs text-brand-mist" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-brand-navy">

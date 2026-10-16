@@ -68,7 +68,7 @@ export function Hero() {
   const { settings } = useSiteSettings();
 
   return (
-    <section className="relative bg-gradient-to-b from-white to-[#EAF0F7]">
+    <section className="relative bg-gradient-to-b from-[#E9EEF4] to-[#D6DFEA]">
       {/* İnce modül çizgileri: 60 cm karo ritmi */}
       <div
         aria-hidden
