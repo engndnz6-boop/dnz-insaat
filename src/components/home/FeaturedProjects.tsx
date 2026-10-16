@@ -156,11 +156,13 @@ export function FeaturedProjects({
       project: productToProject(p),
       slug: p.slug,
     }));
-    const seedIds = new Set(mapped.map((x) => x.project.id));
-    const seeds = seedProjects
-      .filter((p) => !seedIds.has(p.id))
-      .map((p) => ({ project: p, slug: undefined as string | undefined }));
-    return [...mapped, ...seeds];
+    // Admin’de en az bir proje varsa yalnızca gerçek projeler gösterilir;
+    // örnek (seed) projeler sadece hiç proje yokken yer tutucu olarak çıkar.
+    if (mapped.length > 0) return mapped;
+    return seedProjects.map((p) => ({
+      project: p,
+      slug: undefined as string | undefined,
+    }));
   }, [getProjects, seedProjects]);
 
   return (

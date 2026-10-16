@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
+import { useProducts } from "@/lib/products-context";
+import { ProductImage } from "@/components/product/ProductImage";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 const categories = [
@@ -6,6 +11,7 @@ const categories = [
     title: "Alçıpan ve galvaniz profil",
     text: "Plaka, C ve U profil, kutu profil, ABS / UMS profil, askı ve aksesuar.",
     href: "/kategori/alcipan-asma-tavan-malzemeleri",
+    categoryIds: ["cat-alcipan-tavan", "cat-isik-bandi"],
     image:
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1400&q=80",
   },
@@ -13,6 +19,7 @@ const categories = [
     title: "Clip-in ve petek asma tavan",
     text: "Metal panel ve taşıyıcı sistemler.",
     href: "/kategori/clipin-petek-asma-tavan",
+    categoryIds: ["cat-clipin"],
     image:
       "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=900&q=80",
   },
@@ -20,6 +27,7 @@ const categories = [
     title: "Taşyünü, karolam ve vinil",
     text: "Akustik ve yangına dayanıklı tavan panelleri.",
     href: "/kategori/tasyunu-asma-tavan-malzemeleri",
+    categoryIds: ["cat-tasyunu", "cat-karolam"],
     image:
       "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=900&q=80",
   },
@@ -27,6 +35,7 @@ const categories = [
     title: "Bölme ve giydirme duvar",
     text: "Ofis, okul ve konut için alçıpan duvar sistemleri.",
     href: "/kategori/bolme-duvar-malzemeleri",
+    categoryIds: ["cat-bolme"],
     image:
       "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=80",
   },
@@ -40,6 +49,23 @@ const spans = [
 ];
 
 export function CategoryShowcase() {
+  const { products } = useProducts();
+
+  // Admin’de o kategoriye yüklenen ilk fotoğraf (önce projeler, sonra ürünler);
+  // hiç yoksa varsayılan görsel kullanılır.
+  const images = useMemo(
+    () =>
+      categories.map((cat) => {
+        const inCat = products.filter(
+          (p) => cat.categoryIds.includes(p.categoryId) && p.images?.[0]
+        );
+        const pick =
+          inCat.find((p) => p.kind === "project") || inCat[0] || null;
+        return pick ? pick.images[0] : cat.image;
+      }),
+    [products]
+  );
+
   return (
     <section className="bg-brand-paper pb-20 pt-28 sm:pb-24 sm:pt-32">
       <div className="container-page">
@@ -67,12 +93,12 @@ export function CategoryShowcase() {
               href={cat.href}
               className={`group relative flex overflow-hidden bg-brand-navy ${spans[i]}`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={cat.image}
+              <ProductImage
+                src={images[i]}
                 alt={`${cat.title}, Ankara Gölbaşı`}
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                fill
+                sizes={i === 0 ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 1024px) 100vw, 25vw"}
+                className="object-cover transition duration-700 group-hover:scale-[1.03]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-night via-brand-night/55 to-brand-night/5" />
               <div className="relative mt-auto flex w-full items-end justify-between gap-4 p-5 sm:p-6">
