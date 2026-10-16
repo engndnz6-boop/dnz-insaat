@@ -27,7 +27,7 @@ const topics = [
 /** Arama motorları ve ziyaretçiler için hizmet dizini */
 export function SeoTopics() {
   return (
-    <section className="border-t border-black/5 bg-brand-paper py-20 sm:py-24">
+    <section id="hizmetler" className="scroll-mt-24 border-t border-black/5 bg-brand-paper py-20 sm:py-24">
       <div className="container-page grid gap-12 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-16">
         <div>
           <h2 className="type-wide text-2xl font-bold leading-tight text-brand-bone sm:text-[1.75rem]">

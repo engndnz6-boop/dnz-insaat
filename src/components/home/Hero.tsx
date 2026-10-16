@@ -82,29 +82,38 @@ export function Hero() {
 
       <div className="container-page relative grid items-center gap-8 pb-28 pt-14 sm:pt-20 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-10 lg:pb-36 lg:pt-20">
         <div className="max-w-2xl">
-          <p className="text-sm font-medium text-brand-steel/80">
-            {settings.companyName}, Gölbaşı / Ankara
+          <p className="text-sm font-semibold tracking-wide text-brand-steel/85">
+            {settings.companyName.toLocaleUpperCase("tr")} | GÖLBAŞI / ANKARA
           </p>
           <h1 className="type-wide mt-5 text-[2.1rem] font-bold leading-[1.06] tracking-[-0.02em] text-white sm:text-[2.9rem] lg:text-[3.25rem]">
-            Asma tavan ve alçıpan işlerinde malzeme de uygulama da bizden.
+            Hayalinizdeki yapı, tek adreste.
+            <span className="mt-2 block text-[1.35rem] font-semibold leading-snug tracking-normal text-brand-steel sm:text-[1.7rem] lg:text-[1.9rem]">
+              Baştan sona DNZ güvencesiyle.
+            </span>
           </h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-white/75 sm:text-lg">
-            {settings.heroSubtitle}
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-white/80 sm:text-lg">
+            Sıfırdan inşaat, komple tadilat, tamirat ve dekorasyon… İhtiyacınız
+            olan tüm inşaat malzemeleri ve profesyonel uygulama hizmetleri tek
+            çatı altında.
+          </p>
+          <p className="mt-3 max-w-lg text-base leading-relaxed text-white/65">
+            Malzemeden ustalığa, projeden son dokunuşa kadar her aşamada
+            yanınızdayız.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
-              href="/katalog"
+              href="/#hizmetler"
               className="inline-flex items-center gap-2 bg-brand-gold px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-gold-light"
             >
-              Ürünleri incele
+              Hizmetlerimizi keşfedin
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/iletisim"
               className="inline-flex items-center gap-2 border border-white/30 px-6 py-3.5 text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/5"
             >
-              Teklif al
+              Teklif alın
             </Link>
           </div>
 
@@ -112,12 +121,12 @@ export function Hero() {
             href={`tel:${brand.phoneTel}`}
             className="mt-8 inline-flex items-center gap-3 text-white/80 transition hover:text-white"
           >
-            <span className="flex h-9 w-9 items-center justify-center border border-white/20">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/20">
               <Phone className="h-4 w-4" />
             </span>
             <span className="text-sm">
-              Hemen arayın{" "}
-              <span className="ml-1 font-semibold tabular-nums text-white">
+              Projenizi birlikte planlayalım. Hemen arayın:{" "}
+              <span className="whitespace-nowrap font-semibold tabular-nums text-white">
                 {brand.phone}
               </span>
             </span>
