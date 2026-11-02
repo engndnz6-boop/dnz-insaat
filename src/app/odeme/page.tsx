@@ -382,11 +382,7 @@ export default function OdemePage() {
             </div>
             <div className="flex justify-between">
               <dt className="text-brand-mist">Kargo</dt>
-              <dd>
-                {totals.shipping === 0
-                  ? "Ücretsiz"
-                  : formatPrice(totals.shipping)}
-              </dd>
+              <dd>Alıcı öder</dd>
             </div>
             <div className="flex justify-between border-t border-black/10 pt-3 text-base font-semibold">
               <dt>Toplam</dt>

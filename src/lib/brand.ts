@@ -113,7 +113,7 @@ export const returnPolicy = {
 
 export const checkoutConfig = {
   vatRate: 0.2,
-  shippingFlat: 250,
-  freeShippingThreshold: 15000,
+  /** Kargo ücreti alıcıya aittir: siparişe eklenmez, teslimatta kargo firmasına ödenir */
+  shippingPaidByBuyer: true,
   currency: "TRY" as const,
 };

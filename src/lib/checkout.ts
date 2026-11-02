@@ -8,10 +8,8 @@ export interface OrderTotals {
 }
 
 export function calcOrderTotals(subtotal: number): OrderTotals {
-  const shipping =
-    subtotal >= checkoutConfig.freeShippingThreshold
-      ? 0
-      : checkoutConfig.shippingFlat;
+  // Kargo ücreti alıcıya ait (karşı ödemeli); sipariş tutarına eklenmez
+  const shipping = 0;
   const vat = Math.round(subtotal * checkoutConfig.vatRate);
   const total = subtotal + shipping + vat;
   return { subtotal, shipping, vat, total };

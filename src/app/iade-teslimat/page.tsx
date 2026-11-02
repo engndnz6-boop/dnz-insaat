@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { brand, checkoutConfig } from "@/lib/brand";
-import { formatPrice } from "@/lib/utils";
+import { brand } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "İade ve Teslimat Koşulları",
@@ -17,8 +16,7 @@ export default function IadeTeslimatPage() {
           <h2 className="text-lg font-bold text-brand-navy">Teslimat</h2>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>Siparişler Türkiye içine gönderilir. Ürünleri Gölbaşı’ndaki mağazamızdan da teslim alabilirsiniz.</li>
-            <li>Kargo / nakliye ücreti {formatPrice(checkoutConfig.shippingFlat)}’dir.</li>
-            <li>{formatPrice(checkoutConfig.freeShippingThreshold)} ve üzeri siparişlerde teslimat ücretsizdir.</li>
+            <li>Kargo ücreti alıcıya aittir ve teslimatta kargo firmasına ödenir.</li>
             <li>Büyük hacimli ve toplu siparişlerde teslim günü telefonla birlikte planlanır.</li>
           </ul>
         </section>

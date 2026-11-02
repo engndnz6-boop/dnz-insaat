@@ -120,9 +120,7 @@ export default function SepetPage() {
             </div>
             <div className="flex justify-between">
               <dt className="text-brand-mist">Kargo</dt>
-              <dd className="text-brand-bone">
-                {totals.shipping === 0 ? "Ücretsiz" : formatPrice(totals.shipping)}
-              </dd>
+              <dd className="text-brand-bone">Alıcı öder</dd>
             </div>
             <div className="flex justify-between border-t border-black/10 pt-3 font-semibold">
               <dt className="text-brand-bone">Toplam</dt>
@@ -130,8 +128,8 @@ export default function SepetPage() {
             </div>
           </dl>
           <p className="mt-2 text-xs text-brand-mist">
-            {checkoutConfig.freeShippingThreshold.toLocaleString("tr-TR")} ₺ ve
-            üzeri siparişlerde kargo ücretsiz.
+            Kargo ücreti alıcıya aittir ve teslimatta kargo firmasına ödenir.
+            Ürünleri Gölbaşı’ndaki mağazamızdan da teslim alabilirsiniz.
           </p>
           <Link href="/odeme" className="btn-primary mt-6 w-full">
             <CreditCard className="h-4 w-4" />
