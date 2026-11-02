@@ -105,6 +105,12 @@ export const brand = {
   },
 } as const;
 
+/** İade koşulları — İade ve Teslimat sayfası ve Google ürün verisi buradan beslenir */
+export const returnPolicy = {
+  /** Mesafeli satışta yasal cayma süresi */
+  days: 14,
+};
+
 export const checkoutConfig = {
   vatRate: 0.2,
   shippingFlat: 250,

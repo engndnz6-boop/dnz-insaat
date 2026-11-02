@@ -67,6 +67,11 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/iade-teslimat" className="hover:text-white">
+                İade ve Teslimat
+              </Link>
+            </li>
+            <li>
               <Link href="/gizlilik" className="hover:text-white">
                 Gizlilik ve KVKK
               </Link>

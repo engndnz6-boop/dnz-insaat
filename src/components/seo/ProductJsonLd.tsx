@@ -1,4 +1,4 @@
-import { brand } from "@/lib/brand";
+import { brand, checkoutConfig, returnPolicy } from "@/lib/brand";
 import { absoluteImageUrl, absoluteUrl } from "@/lib/seo";
 import type { Product } from "@/lib/types";
 
@@ -47,6 +47,32 @@ export function ProductJsonLd({
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
             seller: { "@id": `${brand.url}/#localbusiness` },
+            // Google Satıcı girişleri: kargo ve iade bilgisi (bkz. /iade-teslimat)
+            shippingDetails: {
+              "@type": "OfferShippingDetails",
+              shippingRate: {
+                "@type": "MonetaryAmount",
+                value:
+                  product.price >= checkoutConfig.freeShippingThreshold
+                    ? 0
+                    : checkoutConfig.shippingFlat,
+                currency: checkoutConfig.currency,
+              },
+              shippingDestination: {
+                "@type": "DefinedRegion",
+                addressCountry: "TR",
+              },
+            },
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "TR",
+              returnPolicyCategory:
+                "https://schema.org/MerchantReturnFiniteReturnWindow",
+              merchantReturnDays: returnPolicy.days,
+              returnMethod: "https://schema.org/ReturnInStore",
+              returnFees: "https://schema.org/FreeReturn",
+              merchantReturnLink: absoluteUrl("/iade-teslimat"),
+            },
           },
         };
 
