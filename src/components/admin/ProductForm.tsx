@@ -428,6 +428,13 @@ export function ProductForm({
                     setError("Geçerli bir http(s) URL girin.");
                     return;
                   }
+                  // ibb.co/xxxx bir sayfa adresidir, görsel değil (Google ürün görselini okuyamaz)
+                  if (/^https?:\/\/(www\.)?ibb\.co\//i.test(url)) {
+                    setError(
+                      "Bu bir ImgBB sayfa adresi, görselin kendisi değil. ImgBB’de fotoğrafı açın, “Doğrudan bağlantı” (i.ibb.co/… ile başlayan, .jpg/.png ile biten) adresini yapıştırın ya da fotoğrafı “Fotoğraf ekle” ile doğrudan yükleyin."
+                    );
+                    return;
+                  }
                   setForm((f) => ({
                     ...f,
                     images: [...f.images, url].slice(0, MAX_IMAGES),
