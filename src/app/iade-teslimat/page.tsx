@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { brand, checkoutConfig, returnPolicy } from "@/lib/brand";
+import { brand, checkoutConfig } from "@/lib/brand";
 import { formatPrice } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -25,11 +25,9 @@ export default function IadeTeslimatPage() {
         <section>
           <h2 className="text-lg font-bold text-brand-navy">İade</h2>
           <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>Teslim aldığınız tarihten itibaren {returnPolicy.days} gün içinde iade edebilirsiniz.</li>
-            <li>Ürün kullanılmamış, ambalajı ve parçaları eksiksiz olmalıdır.</li>
-            <li>Mağazamıza getirilen iadeler ücretsizdir. Kargo ile iade için önce {brand.phone} numarasından bize ulaşın.</li>
-            <li>Sizin ölçünüze göre kesilen, hazırlanan ya da uygulaması yapılmış ürünler iade kapsamı dışındadır.</li>
-            <li>İade onaylandıktan sonra ödemeniz, ödeme yaptığınız yönteme geri yapılır.</li>
+            <li>Satılan ürünlerde iade kabul edilmemektedir.</li>
+            <li>Siparişten önce ölçü, miktar ve ürün seçimini birlikte netleştiriyoruz; emin olmadığınız durumlarda {brand.phone} numarasından bize danışın.</li>
+            <li>Teslimatta hasarlı ya da yanlış ürün gelirse teslim aldığınız gün bize bildirin; ürünü değiştiririz.</li>
           </ul>
         </section>
         <section>

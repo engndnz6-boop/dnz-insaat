@@ -105,10 +105,10 @@ export const brand = {
   },
 } as const;
 
-/** İade koşulları — İade ve Teslimat sayfası ve Google ürün verisi buradan beslenir */
+/** İade koşulları — İade ve Teslimat sayfası ve Google ürün verisi buradan beslenir.
+ *  Firma iade kabul etmiyor. */
 export const returnPolicy = {
-  /** Mesafeli satışta yasal cayma süresi */
-  days: 14,
+  accepted: false,
 };
 
 export const checkoutConfig = {

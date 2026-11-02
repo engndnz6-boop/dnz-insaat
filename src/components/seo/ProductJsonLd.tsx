@@ -1,4 +1,4 @@
-import { brand, checkoutConfig, returnPolicy } from "@/lib/brand";
+import { brand, checkoutConfig } from "@/lib/brand";
 import { absoluteImageUrl, absoluteUrl } from "@/lib/seo";
 import type { Product } from "@/lib/types";
 
@@ -66,11 +66,7 @@ export function ProductJsonLd({
             hasMerchantReturnPolicy: {
               "@type": "MerchantReturnPolicy",
               applicableCountry: "TR",
-              returnPolicyCategory:
-                "https://schema.org/MerchantReturnFiniteReturnWindow",
-              merchantReturnDays: returnPolicy.days,
-              returnMethod: "https://schema.org/ReturnInStore",
-              returnFees: "https://schema.org/FreeReturn",
+              returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
               merchantReturnLink: absoluteUrl("/iade-teslimat"),
             },
           },
